@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGMRP - Sistema de Gerenciamento de Mapas de Refeições Penitenciário</title>
+    <meta name="description" content="Sistema web para gerenciamento e monitoramento do fornecimento de refeições em unidades prisionais">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">SGMRP</a>
+                <nav>
+                    <ul>
+                        <li><a href="index.html" class="active">Início</a></li>
+                        <li><a href="login.html">Login</a></li>
+                        <li><a href="cadastro.html">Cadastro</a></li>
+                        <li><a href="#sobre">Sobre</a></li>
+                        <li><a href="#contato">Contato</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 4rem 0; margin-bottom: 3rem;">
+            <div class="container">
+                <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+                    <h1 class="fade-in" style="font-size: 3rem; margin-bottom: 1rem; color: white;">
+                        Sistema de Gerenciamento de<br>
+                        Mapas de Refeições Penitenciário
+                    </h1>
+                    <p class="fade-in" style="font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.9;">
+                        Modernize o controle alimentar no sistema prisional com nossa solução web integrada,
+                        substituindo planilhas Excel fragmentadas por uma plataforma centralizada e eficiente.
+                    </p>
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="login.html" class="btn btn-lg" style="background-color: white; color: var(--primary-color); font-weight: 600;">
+                            Acessar Sistema
+                        </a>
+                        <a href="cadastro.html" class="btn btn-lg btn-secondary" style="border: 2px solid white; color: white;">
+                            Cadastrar-se
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Funcionalidades Principais -->
+        <section class="container" style="margin-bottom: 4rem;">
+            <div style="text-align: center; margin-bottom: 3rem;">
+                <h2>Funcionalidades Principais</h2>
+                <p style="font-size: 1.125rem; color: var(--gray-600); max-width: 600px; margin: 0 auto;">
+                    Conheça as principais funcionalidades que tornam o SGMRP a solução ideal para o controle alimentar penitenciário
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-3">
+                <div class="card fade-in">
+                    <div class="card-body" style="text-align: center;">
+                        <div style="width: 60px; height: 60px; background-color: var(--light-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem;">
+                            📊
+                        </div>
+                        <h3>Controle Centralizado</h3>
+                        <p style="color: var(--gray-600);">
+                            Substitua múltiplas planilhas Excel por uma interface web centralizada, 
+                            organizando todos os presídios por lotes contratuais em um só lugar.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card fade-in">
+                    <div class="card-body" style="text-align: center;">
+                        <div style="width: 60px; height: 60px; background-color: var(--light-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem;">
+                            📤
+                        </div>
+                        <h3>Importação Automatizada</h3>
+                        <p style="color: var(--gray-600);">
+                            Importe dados de refeições diretamente de PDFs através de texto,
+                            eliminando a necessidade de digitação manual e reduzindo erros.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card fade-in">
+                    <div class="card-body" style="text-align: center;">
+                        <div style="width: 60px; height: 60px; background-color: var(--light-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem;">
+                            🎯
+                        </div>
+                        <h3>Indicadores Visuais</h3>
+                        <p style="color: var(--gray-600);">
+                            Identifique discrepâncias imediatamente através de indicadores coloridos:
+                            verde (OK), azul (pequena diferença) e vermelho (diferença crítica).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card fade-in">
+                    <div class="card-body" style="text-align: center;">
+                        <div style="width: 60px; height: 60px; background-color: var(--light-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem;">
+                            📋
+                        </div>
+                        <h3>Comparação com SIISP</h3>
+                        <p style="color: var(--gray-600);">
+                            Compare automaticamente os dados reportados com as informações oficiais
+                            do SIISP para garantir conformidade e detectar irregularidades.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card fade-in">
+                    <div class="card-body" style="text-align: center;">
+                        <div style="width: 60px; height: 60px; background-color: var(--light-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem;">
+                            📝
+                        </div>
+                        <h3>Sistema de Anotações</h3>
+                        <p style="color: var(--gray-600);">
+                            Adicione observações em células específicas para marcar dados que 
+                            necessitam atenção especial ou esclarecimentos posteriores.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card fade-in">
+                    <div class="card-body" style="text-align: center;">
+                        <div style="width: 60px; height: 60px; background-color: var(--light-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem;">
+                            📱
+                        </div>
+                        <h3>Interface Responsiva</h3>
+                        <p style="color: var(--gray-600);">
+                            Acesse o sistema através de qualquer dispositivo - desktop, tablet ou 
+                            smartphone - mantendo toda funcionalidade em qualquer tela.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Benefícios -->
+        <section style="background-color: var(--gray-100); padding: 4rem 0; margin-bottom: 4rem;">
+            <div class="container">
+                <div style="text-align: center; margin-bottom: 3rem;">
+                    <h2>Por que escolher o SGMRP?</h2>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
+                    <div>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="display: flex; align-items: center; margin-bottom: 1rem; font-size: 1.125rem;">
+                                <span style="color: var(--success-color); margin-right: 0.75rem; font-size: 1.5rem;">✓</span>
+                                Reduz significativamente erros manuais no registro de dados
+                            </li>
+                            <li style="display: flex; align-items: center; margin-bottom: 1rem; font-size: 1.125rem;">
+                                <span style="color: var(--success-color); margin-right: 0.75rem; font-size: 1.5rem;">✓</span>
+                                Facilita auditoria e controle de qualidade alimentar
+                            </li>
+                            <li style="display: flex; align-items: center; margin-bottom: 1rem; font-size: 1.125rem;">
+                                <span style="color: var(--success-color); margin-right: 0.75rem; font-size: 1.5rem;">✓</span>
+                                Proporciona transparência no sistema prisional
+                            </li>
+                            <li style="display: flex; align-items: center; margin-bottom: 1rem; font-size: 1.125rem;">
+                                <span style="color: var(--success-color); margin-right: 0.75rem; font-size: 1.5rem;">✓</span>
+                                Otimiza o processo de gestão de recursos alimentares
+                            </li>
+                            <li style="display: flex; align-items: center; margin-bottom: 1rem; font-size: 1.125rem;">
+                                <span style="color: var(--success-color); margin-right: 0.75rem; font-size: 1.5rem;">✓</span>
+                                Prepara base para análises futuras de consumo e custos
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <h3>Desenvolvido especialmente para:</h3>
+                            <ul style="color: var(--gray-600);">
+                                <li>Funcionários da SFA (Subsecretaria de Administração)</li>
+                                <li>Supervisores e gestores do sistema penitenciário</li>
+                                <li>Auditores internos e externos</li>
+                                <li>Coordenadores de empresas terceirizadas</li>
+                                <li>Analistas administrativos e financeiros</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Funcionalidades Futuras -->
+        <section class="container" id="sobre">
+            <div style="text-align: center; margin-bottom: 3rem;">
+                <h2>Roadmap do Sistema</h2>
+                <p style="font-size: 1.125rem; color: var(--gray-600); max-width: 800px; margin: 0 auto;">
+                    O SGMRP está em constante evolução. Conheça as funcionalidades planejadas para as próximas versões.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Versão Atual (1.0)</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul style="color: var(--gray-600);">
+                            <li>Interface web responsiva</li>
+                            <li>Importação automatizada de dados via PDF</li>
+                            <li>Sistema de indicadores visuais coloridos</li>
+                            <li>Comparação com dados do SIISP</li>
+                            <li>Organização por lotes contratuais</li>
+                            <li>Filtros temporais (mês/ano)</li>
+                            <li>Sistema de anotações</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Próximas Versões</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul style="color: var(--gray-600);">
+                            <li>Geração de documentação PDF</li>
+                            <li>Dashboards com gráficos interativos</li>
+                            <li>Análise financeira avançada</li>
+                            <li>Relatórios exportáveis (PDF/Excel)</li>
+                            <li>Análise de tendências históricas</li>
+                            <li>KPIs e indicadores de performance</li>
+                            <li>Integração com sistemas financeiros</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Seção de Contato -->
+    <section id="contato" style="background-color: var(--primary-color); color: white; padding: 4rem 0;">
+        <div class="container text-center">
+            <h2 style="color: white; margin-bottom: 1rem;">Pronto para modernizar seu controle alimentar?</h2>
+            <p style="font-size: 1.125rem; margin-bottom: 2rem; opacity: 0.9;">
+                Junte-se aos profissionais que já estão utilizando o SGMRP para otimizar 
+                o gerenciamento de refeições no sistema penitenciário.
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="login.html" class="btn btn-lg" style="background-color: white; color: var(--primary-color); font-weight: 600;">
+                    Entrar no Sistema
+                </a>
+                <a href="cadastro.html" class="btn btn-lg" style="border: 2px solid white; background: transparent; color: white;">
+                    Criar Conta
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
+                <div>
+                    <h4 style="color: white; margin-bottom: 1rem;">SGMRP</h4>
+                    <p style="color: var(--gray-400); font-size: 0.875rem;">
+                        Sistema de Gerenciamento de Mapas de Refeições Penitenciário - 
+                        Desenvolvido para modernizar o controle alimentar no sistema prisional.
+                    </p>
+                </div>
+                <div>
+                    <h5 style="color: white; margin-bottom: 1rem;">Links Úteis</h5>
+                    <ul style="list-style: none;">
+                        <li><a href="login.html" style="color: var(--gray-400); text-decoration: none;">Login</a></li>
+                        <li><a href="cadastro.html" style="color: var(--gray-400); text-decoration: none;">Cadastro</a></li>
+                        <li><a href="#sobre" style="color: var(--gray-400); text-decoration: none;">Sobre o Sistema</a></li>
+                        <li><a href="#contato" style="color: var(--gray-400); text-decoration: none;">Contato</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 style="color: white; margin-bottom: 1rem;">Desenvolvedor</h5>
+                    <p style="color: var(--gray-400); font-size: 0.875rem;">
+                        Thallyson Gabriel Martins Correia Fontenele<br>
+                        Matrícula: 2022024639<br>
+                        Sistema Penitenciário - SFA
+                    </p>
+                </div>
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid var(--gray-600); margin: 2rem 0;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <p style="color: var(--gray-400); font-size: 0.875rem; margin: 0;">
+                    © 2025 SGMRP - Sistema de Gerenciamento de Mapas de Refeições Penitenciário. Todos os direitos reservados.
+                </p>
+                <p style="color: var(--gray-500); font-size: 0.75rem; margin: 0;">
+                    Versão 1.0 - Outubro 2025
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Animação de fade-in nos elementos quando aparecem na tela
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observar elementos com classe fade-in
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+
+        // Smooth scroll para links internos
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

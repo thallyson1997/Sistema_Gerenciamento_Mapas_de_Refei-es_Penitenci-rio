@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Lote - SGMRP</title>
+    <meta name="description" content="Detalhes do lote contratual com mapas de refeições e indicadores">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="dashboard.html" class="logo">SGMRP</a>
+                <nav>
+                    <ul>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="lotes.html">Lotes</a></li>
+                        <li><a href="#relatorios">Relatórios</a></li>
+                        <li><a href="#configuracoes">Configurações</a></li>
+                        <li><a href="#" id="logoutLink" style="color: #fed7d7;">Sair</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- Breadcrumb -->
+            <nav aria-label="Navegação" style="margin-bottom: 2rem;">
+                <ol style="display: flex; gap: 0.5rem; font-size: 0.875rem; color: var(--gray-500);">
+                    <li><a href="dashboard.html" style="color: var(--primary-color); text-decoration: none;">Dashboard</a></li>
+                    <li aria-hidden="true">/</li>
+                    <li><a href="lotes.html" style="color: var(--primary-color); text-decoration: none;">Lotes</a></li>
+                    <li aria-hidden="true">/</li>
+                    <li aria-current="page" id="breadcrumb-lote">Lote 1</li>
+                </ol>
+            </nav>
+
+            <!-- Header do Lote -->
+            <section class="card" style="margin-bottom: 2rem;">
+                <div class="card-body" style="padding: 2rem;">
+                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: start;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                <h1 style="margin: 0; color: var(--primary-color);" id="titulo-lote">Lote 1</h1>
+                                <div class="badge" style="background-color: var(--success-color); color: white; padding: 0.5rem 1rem; border-radius: 1rem; font-size: 0.875rem;">
+                                    ATIVO
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                                <div>
+                                    <strong>Empresa Responsável:</strong><br>
+                                    <span id="empresa-nome">ABC Alimentação Ltda.</span>
+                                </div>
+                                <div>
+                                    <strong>Período:</strong><br>
+                                    <span id="periodo-atual">Outubro/2025</span>
+                                </div>
+                                <div>
+                                    <strong>Presídios Ativos:</strong><br>
+                                    <span id="presidios-count">5 unidades</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: right;">
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📊</div>
+                            <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);" id="conformidade-geral">96.8%</div>
+                            <div style="font-size: 0.875rem; color: var(--gray-600);">Conformidade Geral</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Filtros e Controles -->
+            <section class="filters" style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: end; gap: 1rem; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 1rem; align-items: end;">
+                        <div>
+                            <label for="filtro-mes-detalhe" class="form-label">Mês</label>
+                            <select id="filtro-mes-detalhe" class="form-select">
+                                <option value="1">Janeiro</option>
+                                <option value="2">Fevereiro</option>
+                                <option value="3">Março</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Maio</option>
+                                <option value="6">Junho</option>
+                                <option value="7">Julho</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Setembro</option>
+                                <option value="10" selected>Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filtro-ano-detalhe" class="form-label">Ano</label>
+                            <select id="filtro-ano-detalhe" class="form-select">
+                                <option value="2024">2024</option>
+                                <option value="2025" selected>2025</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filtro-presidio" class="form-label">Presídio</label>
+                            <select id="filtro-presidio" class="form-select">
+                                <option value="">Todos os presídios</option>
+                                <option value="presidio1">Penitenciária Central</option>
+                                <option value="presidio2">Casa de Custódia Norte</option>
+                                <option value="presidio3">Centro de Detenção Sul</option>
+                                <option value="presidio4">Presídio Metropolitano</option>
+                                <option value="presidio5">Unidade Prisional Leste</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button class="btn btn-secondary" id="btn-importar">
+                            📤 Importar Dados
+                        </button>
+                        <button class="btn btn-secondary" id="btn-entrada-manual">
+                            ✏️ Entrada Manual
+                        </button>
+                        <button class="btn btn-primary" id="btn-atualizar">
+                            🔄 Atualizar
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seções Colapsáveis -->
+            <div style="display: grid; gap: 2rem;">
+                <!-- Seção de Importação de Dados -->
+                <section class="card" id="secao-importacao" style="display: none;">
+                    <div class="card-header">
+                        <h3>Importação de Dados via PDF</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                            <div>
+                                <div class="form-group">
+                                    <label for="select-presidio-import" class="form-label">Presídio</label>
+                                    <select id="select-presidio-import" class="form-select" required>
+                                        <option value="">Selecione o presídio</option>
+                                        <option value="presidio1">Penitenciária Central</option>
+                                        <option value="presidio2">Casa de Custódia Norte</option>
+                                        <option value="presidio3">Centro de Detenção Sul</option>
+                                        <option value="presidio4">Presídio Metropolitano</option>
+                                        <option value="presidio5">Unidade Prisional Leste</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="texto-pdf" class="form-label">Texto extraído do PDF</label>
+                                    <textarea 
+                                        id="texto-pdf" 
+                                        class="form-textarea" 
+                                        rows="8" 
+                                        placeholder="Cole aqui o texto extraído do PDF com os dados de refeições..."
+                                    ></textarea>
+                                    <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.25rem;">
+                                        Formato esperado: Data, tipo de refeição e quantidade por linha
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="form-group">
+                                    <label for="dados-siisp" class="form-label">Dados do SIISP (opcional)</label>
+                                    <textarea 
+                                        id="dados-siisp" 
+                                        class="form-textarea" 
+                                        rows="4" 
+                                        placeholder="Cole os dados de número de detentos do SIISP para comparação..."
+                                    ></textarea>
+                                </div>
+                                
+                                <div style="padding: 1.5rem; background-color: var(--light-blue); border-radius: var(--border-radius); margin-bottom: 1rem;">
+                                    <h4 style="color: var(--primary-color); margin-bottom: 1rem;">Exemplo de formato:</h4>
+                                    <pre style="font-size: 0.75rem; color: var(--gray-700); margin: 0; white-space: pre-wrap;">01/10/2025 - Café Interno: 120, Funcionário: 15
+01/10/2025 - Almoço Interno: 118, Funcionário: 14
+01/10/2025 - Jantar Interno: 119, Funcionário: 15</pre>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.75rem; justify-content: end; margin-top: 1rem;">
+                            <button class="btn btn-secondary" id="btn-cancelar-import">Cancelar</button>
+                            <button class="btn btn-primary" id="btn-processar-import">Processar Dados</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Seção de Entrada Manual -->
+                <section class="card" id="secao-manual" style="display: none;">
+                    <div class="card-header">
+                        <h3>Entrada Manual de Dados</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="select-presidio-manual" class="form-label">Presídio</label>
+                            <select id="select-presidio-manual" class="form-select" required>
+                                <option value="">Selecione o presídio</option>
+                                <option value="presidio1">Penitenciária Central</option>
+                                <option value="presidio2">Casa de Custódia Norte</option>
+                                <option value="presidio3">Centro de Detenção Sul</option>
+                                <option value="presidio4">Presídio Metropolitano</option>
+                                <option value="presidio5">Unidade Prisional Leste</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Data</label>
+                            <input type="date" id="data-manual" class="form-input" value="2025-10-19">
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                            <div class="form-group">
+                                <label for="cafe-interno" class="form-label">Café - Internos</label>
+                                <input type="number" id="cafe-interno" class="form-input" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="cafe-funcionario" class="form-label">Café - Funcionários</label>
+                                <input type="number" id="cafe-funcionario" class="form-input" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="almoco-interno" class="form-label">Almoço - Internos</label>
+                                <input type="number" id="almoco-interno" class="form-input" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="almoco-funcionario" class="form-label">Almoço - Funcionários</label>
+                                <input type="number" id="almoco-funcionario" class="form-input" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="jantar-interno" class="form-label">Jantar - Internos</label>
+                                <input type="number" id="jantar-interno" class="form-input" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="jantar-funcionario" class="form-label">Jantar - Funcionários</label>
+                                <input type="number" id="jantar-funcionario" class="form-input" min="0">
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.75rem; justify-content: end;">
+                            <button class="btn btn-secondary" id="btn-cancelar-manual">Cancelar</button>
+                            <button class="btn btn-primary" id="btn-salvar-manual">Salvar Dados</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sistema de Abas para Tabelas -->
+                <section class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3>Mapas de Refeições - Outubro/2025</h3>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-sm btn-secondary" id="btn-legenda">
+                                🎨 Legenda
+                            </button>
+                            <button class="btn btn-sm btn-secondary" id="btn-exportar-tabela">
+                                📋 Exportar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Abas de Navegação -->
+                    <div style="border-bottom: 2px solid var(--gray-200); background-color: var(--gray-50);">
+                        <div style="display: flex; padding: 0 1rem;">
+                            <button class="tab-button active" data-tab="dados-refeicoes" style="padding: 1rem 1.5rem; border: none; background: none; cursor: pointer; font-weight: 500; color: var(--gray-600); border-bottom: 3px solid transparent; transition: all 0.3s ease;">
+                                📊 Dados de Refeições
+                            </button>
+                            <button class="tab-button" data-tab="comparacao-siisp" style="padding: 1rem 1.5rem; border: none; background: none; cursor: pointer; font-weight: 500; color: var(--gray-600); border-bottom: 3px solid transparent; transition: all 0.3s ease;">
+                                🎯 Comparação SIISP
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Conteúdo das Abas -->
+                    <div class="card-body" style="padding: 0;">
+                        
+                        <!-- Aba 1: Dados de Refeições -->
+                        <div id="tab-dados-refeicoes" class="tab-content" style="display: block;">
+                            <div style="padding: 1rem; background-color: var(--light-blue); border-bottom: 1px solid var(--gray-200);">
+                                <p style="margin: 0; font-size: 0.875rem; color: var(--primary-color);">
+                                    <strong>📋 Tabela de Entrada:</strong> Visualize apenas os dados de refeições inseridos, 
+                                    sem comparação. Esta é a tabela base com os números originais reportados.
+                                </p>
+                            </div>
+                            <div class="table-container">
+                                <table class="table" id="tabela-dados-refeicoes">
+                                    <thead>
+                                        <tr>
+                                            <th rowspan="2">Data</th>
+                                            <th rowspan="2">Presídio</th>
+                                            <th colspan="2">Café</th>
+                                            <th colspan="2">Almoço</th>
+                                            <th colspan="2">Lanche</th>
+                                            <th colspan="2">Jantar</th>
+                                            <th rowspan="2">Total Dia</th>
+                                        </tr>
+                                        <tr>
+                                            <th>Interno</th>
+                                            <th>Func.</th>
+                                            <th>Interno</th>
+                                            <th>Func.</th>
+                                            <th>Interno</th>
+                                            <th>Func.</th>
+                                            <th>Interno</th>
+                                            <th>Func.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-dados-refeicoes">
+                                        <!-- Dados serão inseridos via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Aba 2: Comparação SIISP -->
+                        <div id="tab-comparacao-siisp" class="tab-content" style="display: none;">
+                            <div style="padding: 1rem; background-color: #fff3cd; border-bottom: 1px solid var(--gray-200);">
+                                <p style="margin: 0; font-size: 0.875rem; color: #856404;">
+                                    <strong>🎯 Tabela de Comparação:</strong> Dados comparados com o SIISP, com indicadores 
+                                    coloridos. Verde (OK), Azul (diferença 1-5), Vermelho (diferença >5).
+                                </p>
+                            </div>
+                            <div class="table-container">
+                                <table class="table" id="tabela-comparacao-siisp">
+                                    <thead>
+                                        <tr>
+                                            <th rowspan="2">Data</th>
+                                            <th rowspan="2">Presídio</th>
+                                            <th rowspan="2">N° SIISP</th>
+                                            <th colspan="2">Café</th>
+                                            <th colspan="2">Almoço</th>
+                                            <th colspan="2">Lanche</th>
+                                            <th colspan="2">Jantar</th>
+                                            <th rowspan="2">Anotações</th>
+                                        </tr>
+                                        <tr>
+                                            <th>Interno</th>
+                                            <th>Func.</th>
+                                            <th>Interno</th>
+                                            <th>Func.</th>
+                                            <th>Interno</th>
+                                            <th>Func.</th>
+                                            <th>Interno</th>
+                                            <th>Func.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-comparacao-siisp">
+                                        <!-- Dados serão inseridos via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Resumo e Estatísticas -->
+                <section class="card">
+                    <div class="card-header">
+                        <h3>Resumo do Período</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="grid grid-cols-4">
+                            <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
+                                <div style="font-size: 2rem; color: var(--primary-color); font-weight: 600;">28,450</div>
+                                <div style="color: var(--gray-600); font-size: 0.875rem;">Total de Refeições</div>
+                            </div>
+                            <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
+                                <div style="font-size: 2rem; color: var(--success-color); font-weight: 600;">892</div>
+                                <div style="color: var(--gray-600); font-size: 0.875rem;">Registros Conformes</div>
+                            </div>
+                            <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
+                                <div style="font-size: 2rem; color: var(--warning-color); font-weight: 600;">23</div>
+                                <div style="color: var(--gray-600); font-size: 0.875rem;">Diferenças Pequenas</div>
+                            </div>
+                            <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
+                                <div style="font-size: 2rem; color: var(--danger-color); font-weight: 600;">8</div>
+                                <div style="color: var(--gray-600); font-size: 0.875rem;">Discrepâncias Críticas</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal da Legenda -->
+    <div id="modal-legenda" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: var(--border-radius-xl); padding: 2rem; max-width: 500px; width: 90%;">
+            <h3 style="margin-bottom: 1.5rem;">Legenda dos Indicadores</h3>
+            
+            <div style="display: grid; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 30px; height: 30px; background-color: var(--success-color); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; font-weight: bold;">OK</div>
+                    <div>
+                        <strong>Verde:</strong> Diferença ≤ 0 entre internos e SIISP (Conforme)
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 30px; height: 30px; background-color: var(--warning-color); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem;">+2</div>
+                    <div>
+                        <strong>Azul:</strong> Diferença de 1-5 refeições para internos (Atenção)
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 30px; height: 30px; background-color: var(--danger-color); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem;">+8</div>
+                    <div>
+                        <strong>Vermelho:</strong> Diferença > 5 refeições para internos (Crítico)
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 30px; height: 30px; background-color: var(--annotation-color); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">📝</div>
+                    <div>
+                        <strong>Amarelo:</strong> Célula com anotação do usuário
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-primary" id="btn-fechar-legenda">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container text-center">
+            <p style="margin: 0; color: var(--gray-400); font-size: 0.875rem;">
+                © 2025 SGMRP - Sistema de Gerenciamento de Mapas de Refeições Penitenciário
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Dados simulados para demonstração
+        const dadosSimulados = [
+            { data: '01/10/2025', presidio: 'Penitenciária Central', siisp: 120, cafeInt: 118, cafeFunc: 15, almocoInt: 125, almocoFunc: 14, lancheInt: 122, lancheFunc: 13, jantarInt: 119, jantarFunc: 15 },
+            { data: '01/10/2025', presidio: 'Casa de Custódia Norte', siisp: 98, cafeInt: 95, cafeFunc: 12, almocoInt: 102, almocoFunc: 11, lancheInt: 99, lancheFunc: 10, jantarInt: 97, jantarFunc: 12 },
+            { data: '02/10/2025', presidio: 'Penitenciária Central', siisp: 120, cafeInt: 120, cafeFunc: 15, almocoInt: 118, almocoFunc: 14, lancheInt: 121, lancheFunc: 14, jantarInt: 121, jantarFunc: 15 },
+            { data: '02/10/2025', presidio: 'Casa de Custódia Norte', siisp: 98, cafeInt: 98, cafeFunc: 12, almocoInt: 95, almocoFunc: 11, lancheInt: 97, lancheFunc: 11, jantarInt: 99, jantarFunc: 12 },
+            { data: '03/10/2025', presidio: 'Penitenciária Central', siisp: 119, cafeInt: 117, cafeFunc: 14, almocoInt: 122, almocoFunc: 15, lancheInt: 120, lancheFunc: 13, jantarInt: 118, jantarFunc: 14 }
+        ];
+
+        // Verificar autenticação
+        window.addEventListener('load', function() {
+            const usuarioSalvo = localStorage.getItem('sgmrp_usuario');
+            if (!usuarioSalvo) {
+                alert('Sessão expirada. Redirecionando para login.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Verificar parâmetros da URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const loteId = urlParams.get('lote') || '1';
+            const acao = urlParams.get('acao');
+
+            // Atualizar interface com dados do lote
+            atualizarInterfaceLote(loteId);
+
+            // Mostrar seção específica se houver ação
+            if (acao === 'importar') {
+                mostrarSecaoImportacao();
+            } else if (acao === 'manual') {
+                mostrarSecaoManual();
+            }
+
+            // Carregar dados da tabela
+            carregarTabelaRefeicoes();
+            
+            // Inicializar sistema de abas
+            initTabs();
+        });
+
+        function atualizarInterfaceLote(loteId) {
+            const loteInfo = {
+                '1': { nome: 'Lote 1', empresa: 'ABC Alimentação Ltda.', presidios: '5 unidades', conformidade: '96.8%' },
+                '2': { nome: 'Lote 2', empresa: 'XYZ Refeições S.A.', presidios: '4 unidades', conformidade: '91.5%' },
+                '3': { nome: 'Lote 3', empresa: 'DEF Nutrição e Alimentação', presidios: '3 unidades', conformidade: '98.2%' },
+                '4': { nome: 'Lote 4', empresa: 'GHI Catering Especializado', presidios: '3 unidades', conformidade: '89.7%' }
+            };
+
+            const info = loteInfo[loteId] || loteInfo['1'];
+            document.getElementById('breadcrumb-lote').textContent = info.nome;
+            document.getElementById('titulo-lote').textContent = info.nome;
+            document.getElementById('empresa-nome').textContent = info.empresa;
+            document.getElementById('presidios-count').textContent = info.presidios;
+            document.getElementById('conformidade-geral').textContent = info.conformidade;
+        }
+
+        function carregarTabelaRefeicoes() {
+            carregarTabelaDados();
+            carregarTabelaComparacao();
+        }
+
+        function carregarTabelaDados() {
+            const tbody = document.getElementById('tbody-dados-refeicoes');
+            tbody.innerHTML = '';
+
+            dadosSimulados.forEach(row => {
+                const tr = document.createElement('tr');
+                const totalDia = row.cafeInt + row.cafeFunc + row.almocoInt + row.almocoFunc + row.lancheInt + row.lancheFunc + row.jantarInt + row.jantarFunc;
+                
+                tr.innerHTML = `
+                    <td>${row.data}</td>
+                    <td>${row.presidio}</td>
+                    <td style="text-align: center; background-color: var(--gray-50);">${row.cafeInt}</td>
+                    <td style="text-align: center;">${row.cafeFunc}</td>
+                    <td style="text-align: center; background-color: var(--gray-50);">${row.almocoInt}</td>
+                    <td style="text-align: center;">${row.almocoFunc}</td>
+                    <td style="text-align: center; background-color: var(--gray-50);">${row.lancheInt}</td>
+                    <td style="text-align: center;">${row.lancheFunc}</td>
+                    <td style="text-align: center; background-color: var(--gray-50);">${row.jantarInt}</td>
+                    <td style="text-align: center;">${row.jantarFunc}</td>
+                    <td style="text-align: center; font-weight: 600; background-color: var(--light-blue);">${totalDia}</td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+        }
+
+        function carregarTabelaComparacao() {
+            const tbody = document.getElementById('tbody-comparacao-siisp');
+            tbody.innerHTML = '';
+
+            dadosSimulados.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                // Calcular diferenças e aplicar cores
+                const cafeClass = getClassificacao(row.cafeInt, row.siisp);
+                const almocoClass = getClassificacao(row.almocoInt, row.siisp);
+                const lancheClass = getClassificacao(row.lancheInt, row.siisp);
+                const jantarClass = getClassificacao(row.jantarInt, row.siisp);
+
+                tr.innerHTML = `
+                    <td>${row.data}</td>
+                    <td>${row.presidio}</td>
+                    <td style="text-align: center; font-weight: 600; background-color: var(--gray-100);">${row.siisp}</td>
+                    <td class="${cafeClass.class}" style="text-align: center; cursor: pointer;" onclick="toggleAnotacao(this)">
+                        ${cafeClass.display}
+                    </td>
+                    <td style="text-align: center; ${row.cafeFunc < row.siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.cafeFunc}</td>
+                    <td class="${almocoClass.class}" style="text-align: center; cursor: pointer;" onclick="toggleAnotacao(this)">
+                        ${almocoClass.display}
+                    </td>
+                    <td style="text-align: center; ${row.almocoFunc < row.siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.almocoFunc}</td>
+                    <td class="${lancheClass.class}" style="text-align: center; cursor: pointer;" onclick="toggleAnotacao(this)">
+                        ${lancheClass.display}
+                    </td>
+                    <td style="text-align: center; ${row.lancheFunc < row.siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.lancheFunc}</td>
+                    <td class="${jantarClass.class}" style="text-align: center; cursor: pointer;" onclick="toggleAnotacao(this)">
+                        ${jantarClass.display}
+                    </td>
+                    <td style="text-align: center; ${row.jantarFunc < row.siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.jantarFunc}</td>
+                    <td style="text-align: center; font-size: 0.875rem; color: var(--gray-500);">-</td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getClassificacao(refeicoes, siisp) {
+            const diferenca = refeicoes - siisp;
+            
+            if (diferenca <= 0) {
+                return { class: 'cell-ok', display: 'OK' };
+            } else if (diferenca <= 5) {
+                return { class: 'cell-warning', display: `+${diferenca}` };
+            } else {
+                return { class: 'cell-danger', display: `+${diferenca}` };
+            }
+        }
+
+        function toggleAnotacao(cell) {
+            if (cell.classList.contains('cell-annotated')) {
+                cell.classList.remove('cell-annotated');
+            } else {
+                cell.classList.add('cell-annotated');
+            }
+        }
+
+        // Controle das Abas
+        function initTabs() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetTab = this.dataset.tab;
+                    
+                    // Remover classe active de todos os botões
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.style.borderBottomColor = 'transparent';
+                        btn.style.color = 'var(--gray-600)';
+                        btn.style.backgroundColor = 'transparent';
+                    });
+                    
+                    // Adicionar classe active ao botão clicado
+                    this.classList.add('active');
+                    this.style.borderBottomColor = 'var(--primary-color)';
+                    this.style.color = 'var(--primary-color)';
+                    this.style.backgroundColor = 'white';
+                    this.style.marginBottom = '-2px';
+                    
+                    // Esconder todos os conteúdos
+                    tabContents.forEach(content => {
+                        content.style.display = 'none';
+                    });
+                    
+                    // Mostrar o conteúdo da aba selecionada
+                    const targetContent = document.getElementById('tab-' + targetTab);
+                    if (targetContent) {
+                        targetContent.style.display = 'block';
+                    }
+                });
+            });
+
+            // Ativar a primeira aba por padrão
+            if (tabButtons.length > 0) {
+                tabButtons[0].click();
+            }
+        }
+
+        // Controles das seções
+        document.getElementById('btn-importar').addEventListener('click', mostrarSecaoImportacao);
+        document.getElementById('btn-entrada-manual').addEventListener('click', mostrarSecaoManual);
+
+        function mostrarSecaoImportacao() {
+            document.getElementById('secao-importacao').style.display = 'block';
+            document.getElementById('secao-manual').style.display = 'none';
+            document.getElementById('secao-importacao').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function mostrarSecaoManual() {
+            document.getElementById('secao-importacao').style.display = 'none';
+            document.getElementById('secao-manual').style.display = 'block';
+            document.getElementById('secao-manual').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Botões de cancelar
+        document.getElementById('btn-cancelar-import').addEventListener('click', function() {
+            document.getElementById('secao-importacao').style.display = 'none';
+        });
+
+        document.getElementById('btn-cancelar-manual').addEventListener('click', function() {
+            document.getElementById('secao-manual').style.display = 'none';
+        });
+
+        // Processar importação
+        document.getElementById('btn-processar-import').addEventListener('click', function() {
+            const presidio = document.getElementById('select-presidio-import').value;
+            const textoPdf = document.getElementById('texto-pdf').value.trim();
+            
+            if (!presidio || !textoPdf) {
+                alert('Por favor, selecione o presídio e forneça o texto do PDF.');
+                return;
+            }
+            
+            alert('Dados processados com sucesso!\nNovos registros foram adicionados à tabela.');
+            document.getElementById('secao-importacao').style.display = 'none';
+            
+            // Aqui seria implementada a lógica real de processamento
+            carregarTabelaRefeicoes();
+        });
+
+        // Salvar entrada manual
+        document.getElementById('btn-salvar-manual').addEventListener('click', function() {
+            const presidio = document.getElementById('select-presidio-manual').value;
+            const data = document.getElementById('data-manual').value;
+            
+            if (!presidio || !data) {
+                alert('Por favor, selecione o presídio e a data.');
+                return;
+            }
+            
+            alert('Dados salvos com sucesso!\nNovo registro foi adicionado à tabela.');
+            document.getElementById('secao-manual').style.display = 'none';
+            
+            // Limpar formulário
+            document.querySelectorAll('#secao-manual input[type="number"]').forEach(input => {
+                input.value = '';
+            });
+            
+            carregarTabelaRefeicoes();
+        });
+
+        // Modal da legenda
+        document.getElementById('btn-legenda').addEventListener('click', function() {
+            document.getElementById('modal-legenda').style.display = 'block';
+        });
+
+        document.getElementById('btn-fechar-legenda').addEventListener('click', function() {
+            document.getElementById('modal-legenda').style.display = 'none';
+        });
+
+        // Fechar modal clicando fora
+        document.getElementById('modal-legenda').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+
+        // Atualizar dados
+        document.getElementById('btn-atualizar').addEventListener('click', function() {
+            alert('Dados atualizados com sucesso!');
+            carregarTabelaRefeicoes();
+        });
+
+        // Exportar tabela
+        document.getElementById('btn-exportar-tabela').addEventListener('click', function() {
+            alert('Funcionalidade de exportação será implementada em versões futuras.\n\nFormatos disponíveis: Excel, PDF, CSV');
+        });
+
+        // Logout
+        document.getElementById('logoutLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Tem certeza que deseja sair do sistema?')) {
+                localStorage.removeItem('sgmrp_usuario');
+                localStorage.removeItem('sgmrp_remember');
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Filtros
+        document.getElementById('filtro-mes-detalhe').addEventListener('change', atualizarPeriodo);
+        document.getElementById('filtro-ano-detalhe').addEventListener('change', atualizarPeriodo);
+
+        function atualizarPeriodo() {
+            const mes = document.getElementById('filtro-mes-detalhe').value;
+            const ano = document.getElementById('filtro-ano-detalhe').value;
+            const nomesMeses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            
+            document.getElementById('periodo-atual').textContent = `${nomesMeses[mes]}/${ano}`;
+            document.querySelector('.card-header h3').textContent = `Mapas de Refeições - ${nomesMeses[mes]}/${ano}`;
+        }
+
+        // Placeholder para links não implementados
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('a[href="#relatorios"]')) {
+                e.preventDefault();
+                alert('Módulo de Relatórios será implementado na próxima versão do SGMRP.');
+            }
+            
+            if (e.target.closest('a[href="#configuracoes"]')) {
+                e.preventDefault();
+                alert('Módulo de Configurações será implementado na próxima versão do SGMRP.');
+            }
+        });
+    </script>
+</body>
+</html>

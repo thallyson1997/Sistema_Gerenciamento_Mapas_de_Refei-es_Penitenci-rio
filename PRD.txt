@@ -1,0 +1,375 @@
+PRD – Product Requirements Document
+Sistema de Gerenciamento de Mapas de Refeições Penitenciário (SGMRP)
+
+=======================================================================
+1.1. VISÃO GERAL DO PRODUTO
+=======================================================================
+
+Nome do produto/sistema: Sistema de Gerenciamento de Mapas de Refeições Penitenciário
+
+Desenvolvedor: Thallyson Gabriel Martins Correia Fontenele – Matrícula: 2022024639
+
+Resumo executivo: 
+
+	O SGMRP é um sistema web desenvolvido em Flask que gerencia e monitora o fornecimento de refeições em unidades prisionais, criado para modernizar o processo atualmente realizado através de múltiplas planilhas Excel no âmbito da SFA. O sistema permite o registro, acompanhamento e análise de dados referentes ao número de refeições fornecidas diariamente para internos e funcionários em diferentes unidades prisionais, organizados por lotes contratuais.
+
+	O sistema oferece funcionalidades de importação automatizada de dados via texto, entrada manual de informações, comparação com dados do número de detentos, e geração de relatórios visuais com indicadores coloridos para facilitar a análise e tomada de decisão. Futuramente, incluirá funcionalidades de download de documentação PDF com mapas revisados e dashboards com gráficos de consumo e gastos.
+
+	A solução visa modernizar o controle alimentar no sistema prisional, substituindo o modelo atual baseado em planilhas Excel fragmentadas, proporcionando maior transparência, eficiência na gestão de recursos e conformidade com as normas de fornecimento de alimentação adequada aos custodiados.
+
+Objetivos do produto:
+    • Substituir o modelo atual baseado em planilhas Excel por uma solução web integrada
+    • Automatizar o controle de fornecimento de refeições em unidades prisionais
+    • Centralizar informações de múltiplos presídios organizados por lotes contratuais
+    • Facilitar a comparação entre dados reportados e dados oficiais do SIISP.
+    • Proporcionar visualização clara de discrepâncias através de indicadores visuais
+    • Otimizar o processo de auditoria e controle de qualidade alimentar realizado pela SFA
+    • Reduzir erros manuais no registro de dados de alimentação
+    • Preparar base para futuras análises de consumo e controle financeiro
+    • Permitir geração de documentação oficial em PDF para arquivo e auditoria
+
+=======================================================================
+1.2. PROBLEMA E OPORTUNIDADE
+=======================================================================
+
+Contexto:
+ 
+Atualmente, o controle de refeições fornecidas em unidades penitenciárias é realizado pela SEAP através de múltiplas planilhas Excel fragmentadas, dificultando o acompanhamento efetivo, a auditoria e a tomada de decisões baseadas em dados. O processo manual atual é trabalhoso, propenso a erros e não oferece uma visão consolidada dos dados. Existe a necessidade de cruzar informações entre diferentes fontes (mapas de refeição e dados do SIISP) para garantir a conformidade e eficiência do serviço, processo que atualmente demanda muito tempo e esforço manual.
+
+Problema:
+
+    • Dependência de múltiplas planilhas Excel desconectadas para controle de dados
+    • Dificuldade no controle centralizado de dados de alimentação de múltiplas unidades
+    • Processo manual propenso a erros de registro e cálculo
+    • Ausência de ferramentas para comparação automática com dados do SIISP
+    • Falta de visualização clara de discrepâncias e problemas
+    • Demora na identificação de irregularidades no fornecimento de refeições
+    • Dificuldade na geração de relatórios consolidados para auditoria
+    • Impossibilidade de análise histórica e tendências de consumo de forma eficiente
+    • Ausência de ferramentas para análise de custos e gastos com alimentação
+
+Solução proposta: 
+	
+	O SGMRP resolve estes problemas através de uma plataforma web centralizada que substitui as planilhas Excel atuais, permitindo importação automatizada de dados, entrada manual estruturada, comparação inteligente com dados do SIISP, e visualização através de indicadores coloridos que facilitam a identificação imediata de problemas ou conformidades. O sistema incluirá funcionalidades futuras de geração de documentação PDF e análise gráfica de consumo e gastos.
+
+Público-alvo:
+ 
+    • Funcionários da SFA responsáveis pelo controle alimentar.
+    • Supervisores e gestores do sistema penitenciários responsáveis pelo controle alimentar
+    • Auditores internos e externos do sistema prisional
+    • Coordenadores de empresas terceirizadas de alimentação
+    • Funcionários administrativos responsáveis pelo lançamento de dados
+    • Analistas financeiros responsáveis pelo controle de custos alimentares
+
+=======================================================================
+1.3. ESCOPO DO PRODUTO
+=======================================================================
+
+O que está incluído nesta versão:
+
+    • Interface web responsiva para acesso via navegadores
+    • Cadastro e gerenciamento de dados de refeições por unidades penitenciárias
+    • Importação automatizada de dados via texto extraído de PDF
+    • Integração com dados do número de prisioneiros para comparação
+    • Visualização de dados em tabelas HTML interativas
+    • Sistema de indicadores visuais coloridos (verde/azul/vermelho)
+    • Filtros por mês e ano para análise temporal
+    • Organização de presídios por lotes contratuais
+    • Persistência de dados em formato JSON
+
+O que está fora do escopo (por enquanto):
+    • Sistema de autenticação e controle de acesso
+    • Sistema de aprovação de lançamentos
+    • Backup automático de dados
+    • API REST para integração com outros sistemas
+
+FUNCIONALIDADES PLANEJADAS PARA VERSÕES FUTURAS:
+
+    • Geração e download de documentação PDF com mapas de refeições revisados e formatados
+    • Dashboard com gráficos interativos de consumo de refeições por período
+    • Módulo de análise financeira com gráficos de gastos e custos por presídio/lote
+    • Relatórios em PDF e Excel para exportação com dados consolidados
+    • Análise de tendências históricas de consumo alimentar
+    • Indicadores de performance e KPIs do sistema alimentar penitenciárias
+    • Integração com sistemas financeiros para controle orçamentário
+
+=======================================================================
+1.4. REQUISITOS FUNCIONAIS
+=======================================================================
+
+[Alta] - RF01: O sistema deve permitir a visualização da lista de lotes contratuais na página inicial
+[Alta] - RF02: O sistema deve permitir o acesso aos dados de um lote específico através de navegação
+[Alta] - RF03: O sistema deve permitir a importação de dados de refeições através de texto extraído de PDF
+[Alta] - RF04: O sistema deve permitir a entrada manual de dados de refeições para cada dia do mês
+[Alta] - RF05: O sistema deve calcular automaticamente as diferenças entre refeições fornecidas e dados de número de prisioneiros
+[Alta] - RF06: O sistema deve exibir indicadores visuais coloridos baseados nas diferenças calculadas
+[Média] - RF07: O sistema deve permitir a inserção de dados do SIISP via texto para comparação
+[Média] - RF08: O sistema deve permitir anotações em células específicas da tabela para observações
+[Média] - RF09: O sistema deve filtrar dados por mês e ano selecionados
+[Média] - RF10: O sistema deve consolidar dados de múltiplos presídios em uma tabela única
+[Baixa] - RF11: O sistema deve permitir a exclusão de dados de presídios específicos
+[Baixa] - RF12: O sistema deve validar a correspondência entre número de dias e linhas de dados
+[Baixa] - RF13: O sistema deve persistir anotações de usuário entre sessões
+[Baixa] - RF14: O sistema deve suportar diferentes tipos de refeição (café, almoço, lanche, jantar)
+[Baixa] - RF15: O sistema deve distinguir entre refeições para internos e funcionários
+
+=======================================================================
+1.5. REQUISITOS NÃO-FUNCIONAIS
+=======================================================================
+
+Usabilidade:
+
+RNF01: A interface deve ser intuitiva, permitindo que usuários realizem operações básicas sem treinamento específico
+RNF02: O sistema deve fornecer feedback visual imediato para ações do usuário através de indicadores coloridos
+
+Performance:
+
+RNF03: As páginas devem carregar em menos de 3 segundos em conexões de banda larga
+RNF04: O processamento de dados de um mês completo deve ser concluído em menos de 5 segundos
+
+Segurança:
+
+RNF05: Os dados devem ser armazenados localmente de forma estruturada em formato JSON
+
+Compatibilidade:
+
+RNF06: O sistema deve funcionar nos navegadores Chrome, Firefox, Safari e Edge (últimas 2 versões)
+RNF07: O sistema deve ser compatível com sistemas operacionais Windows, macOS e Linux
+
+Responsividade:
+
+RNF08: O sistema deve ser totalmente funcional em dispositivos desktop, tablets e smartphones
+
+=======================================================================
+1.6. REGRAS DE NEGÓCIO
+=======================================================================
+
+RN01: Os dados de refeições devem corresponder ao número exato de dias do mês selecionado
+RN02: Células com diferença <= 0 entre interno e número de prisioneiros devem ser marcadas em verde e exibir "OK"
+RN03: Células com diferença entre 1-5 para internos devem ser marcadas em azul
+RN04: Células com diferença > 5 para internos devem ser marcadas em vermelho
+RN05: Para funcionários, células verdes indicam número menor que número de detentos, vermelhas indicam maior ou igual
+RN06: Cada presídio pode ter apenas um registro por mês/ano
+RN07: Dados do número de detentos são opcionais e quando não informados assumem valor 0
+RN08: Anotações de usuário devem persistir entre sessões do sistema
+RN09: A exclusão de dados de um presídio remove todas as informações associadas
+RN10: Presídios devem estar organizados por lotes contratuais conforme arquivo de configuração
+
+=======================================================================
+1.7. CASOS DE USO
+=======================================================================
+
+UC01 - Importar Dados de Refeições via PDF
+
+Ator principal: Usuário administrativo
+Pré-condições: Texto extraído do PDF disponível, presídio e mês/ano selecionados
+Fluxo principal:
+1. Usuário acessa a página do lote desejado
+2. Usuário seleciona presídio, mês e ano
+3. Usuário cola o texto extraído do PDF no campo apropriado
+4. Sistema processa e estrutura os dados automaticamente
+5. Sistema exibe tabela formatada com dados importados
+6. Sistema aplica indicadores visuais baseados nas regras de negócio
+Fluxos alternativos: Se dados inválidos, sistema exibe mensagem de erro
+Pós-condições: Dados salvos e disponíveis para consulta
+
+UC02 - Registrar Dados Manualmente
+Ator principal: Usuário administrativo
+Pré-condições: Usuário autenticado, presídio e período selecionados
+Fluxo principal:
+1. Usuário acessa formulário de entrada manual
+2. Usuário preenche dados de refeições dia a dia
+3. Sistema valida consistência dos dados inseridos
+4. Usuário confirma os dados inseridos
+5. Sistema salva informações e gera visualização
+Fluxos alternativos: Validação falha, usuário corrige dados
+Pós-condições: Dados manuais registrados no sistema
+
+UC03 - Comparar com Dados do número de detentos.
+Ator principal: Auditor ou gestor
+Pré-condições: Dados de refeições já registrados no sistema
+Fluxo principal:
+1. Usuário seleciona presídio com dados existentes
+2. Usuário insere dados do número de detentos correspondentes ao período
+3. Sistema processa e calcula diferenças automaticamente
+4. Sistema atualiza indicadores visuais na tabela
+5. Sistema destaca discrepâncias com cores específicas
+Fluxos alternativos: Dados incompatíveis geram erro
+Pós-condições: Comparação disponível para análise
+
+UC04 - Anotar Observações em Dados
+Ator principal: Usuário revisor
+Pré-condições: Tabela de dados exibida na interface
+Fluxo principal:
+1. Usuário visualiza tabela consolidada de dados
+2. Usuário clica em célula específica para anotar
+3. Sistema alterna marcação visual da célula
+4. Anotação é persistida automaticamente
+5. Marcação permanece visível em sessões futuras
+Fluxos alternativos: Célula já anotada tem marcação removida
+Pós-condições: Observação registrada permanentemente
+
+UC05 - Filtrar Dados por Período
+Ator principal: Qualquer usuário do sistema
+Pré-condições: Dados de múltiplos períodos disponíveis
+Fluxo principal:
+1. Usuário seleciona mês e ano desejados
+2. Sistema filtra dados conforme período selecionado
+3. Tabelas são atualizadas mostrando apenas dados do período
+4. Indicadores visuais são recalculados para dados filtrados
+Fluxos alternativos: Período sem dados exibe tabela vazia
+Pós-condições: Visualização restrita ao período selecionado
+
+UC06 - Excluir Dados de Presídio
+Ator principal: Administrador do sistema
+Pré-condições: Dados de presídio existentes no sistema
+Fluxo principal:
+1. Usuário seleciona presídio para exclusão
+2. Sistema confirma ação de exclusão
+3. Todos os dados relacionados são removidos permanentemente
+4. Sistema atualiza visualização sem os dados excluídos
+5. Confirmação de exclusão é exibida ao usuário
+Fluxos alternativos: Presídio não encontrado gera mensagem de erro
+Pós-condições: Dados completamente removidos do sistema
+
+=======================================================================
+1.8. MODELAGEM DE DADOS (CONCEITUAL)
+=======================================================================
+
+Entidades Principais:
+
+Lote (lote1, lote2, etc.)
+    • Identificador do lote contratual
+    • Lista de presídios associados
+    • Empresa responsável pelo lote
+
+Presídio
+    • Nome/identificação da unidade prisional
+    • Lote ao qual pertence
+    • Dados mensais de refeições
+
+DadosRefeição
+    • presidio (string): identificador do presídio
+    • mes (int): mês de referência (1-12)
+    • ano (int): ano de referência
+    • texto (string): texto original importado (opcional)
+    • tabela_html (string): dados estruturados em HTML
+    • siisp (string): dados do número SIISP para comparação (opcional)
+    • anotacoes (object): mapeamento de células anotadas
+
+TabelaDiária
+    • Data (string): data formatada DD/MM/AAAA
+    • Presídio (string): nome da unidade
+    • n° SIISP (int): valor de referência oficial
+    • Café Interno/Funcionário (int): quantidade de refeições
+    • Almoço Interno/Funcionário (int): quantidade de refeições
+    • Lanche Interno/Funcionário (int): quantidade de refeições
+    • Jantar Interno/Funcionário (int): quantidade de refeições
+    • [Refeição] x SIISP (int): diferença calculada automaticamente
+
+Relacionamentos:
+    • Um Lote contém vários Presídios (1:N)
+    • Um Presídio pode ter vários DadosRefeição mensais (1:N)
+    • Cada DadosRefeição contém uma TabelaDiária com múltiplas linhas diárias
+    • Anotações são vinculadas a células específicas através de coordenadas
+
+
+
+
+
+=======================================================================
+1.9. USER STORIES (HISTÓRIAS DE USUÁRIO)
+=======================================================================
+
+US01: Como funcionário da SFA, eu quero substituir as múltiplas planilhas Excel por uma interface web centralizada, para que eu possa gerenciar todos os dados de refeições de forma mais eficiente.
+
+US02: Como gestor penitenciário, eu quero visualizar todos os lotes contratuais disponíveis na página inicial, para que eu possa navegar rapidamente para o lote de interesse.
+
+US03: Como usuário administrativo, eu quero importar dados de refeições colando texto de PDF, para que eu possa registrar informações rapidamente sem digitação manual.
+
+US04: Como auditor, eu quero comparar dados reportados com informações do SIISP, para que eu possa identificar discrepâncias e irregularidades no fornecimento.
+
+US05: Como supervisor, eu quero visualizar indicadores coloridos nas tabelas, para que eu possa identificar imediatamente problemas ou conformidades nos dados.
+
+US06: Como usuário revisor, eu quero anotar observações em células específicas, para que eu possa marcar dados que necessitam atenção especial ou esclarecimentos.
+
+US07: Como gestor, eu quero filtrar dados por mês e ano específicos, para que eu possa analisar períodos determinados e acompanhar tendências temporais.
+
+US08: Como coordenador de empresa terceirizada, eu quero registrar dados de refeições manualmente quando necessário, para que eu possa manter registros atualizados mesmo sem documentos digitais.
+
+US09: Como administrador, eu quero excluir dados incorretos ou duplicados, para que eu possa manter a integridade das informações no sistema.
+
+US10: Como usuário final, eu quero acessar o sistema através de dispositivos móveis, para que eu possa consultar informações em campo ou fora do escritório.
+
+US11: Como analista, eu quero visualizar dados consolidados de múltiplos presídios em uma única tabela, para que eu possa fazer comparações e análises agregadas eficientemente.
+
+HISTÓRIAS DE USUÁRIO PARA VERSÕES FUTURAS:
+
+US12: Como auditor, eu quero baixar documentação PDF com mapas de refeições revisados e formatados, para que eu possa arquivar e apresentar relatórios oficiais.
+
+US13: Como gestor financeiro da SFA, eu quero visualizar gráficos de consumo de refeições por período, para que eu possa analisar tendências e planejar orçamentos.
+
+US14: Como analista de custos, eu quero acessar dashboards com análise de gastos por presídio e lote, para que eu possa identificar oportunidades de otimização financeira.
+
+US15: Como supervisor, eu quero receber notificações automáticas sobre discrepâncias críticas, para que eu possa tomar ações corretivas rapidamente.
+
+=======================================================================
+1.10. WIREFRAMES/FLUXO DE NAVEGAÇÃO
+=======================================================================
+
+Fluxo Principal de Navegação:
+
+1. PÁGINA INICIAL (index.html)
+   ├── Filtro superior: [Mês] [Ano] [Filtrar]
+   ├── Grid de cards dos lotes (Lote 1, 2, 3...)
+   └── Clique no lote → Redireciona para página específica
+
+2. PÁGINA DO LOTE (lote{num}.html)
+   ├── Cabeçalho com filtros de mês/ano
+   ├── Seção de importação de dados:
+   │   ├── Dropdown de presídios
+   │   ├── Campo de texto para PDF
+   │   └── Botão "Adicionar"
+   ├── Seção de entrada manual:
+   │   ├── Formulário com grid de dias × refeições
+   │   └── Botão "Salvar Manual"
+   ├── Seção de dados SIISP:
+   │   ├── Campo de texto para números SIISP
+   │   └── Botão "Processar SIISP"
+   ├── Tabela consolidada:
+   │   ├── Dados de todos os presídios do mês
+   │   ├── Células coloridas (verde/azul/vermelho)
+   │   └── Função de clique para anotações
+   └── Botões de ação (Excluir, Editar)
+
+3. COMPONENTES INTERATIVOS
+   ├── Células clicáveis para anotação (toggle amarelo)
+   ├── Indicadores visuais automáticos por regra de negócio
+   ├── Tooltips com informações de contexto
+   └── Formulários com validação client-side
+
+4. RESPONSIVIDADE
+   ├── Desktop: Layout em colunas com formulários laterais
+   ├── Tablet: Formulários empilhados, tabela com scroll horizontal
+   └── Mobile: Interface simplificada, um elemento por linha
+
+5. ESTADOS DA APLICAÇÃO
+   ├── Carregamento: Spinners durante processamento
+   ├── Sucesso: Mensagens verdes de confirmação
+   ├── Erro: Alertas vermelhos com descrição do problema
+   └── Vazio: Placeholders informativos quando sem dados
+
+Navegação entre telas:
+- Home → Lote (clique no card)
+- Lote → Home (link no cabeçalho)
+- Dentro do lote: permanece na mesma página com atualizações dinâmicas
+- Filtros: atualizam URL mantendo contexto de navegação
+
+O sistema utiliza uma arquitetura SPA (Single Page Application) parcial, onde a navegação principal recarrega páginas mas as interações dentro de cada lote são dinâmicas via JavaScript/AJAX.
+
+=======================================================================
+FIM DO DOCUMENTO PRD
+=======================================================================
+Documento gerado em: 15 de outubro de 2025
+Sistema: SGMRP - Sistema de Gerenciamento de Mapas de Refeições Prisionais
+Versão: 1.0

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SGMRP</title>
+    <meta name="description" content="Acesse o Sistema de Gerenciamento de Mapas de Refeições Penitenciário">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">SGMRP</a>
+                <nav>
+                    <ul>
+                        <li><a href="index.html">Início</a></li>
+                        <li><a href="login.html" class="active">Login</a></li>
+                        <li><a href="cadastro.html">Cadastro</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container" style="max-width: 500px; margin-top: 2rem;">
+            <!-- Breadcrumb -->
+            <nav aria-label="Navegação">
+                <ol style="display: flex; gap: 0.5rem; margin-bottom: 2rem; font-size: 0.875rem; color: var(--gray-500);">
+                    <li><a href="index.html" style="color: var(--primary-color); text-decoration: none;">Início</a></li>
+                    <li aria-hidden="true">/</li>
+                    <li aria-current="page">Login</li>
+                </ol>
+            </nav>
+
+            <div class="card fade-in">
+                <div class="card-body" style="padding: 3rem;">
+                    <!-- Header do Login -->
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2rem; color: white;">
+                            🔐
+                        </div>
+                        <h1 style="margin-bottom: 0.5rem;">Acesso ao Sistema</h1>
+                        <p style="color: var(--gray-600); margin-bottom: 0;">
+                            Entre com suas credenciais para acessar o SGMRP
+                        </p>
+                    </div>
+
+                    <!-- Formulário de Login -->
+                    <form id="loginForm" novalidate>
+                        <div class="form-group">
+                            <label for="usuario" class="form-label">
+                                Usuário <span style="color: var(--danger-color);">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                id="usuario" 
+                                name="usuario" 
+                                class="form-input" 
+                                placeholder="Digite seu nome de usuário"
+                                required
+                                autocomplete="username"
+                                aria-describedby="usuario-error"
+                            >
+                            <div id="usuario-error" class="error-message" style="display: none; color: var(--danger-color); font-size: 0.875rem; margin-top: 0.25rem;"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="senha" class="form-label">
+                                Senha <span style="color: var(--danger-color);">*</span>
+                            </label>
+                            <div style="position: relative;">
+                                <input 
+                                    type="password" 
+                                    id="senha" 
+                                    name="senha" 
+                                    class="form-input" 
+                                    placeholder="Digite sua senha"
+                                    required
+                                    autocomplete="current-password"
+                                    aria-describedby="senha-error"
+                                    style="padding-right: 3rem;"
+                                >
+                                <button 
+                                    type="button" 
+                                    id="toggleSenha"
+                                    style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--gray-500); cursor: pointer; padding: 0.25rem;"
+                                    aria-label="Mostrar/ocultar senha"
+                                >
+                                    👁️
+                                </button>
+                            </div>
+                            <div id="senha-error" class="error-message" style="display: none; color: var(--danger-color); font-size: 0.875rem; margin-top: 0.25rem;"></div>
+                        </div>
+
+                        <!-- Checkbox "Lembrar-me" -->
+                        <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
+                            <input 
+                                type="checkbox" 
+                                id="lembrarMe" 
+                                name="lembrarMe"
+                                style="margin-right: 0.5rem;"
+                            >
+                            <label for="lembrarMe" style="font-size: 0.875rem; color: var(--gray-600); cursor: pointer;">
+                                Manter-me conectado
+                            </label>
+                        </div>
+
+                        <!-- Botão de Login -->
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;" id="loginButton">
+                            <span id="loginButtonText">Entrar no Sistema</span>
+                            <span id="loginButtonSpinner" style="display: none;">Entrando...</span>
+                        </button>
+
+                        <!-- Link para recuperar senha -->
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <a href="#" style="color: var(--primary-color); font-size: 0.875rem; text-decoration: none;" id="esqueceuSenha">
+                                Esqueceu sua senha?
+                            </a>
+                        </div>
+                    </form>
+
+                    <!-- Divisor -->
+                    <div style="text-align: center; margin: 1.5rem 0; position: relative;">
+                        <hr style="border: none; border-top: 1px solid var(--gray-200);">
+                        <span style="background-color: white; color: var(--gray-500); padding: 0 1rem; position: absolute; top: -0.5rem; left: 50%; transform: translateX(-50%); font-size: 0.875rem;">
+                            Não tem uma conta?
+                        </span>
+                    </div>
+
+                    <!-- Link para Cadastro -->
+                    <div style="text-align: center;">
+                        <a href="cadastro.html" class="btn btn-secondary" style="width: 100%;">
+                            Criar Nova Conta
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informações de Acesso -->
+            <div class="alert alert-info" style="margin-top: 2rem;">
+                <h4 style="margin-bottom: 0.5rem;">Acesso Restrito</h4>
+                <p style="margin-bottom: 0.5rem; font-size: 0.875rem;">
+                    Este sistema é destinado exclusivamente para funcionários autorizados da SFA, 
+                    supervisores, gestores do sistema penitenciário e auditores credenciados.
+                </p>
+                <p style="margin-bottom: 0; font-size: 0.875rem;">
+                    <strong>Para obter acesso:</strong> Entre em contato com o administrador do sistema 
+                    ou responsável pela área de TI da sua unidade.
+                </p>
+            </div>
+
+            <!-- Informações Técnicas -->
+            <div class="card" style="margin-top: 1rem;">
+                <div class="card-body" style="padding: 1.5rem;">
+                    <h5 style="margin-bottom: 1rem;">Requisitos do Sistema</h5>
+                    <ul style="font-size: 0.875rem; color: var(--gray-600); margin: 0; padding-left: 1.25rem;">
+                        <li>Navegadores suportados: Chrome, Firefox, Safari, Edge (últimas 2 versões)</li>
+                        <li>JavaScript deve estar habilitado</li>
+                        <li>Resolução mínima recomendada: 1024x768</li>
+                        <li>Conexão com a internet necessária</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container text-center">
+            <p style="margin: 0; color: var(--gray-400); font-size: 0.875rem;">
+                © 2025 SGMRP - Sistema de Gerenciamento de Mapas de Refeições Penitenciário
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle para mostrar/ocultar senha
+        document.getElementById('toggleSenha').addEventListener('click', function() {
+            const senhaInput = document.getElementById('senha');
+            const toggleButton = document.getElementById('toggleSenha');
+            
+            if (senhaInput.type === 'password') {
+                senhaInput.type = 'text';
+                toggleButton.textContent = '🙈';
+                toggleButton.setAttribute('aria-label', 'Ocultar senha');
+            } else {
+                senhaInput.type = 'password';
+                toggleButton.textContent = '👁️';
+                toggleButton.setAttribute('aria-label', 'Mostrar senha');
+            }
+        });
+
+        // Validação do formulário
+        function validateForm() {
+            let isValid = true;
+            const usuario = document.getElementById('usuario');
+            const senha = document.getElementById('senha');
+            
+            // Limpar erros anteriores
+            clearErrors();
+            
+            // Validar usuário
+            if (!usuario.value.trim()) {
+                showError('usuario', 'O nome de usuário é obrigatório');
+                isValid = false;
+            } else if (usuario.value.trim().length < 3) {
+                showError('usuario', 'O nome de usuário deve ter pelo menos 3 caracteres');
+                isValid = false;
+            }
+            
+            // Validar senha
+            if (!senha.value) {
+                showError('senha', 'A senha é obrigatória');
+                isValid = false;
+            } else if (senha.value.length < 4) {
+                showError('senha', 'A senha deve ter pelo menos 4 caracteres');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        function showError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorDiv = document.getElementById(fieldId + '-error');
+            
+            field.classList.add('error');
+            field.style.borderColor = 'var(--danger-color)';
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function clearErrors() {
+            const fields = ['usuario', 'senha'];
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                const errorDiv = document.getElementById(fieldId + '-error');
+                
+                field.classList.remove('error');
+                field.style.borderColor = '';
+                errorDiv.style.display = 'none';
+                errorDiv.textContent = '';
+            });
+        }
+
+        // Limpar erros quando o usuário começa a digitar
+        document.getElementById('usuario').addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.style.borderColor = '';
+                document.getElementById('usuario-error').style.display = 'none';
+            }
+        });
+
+        document.getElementById('senha').addEventListener('input', function() {
+            if (this.value) {
+                this.style.borderColor = '';
+                document.getElementById('senha-error').style.display = 'none';
+            }
+        });
+
+        // Submissão do formulário
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (validateForm()) {
+                // Mostrar estado de loading
+                const button = document.getElementById('loginButton');
+                const buttonText = document.getElementById('loginButtonText');
+                const buttonSpinner = document.getElementById('loginButtonSpinner');
+                
+                button.disabled = true;
+                buttonText.style.display = 'none';
+                buttonSpinner.style.display = 'inline';
+                
+                // Simular chamada de API
+                setTimeout(() => {
+                    // Em uma implementação real, aqui seria feita a chamada para o servidor
+                    const usuario = document.getElementById('usuario').value;
+                    const senha = document.getElementById('senha').value;
+                    
+                    // Simulação de login bem-sucedido
+                    if (usuario && senha) {
+                        // Salvar dados de sessão se "lembrar-me" estiver marcado
+                        if (document.getElementById('lembrarMe').checked) {
+                            localStorage.setItem('sgmrp_remember', 'true');
+                            localStorage.setItem('sgmrp_usuario', usuario);
+                        }
+                        
+                        // Redirecionar para dashboard
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        // Restaurar estado do botão em caso de erro
+                        button.disabled = false;
+                        buttonText.style.display = 'inline';
+                        buttonSpinner.style.display = 'none';
+                        
+                        alert('Erro no login. Verifique suas credenciais.');
+                    }
+                }, 1500);
+            }
+        });
+
+        // Verificar se existe dados salvos para "lembrar-me"
+        window.addEventListener('load', function() {
+            if (localStorage.getItem('sgmrp_remember') === 'true') {
+                const usuarioSalvo = localStorage.getItem('sgmrp_usuario');
+                if (usuarioSalvo) {
+                    document.getElementById('usuario').value = usuarioSalvo;
+                    document.getElementById('lembrarMe').checked = true;
+                }
+            }
+        });
+
+        // Link "Esqueceu sua senha?"
+        document.getElementById('esqueceuSenha').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Funcionalidade de recuperação de senha será implementada em versões futuras.\n\nPor enquanto, entre em contato com o administrador do sistema para redefinir sua senha.');
+        });
+
+        // Animação de fade-in
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            
+            // Trigger animation
+            setTimeout(() => {
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body>
+</html>
