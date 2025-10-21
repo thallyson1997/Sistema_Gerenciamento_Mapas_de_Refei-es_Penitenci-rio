@@ -1,0 +1,130 @@
+{
+  "lotes": [
+    {
+      "id": 1,
+      "nome": "Lote 1",
+      "contrato": "CT-2024/001",
+      "data_inicio_contrato": "15/01/2024",
+      "empresa": "Empresa ABC Alimentação Ltda",
+      "unidades": [
+        "Penitenciária Central do Estado",
+        "Presídio Regional Norte",
+        "Delegacia Especializada Centro",
+        "Casa de Custódia Feminina",
+        "Instituto Penal Agrícola"
+      ],
+      "ativo": true
+    },
+    {
+      "id": 2,
+      "nome": "Lote 2",
+      "contrato": "CT-2024/002",
+      "data_inicio_contrato": "01/02/2024",
+      "empresa": "XYZ Refeições e Nutrição S.A",
+      "unidades": [
+        "Penitenciária Industrial",
+        "Presídio Metropolitano Sul",
+        "Delegacia Regional Oeste",
+        "Centro de Detenção Provisória"
+      ],
+      "ativo": true
+    },
+    {
+      "id": 3,
+      "nome": "Lote 3",
+      "contrato": "CT-2024/003",
+      "data_inicio_contrato": "10/03/2024",
+      "empresa": "DEF Nutrição e Catering",
+      "unidades": [
+        "Instituto Penal Feminino",
+        "Presídio de Segurança Máxima",
+        "Delegacia Especializada Norte"
+      ],
+      "ativo": true
+    },
+    {
+      "id": 4,
+      "nome": "Lote 4",
+      "contrato": "CT-2023/018",
+      "data_inicio_contrato": "22/11/2023",
+      "empresa": "GHI Catering e Serviços",
+      "unidades": [
+        "Penitenciária Estadual Leste",
+        "Complexo Prisional Central",
+        "Centro de Ressocialização"
+      ],
+      "ativo": true
+    },
+    {
+      "id": 5,
+      "nome": "Lote 5",
+      "contrato": "CT-2024/005",
+      "data_inicio_contrato": "05/04/2024",
+      "empresa": "JKL Alimentação Hospitalar",
+      "unidades": [
+        "Penitenciária de Regime Fechado",
+        "Delegacia de Polícia Civil",
+        "Casa de Albergado Estadual",
+        "Centro de Progressão Penitenciária"
+      ],
+      "ativo": true
+    },
+    {
+      "id": 6,
+      "nome": "Lote 6",
+      "contrato": "CT-2024/006",
+      "data_inicio_contrato": "18/05/2024",
+      "empresa": "MNO Serviços Nutricionais",
+      "unidades": [
+        "Instituto Penal Regional",
+        "Presídio de Regime Semi-Aberto",
+        "Delegacia Especializada Sul",
+        "Centro de Observação Criminológica",
+        "Penitenciária Agrícola"
+      ],
+      "ativo": true
+    },
+    {
+      "id": 7,
+      "nome": "Lote 7",
+      "contrato": "CT-2024/007",
+      "data_inicio_contrato": "30/06/2024",
+      "empresa": "PQR Alimentação Coletiva",
+      "unidades": [
+        "Complexo Penitenciário Norte",
+        "Delegacia Regional Centro",
+        "Casa de Custódia e Tratamento"
+      ],
+      "ativo": true
+    },
+    {
+      "id": 8,
+      "nome": "Lote 8",
+      "contrato": "CT-2024/008",
+      "data_inicio_contrato": "12/07/2024",
+      "empresa": "STU Nutrição Especializada",
+      "unidades": [
+        "Penitenciária Estadual Oeste",
+        "Presídio Central Metropolitano",
+        "Delegacia de Investigações",
+        "Centro de Detenção Especial",
+        "Instituto de Medicina Legal"
+      ],
+      "ativo": true
+    },
+    {
+      "id": 9,
+      "nome": "Lote 9",
+      "contrato": "CT-2024/009",
+      "data_inicio_contrato": "25/08/2024",
+      "empresa": "VWX Catering Corporativo",
+      "unidades": [
+        "Penitenciária de Segurança Média",
+        "Complexo Prisional Sul",
+        "Delegacia Especializada Leste",
+        "Centro de Reinserção Social"
+      ],
+      "ativo": true
+    }
+  ]
+}

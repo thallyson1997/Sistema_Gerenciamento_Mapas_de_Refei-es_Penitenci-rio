@@ -5,18 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro - SGMRP</title>
     <meta name="description" content="Registre-se no Sistema de Gerenciamento de Mapas de Refeições Penitenciário">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/validation.css">
 </head>
 <body>
     <header>
         <div class="container">
             <div class="header-content">
-                <a href="index.html" class="logo">SGMRP</a>
+                <a href="{{ url_for('index') }}" class="logo">SGMRP</a>
                 <nav>
                     <ul>
-                        <li><a href="index.html">Início</a></li>
-                        <li><a href="login.html">Login</a></li>
-                        <li><a href="cadastro.html" class="active">Cadastro</a></li>
+                        <li><a href="{{ url_for('index') }}">Início</a></li>
+                        <li><a href="{{ url_for('login') }}">Login</a></li>
+                        <li><a href="{{ url_for('cadastro') }}" class="active">Cadastro</a></li>
                     </ul>
                 </nav>
             </div>
@@ -28,7 +29,7 @@
             <!-- Breadcrumb -->
             <nav aria-label="Navegação">
                 <ol style="display: flex; gap: 0.5rem; margin-bottom: 2rem; font-size: 0.875rem; color: var(--gray-500);">
-                    <li><a href="index.html" style="color: var(--primary-color); text-decoration: none;">Início</a></li>
+                    <li><a href="{{ url_for('index') }}" style="color: var(--primary-color); text-decoration: none;">Início</a></li>
                     <li aria-hidden="true">/</li>
                     <li aria-current="page">Cadastro</li>
                 </ol>
@@ -48,7 +49,7 @@
                     </div>
 
                     <!-- Formulário de Cadastro -->
-                    <form id="cadastroForm" novalidate>
+                    <form id="cadastroForm" method="POST" action="{{ url_for('cadastro') }}" novalidate>
                         <!-- Dados Pessoais -->
                         <fieldset style="border: none; margin-bottom: 2rem;">
                             <legend style="font-size: 1.125rem; font-weight: 600; color: var(--gray-700); margin-bottom: 1rem;">
@@ -63,7 +64,7 @@
                                     <input 
                                         type="text" 
                                         id="nomeCompleto" 
-                                        name="nomeCompleto" 
+                                        name="nome" 
                                         class="form-input" 
                                         placeholder="Digite seu nome completo"
                                         required
@@ -336,7 +337,7 @@
 
                     <!-- Link para Login -->
                     <div style="text-align: center;">
-                        <a href="login.html" class="btn btn-secondary" style="width: 100%;">
+                        <a href="{{ url_for('login') }}" class="btn btn-secondary" style="width: 100%;">
                             Fazer Login
                         </a>
                     </div>
@@ -436,6 +437,90 @@
             }
         });
 
+        // ===== VALIDAÇÃO EM TEMPO REAL =====
+        
+        // Campos que devem ser validados em tempo real
+        const camposValidar = ['email', 'cpf', 'usuario', 'matricula', 'telefone'];
+        
+        // Configurar listeners para validação em tempo real
+        camposValidar.forEach(campo => {
+            const elemento = document.getElementById(campo);
+            if (elemento) {
+                elemento.addEventListener('blur', validarCampoTempo);
+                elemento.addEventListener('input', limparMensagemValidacao);
+            }
+        });
+        
+        // Função para validar campo em tempo real
+        async function validarCampoTempo(e) {
+            const campo = e.target.id;
+            const valor = e.target.value.trim();
+            
+            // Limpar mensagem anterior
+            limparMensagemValidacao(e);
+            
+            if (!valor) return;
+            
+            // Mostrar loading
+            mostrarMensagemValidacao(campo, 'Verificando...', 'loading');
+            
+            try {
+                const response = await fetch('/api/validar-campo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        campo: campo,
+                        valor: valor
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erro na validação');
+                }
+                
+                const data = await response.json();
+                
+                // Limpar loading
+                limparMensagemValidacao(e);
+                
+                // Mostrar resultado
+                if (data.valido) {
+                    mostrarMensagemValidacao(campo, data.mensagem || 'Disponível!', 'success');
+                } else {
+                    mostrarMensagemValidacao(campo, data.mensagem, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Erro na validação:', error);
+                limparMensagemValidacao(e);
+                mostrarMensagemValidacao(campo, 'Erro ao verificar. Tente novamente.', 'error');
+            }
+        }
+        
+        // Função para limpar mensagens de validação
+        function limparMensagemValidacao(e) {
+            const campo = e.target.id;
+            const mensagemDiv = document.getElementById(`msg-${campo}`);
+            if (mensagemDiv) {
+                mensagemDiv.remove();
+            }
+        }
+        
+        // Função para mostrar mensagem de validação
+        function mostrarMensagemValidacao(campo, mensagem, tipo) {
+            const elemento = document.getElementById(campo);
+            const mensagemDiv = document.createElement('div');
+            mensagemDiv.id = `msg-${campo}`;
+            mensagemDiv.className = `validation-message ${tipo}`;
+            mensagemDiv.textContent = mensagem;
+            
+            elemento.parentNode.insertBefore(mensagemDiv, elemento.nextSibling);
+        }
+
+        // ===== VALIDAÇÃO DO FORMULÁRIO =====
+        
         // Validação do formulário
         function validateForm() {
             let isValid = true;
@@ -573,25 +658,30 @@
 
         // Submissão do formulário
         document.getElementById('cadastroForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (validateForm()) {
-                // Mostrar estado de loading
-                const button = document.getElementById('cadastroButton');
-                const buttonText = document.getElementById('cadastroButtonText');
-                const buttonSpinner = document.getElementById('cadastroButtonSpinner');
-                
-                button.disabled = true;
-                buttonText.style.display = 'none';
-                buttonSpinner.style.display = 'inline';
-                
-                // Simular envio
-                setTimeout(() => {
-                    alert('Solicitação de cadastro enviada com sucesso!\n\nVocê receberá um e-mail de confirmação em até 48 horas úteis.');
-                    // Redirecionar para login
-                    window.location.href = 'login.html';
-                }, 2000);
+            if (!validateForm()) {
+                e.preventDefault();
+                return false;
             }
+            
+            // Verificar se há erros de validação em tempo real
+            const errosValidacao = document.querySelectorAll('.validation-message.error');
+            if (errosValidacao.length > 0) {
+                e.preventDefault();
+                alert('Por favor, corrija os erros antes de prosseguir.');
+                return false;
+            }
+            
+            // Se validação passou, permitir envio normal do formulário
+            // Mostrar estado de loading
+            const button = document.getElementById('cadastroButton');
+            const buttonText = document.getElementById('cadastroButtonText');
+            const buttonSpinner = document.getElementById('cadastroButtonSpinner');
+            
+            button.disabled = true;
+            buttonText.style.display = 'none';
+            buttonSpinner.style.display = 'inline';
+            
+            // Formulário será enviado normalmente para o Flask
         });
 
         // Links dos termos

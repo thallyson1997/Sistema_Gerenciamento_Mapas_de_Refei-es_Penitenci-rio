@@ -1,0 +1,36 @@
+{
+  "usuarios": [
+    {
+      "id": 1,
+      "nome": "Thallyson Gabriel Martins Correia Fontenele",
+      "email": "thallysong10@hotmail.com",
+      "cpf": "061.313.633-07",
+      "telefone": "(98) 98470-7679",
+      "cargo": "funcionario_sfa",
+      "unidade": "SFA",
+      "matricula": "20221",
+      "usuario": "admin",
+      "senha": "123456",
+      "justificativa": "Desejo entrar no sistema pois sou funcionário da parte de estágio e preciso ter acesso ao mapa de alimentação.",
+      "aceitar_termos": true,
+      "data_cadastro": "2025-10-21T09:43:08.253566Z",
+      "acesso": true
+    },
+    {
+      "id": 2,
+      "nome": "Usuario Teste",
+      "email": "teste@exemplo.com",
+      "cpf": "123.456.789-00",
+      "telefone": "(11) 99999-9999",
+      "cargo": "supervisor",
+      "unidade": "Unidade A",
+      "matricula": "12345",
+      "usuario": "teste",
+      "senha": "teste123",
+      "justificativa": "Usuario de teste para validação do sistema.",
+      "aceitar_termos": true,
+      "data_cadastro": "2025-10-21T10:00:00.000000Z",
+      "acesso": false
+    }
+  ]
+}

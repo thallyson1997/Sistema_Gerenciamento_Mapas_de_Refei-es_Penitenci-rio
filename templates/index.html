@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SGMRP - Sistema de Gerenciamento de Mapas de Refeições Penitenciário</title>
     <meta name="description" content="Sistema web para gerenciamento e monitoramento do fornecimento de refeições em unidades prisionais">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <header>
         <div class="container">
             <div class="header-content">
-                <a href="index.html" class="logo">SGMRP</a>
+                <a href="{{ url_for('index') }}" class="logo">SGMRP</a>
                 <nav>
                     <ul>
-                        <li><a href="index.html" class="active">Início</a></li>
-                        <li><a href="login.html">Login</a></li>
-                        <li><a href="cadastro.html">Cadastro</a></li>
+                        <li><a href="{{ url_for('index') }}" class="active">Início</a></li>
+                        <li><a href="{{ url_for('login') }}">Login</a></li>
+                        <li><a href="{{ url_for('cadastro') }}">Cadastro</a></li>
                         <li><a href="#sobre">Sobre</a></li>
                         <li><a href="#contato">Contato</a></li>
                     </ul>
@@ -39,10 +39,10 @@
                         substituindo planilhas Excel fragmentadas por uma plataforma centralizada e eficiente.
                     </p>
                     <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                        <a href="login.html" class="btn btn-lg" style="background-color: white; color: var(--primary-color); font-weight: 600;">
+                        <a href="{{ url_for('login') }}" class="btn btn-lg" style="background-color: white; color: var(--primary-color); font-weight: 600;">
                             Acessar Sistema
                         </a>
-                        <a href="cadastro.html" class="btn btn-lg btn-secondary" style="border: 2px solid white; color: white;">
+                        <a href="{{ url_for('cadastro') }}" class="btn btn-lg btn-secondary" style="border: 2px solid white; color: white;">
                             Cadastrar-se
                         </a>
                     </div>
@@ -245,10 +245,10 @@
                 o gerenciamento de refeições no sistema penitenciário.
             </p>
             <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <a href="login.html" class="btn btn-lg" style="background-color: white; color: var(--primary-color); font-weight: 600;">
+                <a href="{{ url_for('login') }}" class="btn btn-lg" style="background-color: white; color: var(--primary-color); font-weight: 600;">
                     Entrar no Sistema
                 </a>
-                <a href="cadastro.html" class="btn btn-lg" style="border: 2px solid white; background: transparent; color: white;">
+                <a href="{{ url_for('cadastro') }}" class="btn btn-lg" style="border: 2px solid white; background: transparent; color: white;">
                     Criar Conta
                 </a>
             </div>
@@ -268,8 +268,8 @@
                 <div>
                     <h5 style="color: white; margin-bottom: 1rem;">Links Úteis</h5>
                     <ul style="list-style: none;">
-                        <li><a href="login.html" style="color: var(--gray-400); text-decoration: none;">Login</a></li>
-                        <li><a href="cadastro.html" style="color: var(--gray-400); text-decoration: none;">Cadastro</a></li>
+                        <li><a href="{{ url_for('login') }}" style="color: var(--gray-400); text-decoration: none;">Login</a></li>
+                        <li><a href="{{ url_for('cadastro') }}" style="color: var(--gray-400); text-decoration: none;">Cadastro</a></li>
                         <li><a href="#sobre" style="color: var(--gray-400); text-decoration: none;">Sobre o Sistema</a></li>
                         <li><a href="#contato" style="color: var(--gray-400); text-decoration: none;">Contato</a></li>
                     </ul>

@@ -5,18 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - SGMRP</title>
     <meta name="description" content="Acesse o Sistema de Gerenciamento de Mapas de Refeições Penitenciário">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            border: 1px solid;
+        }
+        
+        .alert-danger {
+            color: #dc2626;
+            background-color: #fef2f2;
+            border-color: #fecaca;
+        }
+        
+        .alert-success {
+            color: #16a34a;
+            background-color: #dcfce7;
+            border-color: #bbf7d0;
+        }
+        
+        .alert-warning {
+            color: #d97706;
+            background-color: #fef3c7;
+            border-color: #fed7aa;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        #flashMessage {
+            animation: slideIn 0.3s ease-out;
+        }
+    </style>
 </head>
 <body>
     <header>
         <div class="container">
             <div class="header-content">
-                <a href="index.html" class="logo">SGMRP</a>
+                <a href="{{ url_for('index') }}" class="logo">SGMRP</a>
                 <nav>
                     <ul>
-                        <li><a href="index.html">Início</a></li>
-                        <li><a href="login.html" class="active">Login</a></li>
-                        <li><a href="cadastro.html">Cadastro</a></li>
+                        <li><a href="{{ url_for('index') }}">Início</a></li>
+                        <li><a href="{{ url_for('login') }}" class="active">Login</a></li>
+                        <li><a href="{{ url_for('cadastro') }}">Cadastro</a></li>
                     </ul>
                 </nav>
             </div>
@@ -28,7 +70,7 @@
             <!-- Breadcrumb -->
             <nav aria-label="Navegação">
                 <ol style="display: flex; gap: 0.5rem; margin-bottom: 2rem; font-size: 0.875rem; color: var(--gray-500);">
-                    <li><a href="index.html" style="color: var(--primary-color); text-decoration: none;">Início</a></li>
+                    <li><a href="{{ url_for('index') }}" style="color: var(--primary-color); text-decoration: none;">Início</a></li>
                     <li aria-hidden="true">/</li>
                     <li aria-current="page">Login</li>
                 </ol>
@@ -47,18 +89,43 @@
                         </p>
                     </div>
 
+                    <!-- Mensagens de Erro/Sucesso -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' if category == 'success' else 'warning' }}" 
+                                     id="flashMessage" 
+                                     style="margin-bottom: 1.5rem; animation: slideIn 0.3s ease-out; position: relative; display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <strong>
+                                            {% if category == 'error' %}⚠️ Erro:{% endif %}
+                                            {% if category == 'success' %}✅ Sucesso:{% endif %}
+                                            {% if category == 'warning' %}⚠️ Atenção:{% endif %}
+                                        </strong>
+                                        {{ message }}
+                                    </div>
+                                    <button type="button" 
+                                            onclick="this.parentElement.style.display='none'" 
+                                            style="background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0; margin-left: 1rem; opacity: 0.6; line-height: 1;">
+                                        ×
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
                     <!-- Formulário de Login -->
-                    <form id="loginForm" novalidate>
+                    <form id="loginForm" method="POST" action="{{ url_for('login') }}" novalidate>
                         <div class="form-group">
                             <label for="usuario" class="form-label">
-                                Usuário <span style="color: var(--danger-color);">*</span>
+                                Usuário ou E-mail <span style="color: var(--danger-color);">*</span>
                             </label>
                             <input 
                                 type="text" 
                                 id="usuario" 
-                                name="usuario" 
+                                name="email" 
                                 class="form-input" 
-                                placeholder="Digite seu nome de usuário"
+                                placeholder="Digite seu usuário ou e-mail"
                                 required
                                 autocomplete="username"
                                 aria-describedby="usuario-error"
@@ -131,7 +198,7 @@
 
                     <!-- Link para Cadastro -->
                     <div style="text-align: center;">
-                        <a href="cadastro.html" class="btn btn-secondary" style="width: 100%;">
+                        <a href="{{ url_for('cadastro') }}" class="btn btn-secondary" style="width: 100%;">
                             Criar Nova Conta
                         </a>
                     </div>
@@ -261,44 +328,33 @@
 
         // Submissão do formulário
         document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (validateForm()) {
-                // Mostrar estado de loading
-                const button = document.getElementById('loginButton');
-                const buttonText = document.getElementById('loginButtonText');
-                const buttonSpinner = document.getElementById('loginButtonSpinner');
-                
-                button.disabled = true;
-                buttonText.style.display = 'none';
-                buttonSpinner.style.display = 'inline';
-                
-                // Simular chamada de API
-                setTimeout(() => {
-                    // Em uma implementação real, aqui seria feita a chamada para o servidor
-                    const usuario = document.getElementById('usuario').value;
-                    const senha = document.getElementById('senha').value;
-                    
-                    // Simulação de login bem-sucedido
-                    if (usuario && senha) {
-                        // Salvar dados de sessão se "lembrar-me" estiver marcado
-                        if (document.getElementById('lembrarMe').checked) {
-                            localStorage.setItem('sgmrp_remember', 'true');
-                            localStorage.setItem('sgmrp_usuario', usuario);
-                        }
-                        
-                        // Redirecionar para dashboard
-                        window.location.href = 'dashboard.html';
-                    } else {
-                        // Restaurar estado do botão em caso de erro
-                        button.disabled = false;
-                        buttonText.style.display = 'inline';
-                        buttonSpinner.style.display = 'none';
-                        
-                        alert('Erro no login. Verifique suas credenciais.');
-                    }
-                }, 1500);
+            // Validar campos antes de enviar
+            if (!validateForm()) {
+                e.preventDefault();
+                return false;
             }
+            
+            // Salvar dados de "lembrar-me" antes do envio
+            const usuario = document.getElementById('usuario').value;
+            if (document.getElementById('lembrarMe').checked) {
+                localStorage.setItem('sgmrp_remember', 'true');
+                localStorage.setItem('sgmrp_usuario', usuario);
+            } else {
+                localStorage.removeItem('sgmrp_remember');
+                localStorage.removeItem('sgmrp_usuario');
+            }
+            
+            // Mostrar estado de loading
+            const button = document.getElementById('loginButton');
+            const buttonText = document.getElementById('loginButtonText');
+            const buttonSpinner = document.getElementById('loginButtonSpinner');
+            
+            button.disabled = true;
+            buttonText.style.display = 'none';
+            buttonSpinner.style.display = 'inline';
+            
+            // Permitir que o formulário seja enviado normalmente para o Flask
+            // O Flask irá processar e fazer o redirecionamento
         });
 
         // Verificar se existe dados salvos para "lembrar-me"
@@ -311,6 +367,20 @@
                 }
             }
         });
+
+        // Auto-esconder mensagens flash após 5 segundos
+        const flashMessage = document.getElementById('flashMessage');
+        if (flashMessage) {
+            setTimeout(() => {
+                flashMessage.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+                flashMessage.style.opacity = '0';
+                flashMessage.style.transform = 'translateY(-20px)';
+                
+                setTimeout(() => {
+                    flashMessage.style.display = 'none';
+                }, 500);
+            }, 5000);
+        }
 
         // Link "Esqueceu sua senha?"
         document.getElementById('esqueceuSenha').addEventListener('click', function(e) {

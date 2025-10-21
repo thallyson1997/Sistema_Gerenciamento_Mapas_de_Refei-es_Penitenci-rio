@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalhes do Lote - SGMRP</title>
     <meta name="description" content="Detalhes do lote contratual com mapas de refeições e indicadores">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <header>
         <div class="container">
             <div class="header-content">
-                <a href="dashboard.html" class="logo">SGMRP</a>
+                <a href="{{ url_for('dashboard') }}" class="logo">SGMRP</a>
                 <nav>
                     <ul>
-                        <li><a href="dashboard.html">Dashboard</a></li>
-                        <li><a href="lotes.html">Lotes</a></li>
+                        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                        <li><a href="{{ url_for('lotes') }}">Lotes</a></li>
                         <li><a href="#relatorios">Relatórios</a></li>
                         <li><a href="#configuracoes">Configurações</a></li>
                         <li><a href="#" id="logoutLink" style="color: #fed7d7;">Sair</a></li>
@@ -30,11 +30,11 @@
             <!-- Breadcrumb -->
             <nav aria-label="Navegação" style="margin-bottom: 2rem;">
                 <ol style="display: flex; gap: 0.5rem; font-size: 0.875rem; color: var(--gray-500);">
-                    <li><a href="dashboard.html" style="color: var(--primary-color); text-decoration: none;">Dashboard</a></li>
+                    <li><a href="{{ url_for('dashboard') }}" style="color: var(--primary-color); text-decoration: none;">Dashboard</a></li>
                     <li aria-hidden="true">/</li>
-                    <li><a href="lotes.html" style="color: var(--primary-color); text-decoration: none;">Lotes</a></li>
+                    <li><a href="{{ url_for('lotes') }}" style="color: var(--primary-color); text-decoration: none;">Lotes</a></li>
                     <li aria-hidden="true">/</li>
-                    <li aria-current="page" id="breadcrumb-lote">Lote 1</li>
+                    <li aria-current="page" id="breadcrumb-lote">{{ lote.nome }}</li>
                 </ol>
             </nav>
 
@@ -44,31 +44,42 @@
                     <div style="display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: start;">
                         <div>
                             <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                                <h1 style="margin: 0; color: var(--primary-color);" id="titulo-lote">Lote 1</h1>
-                                <div class="badge" style="background-color: var(--success-color); color: white; padding: 0.5rem 1rem; border-radius: 1rem; font-size: 0.875rem;">
-                                    ATIVO
+                                <h1 style="margin: 0; color: var(--primary-color);" id="titulo-lote">{{ lote.nome }}</h1>
+                                <div class="badge" style="background-color: {% if lote.ativo %}var(--success-color){% else %}var(--gray-400){% endif %}; color: white; padding: 0.5rem 1rem; border-radius: 1rem; font-size: 0.875rem;">
+                                    {% if lote.ativo %}ATIVO{% else %}INATIVO{% endif %}
                                 </div>
                             </div>
                             
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
                                 <div>
                                     <strong>Empresa Responsável:</strong><br>
-                                    <span id="empresa-nome">ABC Alimentação Ltda.</span>
+                                    <span id="empresa-nome">{{ lote.empresa }}</span>
                                 </div>
                                 <div>
-                                    <strong>Período:</strong><br>
-                                    <span id="periodo-atual">Outubro/2025</span>
+                                    <strong>Contrato:</strong><br>
+                                    <span>{{ lote.contrato }} - {{ lote.data_inicio_contrato }}</span>
                                 </div>
                                 <div>
-                                    <strong>Presídios Ativos:</strong><br>
-                                    <span id="presidios-count">5 unidades</span>
+                                    <strong>Unidades Ativas:</strong><br>
+                                    <span id="unidades-count">{{ lote.unidades | length }} unidades</span>
                                 </div>
                             </div>
                         </div>
                         
                         <div style="text-align: right;">
                             <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📊</div>
-                            <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);" id="conformidade-geral">96.8%</div>
+                            <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);" id="conformidade-geral">
+                                {% if lote.id == 1 %}96.8%
+                                {% elif lote.id == 2 %}91.5%
+                                {% elif lote.id == 3 %}98.2%
+                                {% elif lote.id == 4 %}89.7%
+                                {% elif lote.id == 5 %}94.3%
+                                {% elif lote.id == 6 %}87.9%
+                                {% elif lote.id == 7 %}92.1%
+                                {% elif lote.id == 8 %}95.6%
+                                {% elif lote.id == 9 %}93.4%
+                                {% else %}95.0%{% endif %}
+                            </div>
                             <div style="font-size: 0.875rem; color: var(--gray-600);">Conformidade Geral</div>
                         </div>
                     </div>
@@ -141,14 +152,12 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                             <div>
                                 <div class="form-group">
-                                    <label for="select-presidio-import" class="form-label">Presídio</label>
+                                    <label for="select-presidio-import" class="form-label">Unidade</label>
                                     <select id="select-presidio-import" class="form-select" required>
-                                        <option value="">Selecione o presídio</option>
-                                        <option value="presidio1">Penitenciária Central</option>
-                                        <option value="presidio2">Casa de Custódia Norte</option>
-                                        <option value="presidio3">Centro de Detenção Sul</option>
-                                        <option value="presidio4">Presídio Metropolitano</option>
-                                        <option value="presidio5">Unidade Prisional Leste</option>
+                                        <option value="">Selecione a unidade</option>
+                                        {% for unidade in lote.unidades %}
+                                        <option value="unidade{{ loop.index }}">{{ unidade }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                                 
@@ -200,14 +209,12 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group">
-                            <label for="select-presidio-manual" class="form-label">Presídio</label>
+                            <label for="select-presidio-manual" class="form-label">Unidade</label>
                             <select id="select-presidio-manual" class="form-select" required>
-                                <option value="">Selecione o presídio</option>
-                                <option value="presidio1">Penitenciária Central</option>
-                                <option value="presidio2">Casa de Custódia Norte</option>
-                                <option value="presidio3">Centro de Detenção Sul</option>
-                                <option value="presidio4">Presídio Metropolitano</option>
-                                <option value="presidio5">Unidade Prisional Leste</option>
+                                <option value="">Selecione a unidade</option>
+                                {% for unidade in lote.unidades %}
+                                <option value="unidade{{ loop.index }}">{{ unidade }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         
@@ -456,13 +463,11 @@
                 return;
             }
 
-            // Verificar parâmetros da URL
+            // Verificar parâmetros da URL para ações específicas
             const urlParams = new URLSearchParams(window.location.search);
-            const loteId = urlParams.get('lote') || '1';
             const acao = urlParams.get('acao');
 
-            // Atualizar interface com dados do lote
-            atualizarInterfaceLote(loteId);
+            // Interface já inicializada pelo Flask com dados dinâmicos
 
             // Mostrar seção específica se houver ação
             if (acao === 'importar') {
@@ -471,6 +476,9 @@
                 mostrarSecaoManual();
             }
 
+            // Definir mês anterior como padrão no filtro
+            setDefaultPreviousMonth();
+            
             // Carregar dados da tabela
             carregarTabelaRefeicoes();
             
@@ -478,20 +486,28 @@
             initTabs();
         });
 
-        function atualizarInterfaceLote(loteId) {
-            const loteInfo = {
-                '1': { nome: 'Lote 1', empresa: 'ABC Alimentação Ltda.', presidios: '5 unidades', conformidade: '96.8%' },
-                '2': { nome: 'Lote 2', empresa: 'XYZ Refeições S.A.', presidios: '4 unidades', conformidade: '91.5%' },
-                '3': { nome: 'Lote 3', empresa: 'DEF Nutrição e Alimentação', presidios: '3 unidades', conformidade: '98.2%' },
-                '4': { nome: 'Lote 4', empresa: 'GHI Catering Especializado', presidios: '3 unidades', conformidade: '89.7%' }
-            };
+        // Função removida - interface agora é inicializada pelo Flask com dados dinâmicos
 
-            const info = loteInfo[loteId] || loteInfo['1'];
-            document.getElementById('breadcrumb-lote').textContent = info.nome;
-            document.getElementById('titulo-lote').textContent = info.nome;
-            document.getElementById('empresa-nome').textContent = info.empresa;
-            document.getElementById('presidios-count').textContent = info.presidios;
-            document.getElementById('conformidade-geral').textContent = info.conformidade;
+        // Função para definir o mês anterior como padrão
+        function setDefaultPreviousMonth() {
+            const now = new Date();
+            let previousMonth = now.getMonth(); // getMonth() retorna 0-11 (Janeiro=0)
+            let previousYear = now.getFullYear();
+            
+            // Se estamos em Janeiro, o mês anterior é Dezembro do ano passado
+            if (previousMonth === 0) {
+                previousMonth = 12;
+                previousYear--;
+            }
+            
+            // Selecionar o mês anterior no filtro
+            const filtroMes = document.getElementById('filtro-mes-detalhe');
+            const filtroAno = document.getElementById('filtro-ano-detalhe');
+            
+            if (filtroMes && filtroAno) {
+                filtroMes.value = previousMonth.toString();
+                filtroAno.value = previousYear.toString();
+            }
         }
 
         function carregarTabelaRefeicoes() {

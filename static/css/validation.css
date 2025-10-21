@@ -1,0 +1,62 @@
+/* Mensagens de validação em tempo real */
+.validation-message {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    animation: slideIn 0.3s ease-out;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.validation-message.success {
+    color: #16a34a;
+    background-color: #dcfce7;
+    border-left: 3px solid #16a34a;
+}
+
+.validation-message.success::before {
+    content: "✓";
+    font-weight: bold;
+}
+
+.validation-message.error {
+    color: #dc2626;
+    background-color: #fef2f2;
+    border-left: 3px solid #dc2626;
+}
+
+.validation-message.error::before {
+    content: "⚠";
+    font-weight: bold;
+}
+
+.validation-message.loading {
+    color: #0066cc;
+    background-color: #e6f3ff;
+    border-left: 3px solid #0066cc;
+}
+
+.validation-message.loading::before {
+    content: "⟳";
+    animation: spin 1s linear infinite;
+    font-weight: bold;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

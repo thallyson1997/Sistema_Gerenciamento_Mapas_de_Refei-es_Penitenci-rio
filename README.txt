@@ -1,13 +1,14 @@
 ======================================================================================
-README - PROTÓTIPO SGMRP (Sistema de Gerenciamento de Mapas de Refeições Penitenciário)
+SGMRP - Sistema de Gerenciamento de Mapas de Refeições Penitenciário (v2.0)
 ======================================================================================
 
 DESCRIÇÃO DO PROJETO
 --------------------
-Este é um protótipo estático navegável do Sistema de Gerenciamento de Mapas de Refeições 
-Penitenciário (SGMRP), desenvolvido em HTML e CSS puro. O sistema tem como objetivo 
-modernizar o controle de refeições em unidades prisionais, substituindo o modelo atual 
-baseado em planilhas Excel fragmentadas por uma solução web integrada.
+Sistema web Flask completo e funcional para gerenciar e monitorar o fornecimento de 
+refeições em unidades prisionais. Evoluiu de protótipo estático para aplicação web 
+dinâmica com backend Python, sistema de autenticação, base de dados JSON e interface 
+responsiva. Objetivo: modernizar o controle de refeições substituindo planilhas Excel 
+fragmentadas por solução web integrada e centralizada.
 
 DESENVOLVEDOR
 -------------
@@ -15,62 +16,88 @@ Thallyson Gabriel Martins Correia Fontenele
 Matrícula: 2022024639
 Sistema Penitenciário - SFA (Subsecretaria de Administração)
 
+TECNOLOGIAS UTILIZADAS
+---------------------
+Backend: Python 3.11+ | Flask 3.1.2 | Jinja2 | Sessions
+Frontend: HTML5 | CSS3 | JavaScript ES6+ | Responsive Design
+Dados: JSON estruturado (usuarios.json, lotes.json)
+Arquitetura: MVC Pattern | RESTful Routes | Component-Based CSS
+
 ESTRUTURA DE ARQUIVOS
 --------------------
 projeto/
-├── index.html                  # Landing page - apresentação do sistema
-├── login.html                  # Página de autenticação
-├── cadastro.html              # Formulário de registro de usuários
-├── dashboard.html             # Dashboard principal após login
-├── lotes.html                 # Listagem completa dos lotes contratuais
-├── lote-detalhes.html         # Detalhes do lote com tabelas de refeições
-├── css/
-│   └── style.css              # Estilos principais responsivos
-├── images/                    # Pasta para imagens (não utilizada no protótipo)
-└── README.txt                 # Este arquivo de documentação
+├── main.py                    # Aplicação Flask principal
+├── requirements.txt           # Dependências Python  
+├── dados/                    # Base de dados JSON
+│   ├── usuarios.json         # Controle de usuários e permissões
+│   └── lotes.json           # Dados dos 9 lotes contratuais
+├── templates/               # Templates Jinja2
+│   ├── index.html           # Landing page dinâmica
+│   ├── login.html           # Autenticação com validação real
+│   ├── cadastro.html        # Registro com aprovação admin
+│   ├── dashboard.html       # Painel principal com dados reais
+│   ├── lotes.html           # Lista de lotes com filtros
+│   ├── lote-detalhes.html   # Detalhes dinâmicos por lote
+│   └── admin/
+│       └── usuarios.html    # Gestão administrativa
+├── static/
+│   └── css/
+│       └── style.css        # Sistema de design completo
+└── README.txt              # Esta documentação
 
-PÁGINAS DESENVOLVIDAS
---------------------
+FUNCIONALIDADES IMPLEMENTADAS
+----------------------------
 
-1. INDEX.HTML - Landing Page
-   - Apresentação do sistema SGMRP
-   - Funcionalidades principais com ícones
-   - Benefícios e roadmap do sistema
-   - Navegação para login e cadastro
-   - Design responsivo com animações
+BACKEND FLASK:
+- Sistema de rotas dinâmicas (/lote/<id>)
+- Autenticação com sessões Flask
+- Carregamento de dados JSON estruturado
+- Templating Jinja2 para conteúdo dinâmico
+- Gestão de usuários com aprovação admin
+- Controle de acesso por sessão
 
-2. LOGIN.HTML - Autenticação
-   - Formulário de login com validação
-   - Toggle para mostrar/ocultar senha
-   - Funcionalidade "lembrar-me"
-   - Estados de loading e validação
-   - Informações sobre acesso restrito
+PÁGINAS DESENVOLVIDAS:
 
-3. CADASTRO.HTML - Registro
-   - Formulário completo de cadastro
-   - Validação de campos (CPF, email, etc.)
-   - Máscaras para telefone e CPF
-   - Validador de força da senha
-   - Seções organizadas (dados pessoais, profissionais, acesso)
+1. ROTA "/" - Landing Page
+   - Apresentação dinâmica do sistema
+   - Funcionalidades com ícones e animações
+   - Navegação inteligente baseada em sessão
+   - Design responsivo mobile-first
 
-4. DASHBOARD.HTML - Painel Principal
-   - Resumo estatístico com cards
-   - Grid de lotes contratuais
-   - Filtros globais (mês, ano, busca)
-   - Alertas e discrepâncias recentes
-   - Ações rápidas (importar, manual, relatórios)
+2. ROTA "/login" - Autenticação Real
+   - Validação de credenciais contra JSON
+   - Criação de sessões Flask
+   - Redirecionamento inteligente
+   - Feedback visual de erros/sucesso
+   - Notificação de login bem-sucedido
 
-5. LOTES.HTML - Listagem
-   - Lista completa dos lotes contratuais
-   - Filtros avançados (status, empresa, conformidade)
-   - Ordenação por diferentes critérios
-   - Busca em tempo real
-   - Estatísticas detalhadas por lote
+3. ROTA "/cadastro" - Registro
+   - Formulário completo com validação CPF/email
+   - Sistema de aprovação administrativa
+   - Persistência em dados/usuarios.json
 
-6. LOTE-DETALHES.HTML - Detalhes
-   - Informações específicas do lote
-   - Tabela com indicadores coloridos
-   - Seções de importação de dados
+4. ROTA "/dashboard" - Painel Principal 
+   - Dados dinâmicos dos 9 lotes reais
+   - Notificação de boas-vindas personalizada
+   - Filtros sincronizados (mês anterior como padrão)
+   - Cards de lotes com informações específicas
+   - Links dinâmicos para /lote/<id>
+   - Alertas e estatísticas em tempo real
+
+5. ROTA "/lotes" - Listagem
+   - Lista dos 9 lotes com dados reais do JSON
+   - Filtros avançados e busca em tempo real
+   - Ordenação por múltiplos critérios
+   - Links para detalhamento individual
+   - Animações e feedback visual
+
+6. ROTA "/lote/<id>" - Detalhes Dinâmicos
+   - Página específica para cada lote (1-9)
+   - Header com dados reais: nome, empresa, contrato
+   - Unidades específicas por lote em dropdowns
+   - Conformidade calculada por lote
+   - Filtros sincronizados com dashboard
+   - Interface de importação/entrada manual
    - Entrada manual de refeições
    - Modal com legenda dos indicadores
 
@@ -120,13 +147,18 @@ ANIMAÇÕES:
 - Estados visuais interativos
 - Loading states
 
-TECNOLOGIAS UTILIZADAS
----------------------
-- HTML5 semântico (header, nav, main, section, article, footer)
-- CSS3 com variáveis customizadas
-- JavaScript vanilla (sem frameworks)
-- Design system consistente
-- Acessibilidade básica (labels, alt texts, ARIA)
+DADOS ESTRUTURADOS
+-----------------
+dados/usuarios.json - Controle de acesso:
+- Usuários com perfis (admin, operador, visualizador)
+- Sistema de aprovação para novos usuários
+- Senhas (em produção usar hash/bcrypt)
+
+dados/lotes.json - Informações contratuais:
+- 9 lotes com dados reais simulados
+- Empresas: ABC Alimentação, XYZ Refeições, DEF Nutrição, etc.
+- Unidades específicas por lote (presídios, delegacias)
+- Contratos com datas e status de ativação
 
 PALETA DE CORES
 ---------------
@@ -168,8 +200,32 @@ RESPONSIVIDADE:
 - Grid system flexível
 - Componentes adaptáveis
 
-COMO UTILIZAR
+COMO EXECUTAR
 -------------
+
+PRÉ-REQUISITOS:
+- Python 3.11+ instalado
+- pip para gerenciamento de pacotes
+
+PASSOS:
+1. Clone ou baixe o repositório
+2. Abra terminal na pasta do projeto
+3. Execute: pip install flask
+4. Execute: python main.py
+5. Acesse: http://localhost:5000
+
+CREDENCIAIS DE TESTE:
+- Admin: admin@seap.gov.br / admin123
+- Admin: admin / admin123
+- (Outros usuários podem ser criados via cadastro)
+
+URLS PRINCIPAIS:
+- Landing: http://localhost:5000/
+- Login: http://localhost:5000/login
+- Dashboard: http://localhost:5000/dashboard  
+- Lotes: http://localhost:5000/lotes
+- Lote específico: http://localhost:5000/lote/1 (1 a 9)
+- Admin: http://localhost:5000/admin/usuarios
 
 1. NAVEGAÇÃO INICIAL:
    - Abra o arquivo index.html em um navegador moderno
@@ -296,22 +352,65 @@ RESOLUÇÃO MÍNIMA:
 - Tablet: 768x1024
 - Mobile: 320x568
 
-CONSIDERAÇÕES DE DESENVOLVIMENTO
---------------------------------
+PRÓXIMAS FUNCIONALIDADES
+-----------------------
 
-CÓDIGO LIMPO:
-- Comentários explicativos no CSS e JavaScript
-- Nomenclatura consistente de classes
-- Estrutura HTML semântica
-- Separação clara de responsabilidades
+FASE 3 - DADOS DINÂMICOS:
+- Integração completa das tabelas de refeições via Flask
+- Upload real de PDFs e processamento automático
+- Geração de relatórios consolidados
+- Sistema de notificações por email
 
-MANUTENIBILIDADE:
-- Variáveis CSS centralizadas
-- Componentes reutilizáveis
-- JavaScript modular
-- Estrutura escalável
+FASE 4 - PRODUÇÃO:
+- Migração para PostgreSQL
+- Sistema de backup automatizado
+- Logs de auditoria completos
+- Deploy com Docker e CI/CD
 
-PERFORMANCE:
+ARQUITETURA ATUAL
+-----------------
+MVC Pattern com Flask:
+- Model: Dados JSON estruturados
+- View: Templates Jinja2 responsivos  
+- Controller: Rotas Flask com lógica de negócio
+- Session: Controle de estado e autenticação
+- Static: CSS/JS organizados por componentes
+
+SEGURANÇA IMPLEMENTADA:
+- Validação server-side em todas as rotas
+- Controle de sessão Flask
+- Sanitização de inputs
+- Proteção contra acesso direto a dados
+- Redirecionamentos seguros
+
+SUPORTE E CONTATO
+----------------
+Desenvolvedor: Thallyson Gabriel Martins Correia Fontenele
+Matrícula: 2022024639
+Órgão: SEAP - Secretaria de Estado de Administração Penitenciária
+Setor: SFA - Subsecretaria de Administração
+
+LICENÇA
+-------
+Este projeto está sob licença MIT. Consulte o arquivo LICENSE para mais detalhes.
+
+CHANGELOG v2.0
+--------------
+- ✅ Implementação completa do backend Flask
+- ✅ Sistema de autenticação com sessões
+- ✅ Base de dados JSON estruturada (usuários + 9 lotes)
+- ✅ Roteamento dinâmico /lote/<id>
+- ✅ Templates Jinja2 com dados reais
+- ✅ Interface administrativa para usuários
+- ✅ Filtros sincronizados entre páginas
+- ✅ Notificações e feedback visual aprimorados
+- ✅ Estrutura MVC completa e escalável
+
+======================================================================================
+Documentação atualizada em: Outubro 2025
+Versão: 2.0 - Sistema Flask Funcional
+Status: Em desenvolvimento ativo
+======================================================================================
 - CSS otimizado com custom properties
 - JavaScript eficiente
 - Animações suaves com CSS

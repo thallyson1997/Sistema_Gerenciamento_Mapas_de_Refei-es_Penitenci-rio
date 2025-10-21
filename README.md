@@ -7,47 +7,83 @@ O **SGMRP** é um sistema web desenvolvido para gerenciar e monitorar o fornecim
 ### 🎯 Objetivo Principal
 Centralizar o controle de dados de refeições fornecidas aos internos, permitindo comparação automática com dados do SIISP e facilitando a gestão administrativa das unidades prisionais.
 
-## 🚀 Status Atual - Protótipo Estático (v1.0)
+## 🚀 Status Atual - Sistema Flask Funcional (v2.0)
 
-Este repositório contém o **protótipo estático navegável** desenvolvido em HTML5, CSS3 e JavaScript ES6+, servindo como base visual e funcional para o desenvolvimento da aplicação completa.
+Este repositório contém uma **aplicação Flask completa e funcional** desenvolvida em Python com frontend responsivo em HTML5, CSS3 e JavaScript ES6+. O sistema evoluiu de protótipo estático para uma aplicação web dinâmica com banco de dados JSON.
 
 ### ✅ Funcionalidades Implementadas
 
+#### 🖥️ Backend Flask
+- **Framework**: Flask 3.1.2 com Jinja2 templating
+- **Banco de Dados**: Sistema de arquivos JSON para persistência
+- **Autenticação**: Sistema de login com sessões Flask
+- **Roteamento Dinâmico**: URLs parametrizadas para lotes individuais
+- **Gestão de Usuários**: Cadastro, aprovação e controle de acesso
+
 #### 🏠 Páginas Principais
-- **Landing Page (`index.html`)**: Apresentação do sistema com recursos e benefícios
-- **Login (`login.html`)**: Autenticação simulada com validação de formulário
-- **Cadastro (`cadastro.html`)**: Registro de usuários com validação de CPF e e-mail
-- **Dashboard (`dashboard.html`)**: Painel principal com cards de lotes e estatísticas
-- **Lista de Lotes (`lotes.html`)**: Visualização avançada com filtros e busca
-- **Detalhes do Lote (`lote-detalhes.html`)**: Visualização detalhada com sistema de abas
+- **Landing Page (`/`)**: Apresentação do sistema com recursos e benefícios
+- **Login (`/login`)**: Autenticação real com validação de credenciais
+- **Cadastro (`/cadastro`)**: Registro de usuários com aprovação administrativa
+- **Dashboard (`/dashboard`)**: Painel dinâmico com dados reais dos lotes
+- **Lista de Lotes (`/lotes`)**: Visualização avançada com filtros e busca
+- **Detalhes do Lote (`/lote/<id>`)**: Páginas dinâmicas por lote com dados específicos
 
 #### 🍽️ Sistema de Refeições
 - **4 Tipos de Refeição**: Café, Almoço, Lanche e Jantar
 - **Dupla Visualização**:
   - **Aba "Dados de Refeições"**: Tabela simples com números de internos por refeição
   - **Aba "Comparação SIISP"**: Comparação visual com código de cores
-- **Indicadores Visuais**: Verde para conformidade, vermelho para divergências
+- **Indicadores Visuais**: Verde para conformidade, amarelo/vermelho para divergências
+- **Importação de Dados**: Interface para upload de PDFs e entrada manual
+- **Relatórios**: Sistema de exportação em múltiplos formatos
 
-#### 🎨 Design System
+#### 📊 Gestão de Lotes
+- **9 Lotes Contratuais**: Dados reais com empresas e unidades específicas
+- **Informações Dinâmicas**: Nome, empresa, contrato, data de início
+- **Unidades por Lote**: Lista específica de presídios/delegacias por lote
+- **Status de Conformidade**: Cálculo automático de indicadores
+- **Filtros Inteligentes**: Mês anterior como padrão (sincronizado)
+
+#### 🎨 Design System & UX
 - **Identidade Visual**: Esquema de cores azul profissional (#2c5282)
 - **Responsividade**: Layout adaptativo para desktop, tablet e mobile
 - **Acessibilidade**: Contraste adequado e navegação por teclado
 - **Componentes**: Sistema de cards, formulários, tabelas e botões padronizados
+- **Feedback Visual**: Notificações, alertas e validações em tempo real
 
 #### 🔧 Funcionalidades Técnicas
-- **Simulação de Dados**: Dataset realístico para demonstração
-- **LocalStorage**: Persistência local para simulação de autenticação
-- **Validação de Formulários**: CPF, e-mail e senhas com feedback visual
-- **Sistema de Abas**: Interface intuitiva inspirada no workflow Excel atual
-- **Filtros e Busca**: Funcionalidades de pesquisa em tempo real
+- **Base de Dados JSON**: 
+  - `dados/usuarios.json`: Controle de usuários e permissões
+  - `dados/lotes.json`: Informações estruturadas dos 9 lotes
+- **Templating Jinja2**: Renderização dinâmica server-side
+- **Sessões Flask**: Controle de estado e autenticação
+- **Roteamento RESTful**: URLs semânticas e organizadas
+- **Validação Completa**: Backend + Frontend com feedback imediato
 
 ## 📁 Estrutura de Arquivos
 
 ```
 Sistema_Gerenciamento_Mapas_de_Refei-es_Penitenci-rio/
-├── index.html              # Landing page do sistema
-├── login.html               # Página de autenticação
-├── cadastro.html           # Formulário de registro
+├── main.py                 # Aplicação Flask principal
+├── requirements.txt        # Dependências Python
+├── .env                   # Variáveis de ambiente (não versionado)
+├── dados/                 # Base de dados JSON
+│   ├── usuarios.json      # Usuários e permissões
+│   └── lotes.json        # Dados dos 9 lotes contratuais
+├── templates/            # Templates Jinja2
+│   ├── index.html        # Landing page
+│   ├── login.html        # Autenticação
+│   ├── cadastro.html     # Registro de usuários
+│   ├── dashboard.html    # Painel principal
+│   ├── lotes.html        # Lista de lotes
+│   ├── lote-detalhes.html # Detalhes dinâmicos por lote
+│   └── admin/            # Área administrativa
+│       └── usuarios.html # Gestão de usuários
+├── static/              # Arquivos estáticos
+│   ├── css/
+│   │   └── style.css    # Estilos principais
+│   ├── js/              # JavaScript (se necessário)
+│   └── assets/          # Imagens e recursos
 ├── dashboard.html          # Painel principal
 ├── lotes.html              # Lista de lotes com filtros
 ├── lote-detalhes.html      # Detalhamento com abas
@@ -60,45 +96,54 @@ Sistema_Gerenciamento_Mapas_de_Refei-es_Penitenci-rio/
 
 ## 🛠️ Tecnologias Utilizadas
 
-### Frontend (Atual)
-- **HTML5**: Estrutura semântica moderna
-- **CSS3**: Grid layout, flexbox, custom properties
-- **JavaScript ES6+**: Módulos, arrow functions, template literals
-- **Responsive Design**: Mobile-first approach
+### Backend (Implementado)
+- **Python 3.11+**: Linguagem principal
+- **Flask 3.1.2**: Framework web minimalista e flexível
+- **Jinja2**: Template engine para renderização dinâmica
+- **JSON**: Base de dados estruturada para persistência
+- **Session Management**: Controle de estado e autenticação
 
-### Backend (Planejado)
-- **Python Flask**: Framework web principal
-- **SQLAlchemy**: ORM para banco de dados
-- **PostgreSQL**: Banco de dados relacional
-- **JWT**: Autenticação segura
+### Frontend (Implementado)
+- **HTML5**: Estrutura semântica moderna
+- **CSS3**: Grid layout, flexbox, custom properties, animations
+- **JavaScript ES6+**: Módulos, arrow functions, async/await
+- **Responsive Design**: Mobile-first approach com breakpoints
+- **Progressive Enhancement**: Funciona sem JavaScript habilitado
+
+### Arquitetura
+- **MVC Pattern**: Separação clara de responsabilidades
+- **RESTful Routes**: URLs semânticas e organizadas
+- **Component-Based CSS**: Sistema de design escalável
+- **File-Based Database**: JSON estruturado para prototipagem rápida
 
 ## 🎯 Próximas Etapas de Desenvolvimento
 
-### Fase 2 - Backend e Integração
-1. **API REST** com Flask
-2. **Banco de dados** PostgreSQL
-3. **Autenticação** JWT
-4. **Integração SIISP** (API externa)
+### Fase 3 - Funcionalidades de Dados (Em Planejamento)
+1. **Tabelas Dinâmicas**: Integração real dos dados de refeições via Flask
+2. **Import/Export**: Upload de PDFs e planilhas Excel
+3. **Relatórios Avançados**: Geração automática de relatórios consolidados
+4. **Integração SIISP**: API para sincronização de dados externos
 
-### Fase 3 - Funcionalidades Avançadas
-1. **Import/Export** de planilhas Excel
-2. **Relatórios** automáticos
-3. **Notificações** de divergências
-4. **Auditoria** de alterações
+### Fase 4 - Aprimoramentos (Futuro)
+1. **Banco de Dados**: Migração de JSON para PostgreSQL
+2. **Notificações**: Sistema de alertas automáticos por e-mail
+3. **Auditoria**: Log completo de alterações e acessos
+4. **Dashboard Analytics**: Gráficos e métricas avançadas
 
-### Fase 4 - Deploy e Produção
-1. **Containerização** Docker
-2. **CI/CD** GitHub Actions
-3. **Monitoramento** e logs
-4. **Backup** automatizado
+### Fase 5 - Deploy e Produção
+1. **Containerização**: Docker para ambiente de produção
+2. **CI/CD**: GitHub Actions para deploy automatizado
+3. **Segurança**: HTTPS, CSP headers, rate limiting
+4. **Monitoramento**: Logs centralizados e métricas de performance
 
-## 🚀 Como Executar o Protótipo
+## 🚀 Como Executar o Sistema
 
 ### Pré-requisitos
+- **Python 3.11+** instalado
+- **pip** para gestão de pacotes
 - Navegador web moderno (Chrome, Firefox, Safari, Edge)
-- Servidor web local (opcional, mas recomendado)
 
-### Execução Simples
+### Instalação e Execução
 ```bash
 # Clone o repositório
 git clone https://github.com/thallyson1997/Sistema_Gerenciamento_Mapas_de_Refei-es_Penitenci-rio.git
@@ -106,15 +151,27 @@ git clone https://github.com/thallyson1997/Sistema_Gerenciamento_Mapas_de_Refei-
 # Navegue até o diretório
 cd Sistema_Gerenciamento_Mapas_de_Refei-es_Penitenci-rio
 
-# Abra o index.html no navegador
-# Ou use um servidor local:
-python -m http.server 8000
-# Acesse: http://localhost:8000
+# Instale as dependências
+pip install flask
+
+# Execute o servidor Flask
+python main.py
+
+# Acesse no navegador:
+# http://localhost:5000
 ```
 
 ### Credenciais de Teste
-- **Login**: admin@seap.rj.gov.br
-- **Senha**: admin123
+- **Admin**: admin@seap.gov.br / admin123
+- **Usuário**: admin / admin123
+
+### URLs Principais
+- **Landing Page**: http://localhost:5000/
+- **Login**: http://localhost:5000/login  
+- **Dashboard**: http://localhost:5000/dashboard
+- **Lotes**: http://localhost:5000/lotes
+- **Lote Específico**: http://localhost:5000/lote/1 (1-9)
+- **Admin**: http://localhost:5000/admin/usuarios
 
 ## 📊 Funcionalidades em Destaque
 

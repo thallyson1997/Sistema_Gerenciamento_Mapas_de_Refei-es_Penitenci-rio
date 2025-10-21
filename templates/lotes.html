@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lotes Contratuais - SGMRP</title>
     <meta name="description" content="Listagem completa dos lotes contratuais do sistema penitenciário">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <header>
         <div class="container">
             <div class="header-content">
-                <a href="dashboard.html" class="logo">SGMRP</a>
+                <a href="{{ url_for('dashboard') }}" class="logo">SGMRP</a>
                 <nav>
                     <ul>
-                        <li><a href="dashboard.html">Dashboard</a></li>
-                        <li><a href="lotes.html" class="active">Lotes</a></li>
+                        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                        <li><a href="{{ url_for('lotes') }}" class="active">Lotes</a></li>
                         <li><a href="#relatorios">Relatórios</a></li>
                         <li><a href="#configuracoes">Configurações</a></li>
                         <li><a href="#" id="logoutLink" style="color: #fed7d7;">Sair</a></li>
@@ -30,7 +30,7 @@
             <!-- Breadcrumb -->
             <nav aria-label="Navegação" style="margin-bottom: 2rem;">
                 <ol style="display: flex; gap: 0.5rem; font-size: 0.875rem; color: var(--gray-500);">
-                    <li><a href="dashboard.html" style="color: var(--primary-color); text-decoration: none;">Dashboard</a></li>
+                    <li><a href="{{ url_for('dashboard') }}" style="color: var(--primary-color); text-decoration: none;">Dashboard</a></li>
                     <li aria-hidden="true">/</li>
                     <li aria-current="page">Lotes Contratuais</li>
                 </ol>
