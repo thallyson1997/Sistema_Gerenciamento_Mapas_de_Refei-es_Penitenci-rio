@@ -6,13 +6,7 @@
       "contrato": "CT-2024/001",
       "data_inicio_contrato": "15/01/2024",
       "empresa": "Empresa ABC Alimentação Ltda",
-      "unidades": [
-        "Penitenciária Central do Estado",
-        "Presídio Regional Norte",
-        "Delegacia Especializada Centro",
-        "Casa de Custódia Feminina",
-        "Instituto Penal Agrícola"
-      ],
+      "unidades": [1, 2, 3, 4, 5],
       "ativo": true
     },
     {
@@ -21,12 +15,7 @@
       "contrato": "CT-2024/002",
       "data_inicio_contrato": "01/02/2024",
       "empresa": "XYZ Refeições e Nutrição S.A",
-      "unidades": [
-        "Penitenciária Industrial",
-        "Presídio Metropolitano Sul",
-        "Delegacia Regional Oeste",
-        "Centro de Detenção Provisória"
-      ],
+      "unidades": [6, 7, 8, 9],
       "ativo": true
     },
     {
@@ -35,11 +24,7 @@
       "contrato": "CT-2024/003",
       "data_inicio_contrato": "10/03/2024",
       "empresa": "DEF Nutrição e Catering",
-      "unidades": [
-        "Instituto Penal Feminino",
-        "Presídio de Segurança Máxima",
-        "Delegacia Especializada Norte"
-      ],
+      "unidades": [10, 11, 12],
       "ativo": true
     },
     {
@@ -48,11 +33,7 @@
       "contrato": "CT-2023/018",
       "data_inicio_contrato": "22/11/2023",
       "empresa": "GHI Catering e Serviços",
-      "unidades": [
-        "Penitenciária Estadual Leste",
-        "Complexo Prisional Central",
-        "Centro de Ressocialização"
-      ],
+      "unidades": [13, 14, 15],
       "ativo": true
     },
     {
@@ -61,12 +42,7 @@
       "contrato": "CT-2024/005",
       "data_inicio_contrato": "05/04/2024",
       "empresa": "JKL Alimentação Hospitalar",
-      "unidades": [
-        "Penitenciária de Regime Fechado",
-        "Delegacia de Polícia Civil",
-        "Casa de Albergado Estadual",
-        "Centro de Progressão Penitenciária"
-      ],
+      "unidades": [16, 17, 18, 19],
       "ativo": true
     },
     {
@@ -75,13 +51,7 @@
       "contrato": "CT-2024/006",
       "data_inicio_contrato": "18/05/2024",
       "empresa": "MNO Serviços Nutricionais",
-      "unidades": [
-        "Instituto Penal Regional",
-        "Presídio de Regime Semi-Aberto",
-        "Delegacia Especializada Sul",
-        "Centro de Observação Criminológica",
-        "Penitenciária Agrícola"
-      ],
+      "unidades": [20, 21, 22, 23, 24],
       "ativo": true
     },
     {
@@ -90,11 +60,7 @@
       "contrato": "CT-2024/007",
       "data_inicio_contrato": "30/06/2024",
       "empresa": "PQR Alimentação Coletiva",
-      "unidades": [
-        "Complexo Penitenciário Norte",
-        "Delegacia Regional Centro",
-        "Casa de Custódia e Tratamento"
-      ],
+      "unidades": [25, 26, 27],
       "ativo": true
     },
     {
@@ -103,13 +69,7 @@
       "contrato": "CT-2024/008",
       "data_inicio_contrato": "12/07/2024",
       "empresa": "STU Nutrição Especializada",
-      "unidades": [
-        "Penitenciária Estadual Oeste",
-        "Presídio Central Metropolitano",
-        "Delegacia de Investigações",
-        "Centro de Detenção Especial",
-        "Instituto de Medicina Legal"
-      ],
+      "unidades": [28, 29, 30, 31, 32],
       "ativo": true
     },
     {
@@ -118,12 +78,7 @@
       "contrato": "CT-2024/009",
       "data_inicio_contrato": "25/08/2024",
       "empresa": "VWX Catering Corporativo",
-      "unidades": [
-        "Penitenciária de Segurança Média",
-        "Complexo Prisional Sul",
-        "Delegacia Especializada Leste",
-        "Centro de Reinserção Social"
-      ],
+      "unidades": [33, 34, 35, 36],
       "ativo": true
     }
   ]

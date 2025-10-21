@@ -7,18 +7,19 @@ O **SGMRP** é um sistema web desenvolvido para gerenciar e monitorar o fornecim
 ### 🎯 Objetivo Principal
 Centralizar o controle de dados de refeições fornecidas aos internos, permitindo comparação automática com dados do SIISP e facilitando a gestão administrativa das unidades prisionais.
 
-## 🚀 Status Atual - Sistema Flask Funcional (v2.0)
+## 🚀 Status Atual - Sistema Flask Funcional com Filtros Avançados (v3.0)
 
-Este repositório contém uma **aplicação Flask completa e funcional** desenvolvida em Python com frontend responsivo em HTML5, CSS3 e JavaScript ES6+. O sistema evoluiu de protótipo estático para uma aplicação web dinâmica com banco de dados JSON.
+Este repositório contém uma **aplicação Flask completa e funcional** desenvolvida em Python com frontend responsivo em HTML5, CSS3 e JavaScript ES6+. O sistema evoluiu para incluir arquitetura de dados normalizada, sistema de filtros multi-seleção avançados e integração completa de dados reais de refeições.
 
 ### ✅ Funcionalidades Implementadas
 
 #### 🖥️ Backend Flask
 - **Framework**: Flask 3.1.2 com Jinja2 templating
-- **Banco de Dados**: Sistema de arquivos JSON para persistência
+- **Banco de Dados**: Sistema de arquivos JSON normalizado para máxima eficiência
 - **Autenticação**: Sistema de login com sessões Flask
 - **Roteamento Dinâmico**: URLs parametrizadas para lotes individuais
 - **Gestão de Usuários**: Cadastro, aprovação e controle de acesso
+- **Sistema de Dados**: Carregamento e filtragem de mapas de refeições reais
 
 #### 🏠 Páginas Principais
 - **Landing Page (`/`)**: Apresentação do sistema com recursos e benefícios
@@ -26,18 +27,21 @@ Este repositório contém uma **aplicação Flask completa e funcional** desenvo
 - **Cadastro (`/cadastro`)**: Registro de usuários com aprovação administrativa
 - **Dashboard (`/dashboard`)**: Painel dinâmico com dados reais dos lotes
 - **Lista de Lotes (`/lotes`)**: Visualização avançada com filtros e busca
-- **Detalhes do Lote (`/lote/<id>`)**: Páginas dinâmicas por lote com dados específicos
+- **Detalhes do Lote (`/lote/<id>`)**: Páginas dinâmicas por lote com dados específicos e filtros avançados
 
-#### 🍽️ Sistema de Refeições
-- **4 Tipos de Refeição**: Café, Almoço, Lanche e Jantar
+#### 🍽️ Sistema de Refeições com Dados Reais
+- **Integração Completa**: Dados reais de 60 registros (30 dias × 2 unidades)
+- **8 Tipos de Refeição**: Café da manhã, Almoço, Lanche da tarde, Jantar, Ceia, Lanche noturno, Café especial, Almoço especial
+- **Filtros Avançados**: 
+  - **Filtro de Período**: Seleção personalizada de datas com conversão automática de formato brasileiro (DD/MM/YYYY)
+  - **Filtro de Unidades**: Multi-seleção com interface popup, permitindo filtrar por unidades específicas
 - **Dupla Visualização**:
-  - **Aba "Dados de Refeições"**: Tabela simples com números de internos por refeição
+  - **Aba "Dados Refeição"**: Tabela dinâmica com dados reais integrados via Flask
   - **Aba "Comparação SIISP"**: Comparação visual com código de cores
 - **Indicadores Visuais**: Verde para conformidade, amarelo/vermelho para divergências
 - **Importação de Dados**: Interface para upload de PDFs e entrada manual
-- **Relatórios**: Sistema de exportação em múltiplos formatos
 
-#### 📊 Gestão de Lotes
+#### 📊 Gestão de Lotes com Arquitetura Normalizada
 - **9 Lotes Contratuais**: Dados reais com empresas e unidades específicas
 - **Informações Dinâmicas**: Nome, empresa, contrato, data de início
 - **Unidades por Lote**: Lista específica de presídios/delegacias por lote

@@ -1,0 +1,184 @@
+{
+  "unidades": [
+    {
+      "id": 1,
+      "nome": "Penitenciária Central do Estado",
+      "lote_id": 1
+    },
+    {
+      "id": 2,
+      "nome": "Presídio Regional Norte",
+      "lote_id": 1
+    },
+    {
+      "id": 3,
+      "nome": "Delegacia Especializada Centro",
+      "lote_id": 1
+    },
+    {
+      "id": 4,
+      "nome": "Casa de Custódia Feminina",
+      "lote_id": 1
+    },
+    {
+      "id": 5,
+      "nome": "Instituto Penal Agrícola",
+      "lote_id": 1
+    },
+    {
+      "id": 6,
+      "nome": "Penitenciária Industrial",
+      "lote_id": 2
+    },
+    {
+      "id": 7,
+      "nome": "Presídio Metropolitano Sul",
+      "lote_id": 2
+    },
+    {
+      "id": 8,
+      "nome": "Delegacia Regional Oeste",
+      "lote_id": 2
+    },
+    {
+      "id": 9,
+      "nome": "Centro de Detenção Provisória",
+      "lote_id": 2
+    },
+    {
+      "id": 10,
+      "nome": "Instituto Penal Feminino",
+      "lote_id": 3
+    },
+    {
+      "id": 11,
+      "nome": "Presídio de Segurança Máxima",
+      "lote_id": 3
+    },
+    {
+      "id": 12,
+      "nome": "Delegacia Especializada Norte",
+      "lote_id": 3
+    },
+    {
+      "id": 13,
+      "nome": "Penitenciária Estadual Leste",
+      "lote_id": 4
+    },
+    {
+      "id": 14,
+      "nome": "Complexo Prisional Central",
+      "lote_id": 4
+    },
+    {
+      "id": 15,
+      "nome": "Centro de Ressocialização",
+      "lote_id": 4
+    },
+    {
+      "id": 16,
+      "nome": "Penitenciária de Regime Fechado",
+      "lote_id": 5
+    },
+    {
+      "id": 17,
+      "nome": "Delegacia de Polícia Civil",
+      "lote_id": 5
+    },
+    {
+      "id": 18,
+      "nome": "Casa de Albergado Estadual",
+      "lote_id": 5
+    },
+    {
+      "id": 19,
+      "nome": "Centro de Progressão Penitenciária",
+      "lote_id": 5
+    },
+    {
+      "id": 20,
+      "nome": "Instituto Penal Regional",
+      "lote_id": 6
+    },
+    {
+      "id": 21,
+      "nome": "Presídio de Regime Semi-Aberto",
+      "lote_id": 6
+    },
+    {
+      "id": 22,
+      "nome": "Delegacia Especializada Sul",
+      "lote_id": 6
+    },
+    {
+      "id": 23,
+      "nome": "Centro de Observação Criminológica",
+      "lote_id": 6
+    },
+    {
+      "id": 24,
+      "nome": "Penitenciária Agrícola",
+      "lote_id": 6
+    },
+    {
+      "id": 25,
+      "nome": "Complexo Penitenciário Norte",
+      "lote_id": 7
+    },
+    {
+      "id": 26,
+      "nome": "Delegacia Regional Centro",
+      "lote_id": 7
+    },
+    {
+      "id": 27,
+      "nome": "Casa de Custódia e Tratamento",
+      "lote_id": 7
+    },
+    {
+      "id": 28,
+      "nome": "Penitenciária Estadual Oeste",
+      "lote_id": 8
+    },
+    {
+      "id": 29,
+      "nome": "Presídio Central Metropolitano",
+      "lote_id": 8
+    },
+    {
+      "id": 30,
+      "nome": "Delegacia de Investigações",
+      "lote_id": 8
+    },
+    {
+      "id": 31,
+      "nome": "Centro de Detenção Especial",
+      "lote_id": 8
+    },
+    {
+      "id": 32,
+      "nome": "Instituto de Medicina Legal",
+      "lote_id": 8
+    },
+    {
+      "id": 33,
+      "nome": "Penitenciária de Segurança Média",
+      "lote_id": 9
+    },
+    {
+      "id": 34,
+      "nome": "Complexo Prisional Sul",
+      "lote_id": 9
+    },
+    {
+      "id": 35,
+      "nome": "Delegacia Especializada Leste",
+      "lote_id": 9
+    },
+    {
+      "id": 36,
+      "nome": "Centro de Reinserção Social",
+      "lote_id": 9
+    }
+  ]
+}

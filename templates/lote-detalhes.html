@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalhes do Lote - SGMRP</title>
     <meta name="description" content="Detalhes do lote contratual com mapas de refeições e indicadores">
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <header>
@@ -45,9 +45,15 @@
                         <div>
                             <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
                                 <h1 style="margin: 0; color: var(--primary-color);" id="titulo-lote">{{ lote.nome }}</h1>
-                                <div class="badge" style="background-color: {% if lote.ativo %}var(--success-color){% else %}var(--gray-400){% endif %}; color: white; padding: 0.5rem 1rem; border-radius: 1rem; font-size: 0.875rem;">
-                                    {% if lote.ativo %}ATIVO{% else %}INATIVO{% endif %}
+                                {% if lote.ativo %}
+                                <div class="badge" style="background-color: var(--success-color); color: white; padding: 0.5rem 1rem; border-radius: 1rem; font-size: 0.875rem;">
+                                    ATIVO
                                 </div>
+                                {% else %}
+                                <div class="badge" style="background-color: var(--gray-400); color: white; padding: 0.5rem 1rem; border-radius: 1rem; font-size: 0.875rem;">
+                                    INATIVO
+                                </div>
+                                {% endif %}
                             </div>
                             
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
@@ -61,7 +67,9 @@
                                 </div>
                                 <div>
                                     <strong>Unidades Ativas:</strong><br>
-                                    <span id="unidades-count">{{ lote.unidades | length }} unidades</span>
+                                    <span id="unidades-count">
+                                        {{ unidades_lote | length }} unidades
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -90,40 +98,101 @@
             <section class="filters" style="margin-bottom: 2rem;">
                 <div style="display: flex; justify-content: space-between; align-items: end; gap: 1rem; flex-wrap: wrap;">
                     <div style="display: flex; gap: 1rem; align-items: end;">
-                        <div>
-                            <label for="filtro-mes-detalhe" class="form-label">Mês</label>
-                            <select id="filtro-mes-detalhe" class="form-select">
-                                <option value="1">Janeiro</option>
-                                <option value="2">Fevereiro</option>
-                                <option value="3">Março</option>
-                                <option value="4">Abril</option>
-                                <option value="5">Maio</option>
-                                <option value="6">Junho</option>
-                                <option value="7">Julho</option>
-                                <option value="8">Agosto</option>
-                                <option value="9">Setembro</option>
-                                <option value="10" selected>Outubro</option>
-                                <option value="11">Novembro</option>
-                                <option value="12">Dezembro</option>
-                            </select>
+                        <div class="periodo-filter-container">
+                            <label class="form-label">Período</label>
+                            <div class="periodo-display" id="periodo-display">
+                                <span class="periodo-text" id="periodo-text">Setembro/2025</span>
+                                <span class="periodo-icon">📅</span>
+                            </div>
+                            
+                            <!-- Overlay para fechar calendário -->
+                            <div class="calendario-overlay" id="calendario-overlay"></div>
+                            
+                            <!-- Popup do calendário -->
+                            <div class="calendario-popup" id="calendario-popup">
+                                <div class="calendario-header">
+                                    <h4 style="margin: 0; color: var(--primary-color); font-size: 1rem;">📅 Selecionar Período</h4>
+                                    <p style="margin: 0.5rem 0 0 0; font-size: 0.75rem; color: var(--gray-600);">Escolha as datas de início e fim para filtrar os dados</p>
+                                </div>
+                                
+                                <div class="calendario-body">
+                                    <div class="periodo-inputs">
+                                        <div class="date-input-group">
+                                            <label class="date-input-label">� Início</label>
+                                            <input type="date" class="date-input" id="data-inicio" value="2025-09-01">
+                                        </div>
+                                        <div class="date-input-group">
+                                            <label class="date-input-label">� Fim</label>
+                                            <input type="date" class="date-input" id="data-fim" value="2025-09-30">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="presets-container">
+                                        <button class="preset-btn" data-preset="mes-atual">📅 Mês Atual</button>
+                                        <button class="preset-btn" data-preset="mes-anterior">⬅️ Mês Anterior</button>
+                                        <button class="preset-btn" data-preset="ultimos-30">📊 Últimos 30 dias</button>
+                                        <button class="preset-btn" data-preset="ultimos-7">📈 Últimos 7 dias</button>
+                                        <button class="preset-btn" data-preset="trimestre">📋 Trimestre Atual</button>
+                                        <button class="preset-btn" data-preset="semestre">📊 Semestre Atual</button>
+                                    </div>
+                                    
+                                    <div class="calendario-actions">
+                                        <div class="periodo-info">
+                                            <span id="dias-periodo">30 dias selecionados</span>
+                                        </div>
+                                        <div class="action-buttons">
+                                            <button class="btn-calendario" id="btn-cancelar-periodo">❌ Cancelar</button>
+                                            <button class="btn-calendario primary" id="btn-aplicar-periodo">✅ Aplicar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label for="filtro-ano-detalhe" class="form-label">Ano</label>
-                            <select id="filtro-ano-detalhe" class="form-select">
-                                <option value="2024">2024</option>
-                                <option value="2025" selected>2025</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="filtro-presidio" class="form-label">Presídio</label>
-                            <select id="filtro-presidio" class="form-select">
-                                <option value="">Todos os presídios</option>
-                                <option value="presidio1">Penitenciária Central</option>
-                                <option value="presidio2">Casa de Custódia Norte</option>
-                                <option value="presidio3">Centro de Detenção Sul</option>
-                                <option value="presidio4">Presídio Metropolitano</option>
-                                <option value="presidio5">Unidade Prisional Leste</option>
-                            </select>
+                        <div class="unidades-filter-container">
+                            <label class="form-label">Unidades</label>
+                            <div class="unidades-display" id="unidades-display">
+                                <span class="unidades-text" id="unidades-text">Todas as unidades</span>
+                                <span class="unidades-icon">🏢</span>
+                            </div>
+                            
+                            <!-- Overlay para fechar popup de unidades -->
+                            <div class="unidades-overlay" id="unidades-overlay"></div>
+                            
+                            <!-- Popup de seleção de unidades -->
+                            <div class="unidades-popup" id="unidades-popup">
+                                <div class="unidades-header">
+                                    <h4 style="margin: 0; color: var(--primary-color); font-size: 1rem;">🏢 Selecionar Unidades</h4>
+                                    <p style="margin: 0.5rem 0 0 0; font-size: 0.75rem; color: var(--gray-600);">Escolha as unidades para filtrar os dados</p>
+                                </div>
+                                
+                                <div class="unidades-body">
+                                    <div class="unidades-controls">
+                                        <button class="control-btn" id="btn-selecionar-todas">✅ Todas</button>
+                                        <button class="control-btn" id="btn-limpar-todas">❌ Limpar</button>
+                                    </div>
+                                    
+                                    <div class="unidades-list" id="unidades-list">
+                                        {% for unidade in unidades_lote %}
+                                        <div class="unidade-item" data-value="{{ unidade }}">
+                                            <input type="checkbox" class="unidade-checkbox" id="checkbox-unidade{{ loop.index }}" value="{{ unidade }}">
+                                            <label class="unidade-label" for="checkbox-unidade{{ loop.index }}">{{ unidade }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <div class="unidades-actions">
+                                        <div class="unidades-info">
+                                            <span id="unidades-selecionadas-count">
+                                                {{ unidades_lote | length }} unidades selecionadas
+                                            </span>
+                                        </div>
+                                        <div class="action-buttons">
+                                            <button class="btn-calendario" id="btn-cancelar-unidades">❌ Cancelar</button>
+                                            <button class="btn-calendario primary" id="btn-aplicar-unidades">✅ Aplicar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
@@ -149,13 +218,47 @@
                         <h3>Importação de Dados via PDF</h3>
                     </div>
                     <div class="card-body">
+                        <!-- Seletor de Mês e Ano -->
+                        <div class="mes-ano-selector">
+                            <div style="display: flex; align-items: center; gap: 1rem; flex: 1;">
+                                <label class="form-label" style="margin: 0; font-weight: 600; color: var(--primary-color);">📅 Período de Referência:</label>
+                                <div class="mes-ano-display" id="mes-ano-display-import">
+                                    <span class="mes-ano-text" id="mes-ano-text-import">Setembro/2025</span>
+                                    <span class="mes-ano-icon">📅</span>
+                                </div>
+                            </div>
+                            <div class="mes-ano-inputs">
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; color: var(--gray-600); margin-bottom: 0.25rem;">Mês</label>
+                                    <select id="mes-import" class="mes-ano-input">
+                                        <option value="1">Jan</option>
+                                        <option value="2">Fev</option>
+                                        <option value="3">Mar</option>
+                                        <option value="4">Abr</option>
+                                        <option value="5">Mai</option>
+                                        <option value="6">Jun</option>
+                                        <option value="7">Jul</option>
+                                        <option value="8">Ago</option>
+                                        <option value="9" selected>Set</option>
+                                        <option value="10">Out</option>
+                                        <option value="11">Nov</option>
+                                        <option value="12">Dez</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; color: var(--gray-600); margin-bottom: 0.25rem;">Ano</label>
+                                    <input type="number" id="ano-import" class="mes-ano-input" value="2025" min="2020" max="2030">
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                             <div>
                                 <div class="form-group">
                                     <label for="select-presidio-import" class="form-label">Unidade</label>
-                                    <select id="select-presidio-import" class="form-select" required>
+                                    <select id="select-unidade-import" class="form-select" required>
                                         <option value="">Selecione a unidade</option>
-                                        {% for unidade in lote.unidades %}
+                                        {% for unidade in unidades_lote %}
                                         <option value="unidade{{ loop.index }}">{{ unidade }}</option>
                                         {% endfor %}
                                     </select>
@@ -210,9 +313,9 @@
                     <div class="card-body">
                         <div class="form-group">
                             <label for="select-presidio-manual" class="form-label">Unidade</label>
-                            <select id="select-presidio-manual" class="form-select" required>
+                            <select id="select-unidade-manual" class="form-select" required>
                                 <option value="">Selecione a unidade</option>
-                                {% for unidade in lote.unidades %}
+                                {% for unidade in unidades_lote %}
                                 <option value="unidade{{ loop.index }}">{{ unidade }}</option>
                                 {% endfor %}
                             </select>
@@ -260,7 +363,13 @@
                 <!-- Sistema de Abas para Tabelas -->
                 <section class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <h3>Mapas de Refeições - Outubro/2025</h3>
+                        <div>
+                            <h3 id="titulo-tabela">Mapas de Refeições - Setembro/2025</h3>
+                            <div id="indicador-filtros" style="font-size: 0.875rem; color: var(--primary-color); margin-top: 0.25rem; display: none;">
+                                <span>📊 Dados filtrados</span>
+                                <button id="btn-limpar-filtros" style="margin-left: 0.5rem; background: none; border: none; color: var(--danger-color); text-decoration: underline; cursor: pointer; font-size: 0.875rem;">Limpar filtros</button>
+                            </div>
+                        </div>
                         <div style="display: flex; gap: 0.5rem;">
                             <button class="btn btn-sm btn-secondary" id="btn-legenda">
                                 🎨 Legenda
@@ -299,7 +408,7 @@
                                     <thead>
                                         <tr>
                                             <th rowspan="2">Data</th>
-                                            <th rowspan="2">Presídio</th>
+                                            <th rowspan="2">Unidade</th>
                                             <th colspan="2">Café</th>
                                             <th colspan="2">Almoço</th>
                                             <th colspan="2">Lanche</th>
@@ -337,8 +446,8 @@
                                     <thead>
                                         <tr>
                                             <th rowspan="2">Data</th>
-                                            <th rowspan="2">Presídio</th>
-                                            <th rowspan="2">N° SIISP</th>
+                                            <th rowspan="2">Unidade</th>
+                                            <th rowspan="2">SIISP</th>
                                             <th colspan="2">Café</th>
                                             <th colspan="2">Almoço</th>
                                             <th colspan="2">Lanche</th>
@@ -445,14 +554,145 @@
     </footer>
 
     <script>
-        // Dados simulados para demonstração
-        const dadosSimulados = [
-            { data: '01/10/2025', presidio: 'Penitenciária Central', siisp: 120, cafeInt: 118, cafeFunc: 15, almocoInt: 125, almocoFunc: 14, lancheInt: 122, lancheFunc: 13, jantarInt: 119, jantarFunc: 15 },
-            { data: '01/10/2025', presidio: 'Casa de Custódia Norte', siisp: 98, cafeInt: 95, cafeFunc: 12, almocoInt: 102, almocoFunc: 11, lancheInt: 99, lancheFunc: 10, jantarInt: 97, jantarFunc: 12 },
-            { data: '02/10/2025', presidio: 'Penitenciária Central', siisp: 120, cafeInt: 120, cafeFunc: 15, almocoInt: 118, almocoFunc: 14, lancheInt: 121, lancheFunc: 14, jantarInt: 121, jantarFunc: 15 },
-            { data: '02/10/2025', presidio: 'Casa de Custódia Norte', siisp: 98, cafeInt: 98, cafeFunc: 12, almocoInt: 95, almocoFunc: 11, lancheInt: 97, lancheFunc: 11, jantarInt: 99, jantarFunc: 12 },
-            { data: '03/10/2025', presidio: 'Penitenciária Central', siisp: 119, cafeInt: 117, cafeFunc: 14, almocoInt: 122, almocoFunc: 15, lancheInt: 120, lancheFunc: 13, jantarInt: 118, jantarFunc: 14 }
-        ];
+        // Dados reais dos mapas do lote - carregados do Flask
+        const mapasLote = {{ mapas_lote | tojson }};
+        
+        // Variáveis globais para controle dos filtros
+        let filtrosAtivos = {
+            dataInicio: null,
+            dataFim: null,
+            unidadesSelecionadas: []
+        };
+        
+        // Converter dados dos mapas para formato da tabela
+        const dadosRefeicoes = [];
+        const dadosOriginais = []; // Manter cópia dos dados originais
+        
+        mapasLote.forEach(mapa => {
+            // Para cada dia do mês
+            for (let i = 0; i < mapa.data.length; i++) {
+                const registro = {
+                    data: mapa.data[i],
+                    unidade: mapa.nome_unidade,
+                    cafeInt: mapa.cafe_interno[i],
+                    cafeFunc: mapa.cafe_funcionario[i],
+                    almocoInt: mapa.almoco_interno[i],
+                    almocoFunc: mapa.almoco_funcionario[i],
+                    lancheInt: mapa.lanche_interno[i],
+                    lancheFunc: mapa.lanche_funcionario[i],
+                    jantarInt: mapa.jantar_interno[i],
+                    jantarFunc: mapa.jantar_funcionario[i]
+                };
+                dadosOriginais.push(registro);
+                dadosRefeicoes.push({...registro}); // Cópia para manipulação
+            }
+        });
+        
+        // Função para aplicar filtros aos dados
+        function aplicarFiltros() {
+            // Limpar dados filtrados
+            dadosRefeicoes.length = 0;
+            
+            console.log('=== APLICANDO FILTROS ===');
+            console.log('Filtros ativos:', filtrosAtivos);
+            console.log('Dados originais total:', dadosOriginais.length);
+            
+            // Se não há filtros ativos, mostrar todos os dados
+            if (!filtrosAtivos.dataInicio && !filtrosAtivos.dataFim && filtrosAtivos.unidadesSelecionadas.length === 0) {
+                console.log('Nenhum filtro ativo - mostrando todos os dados');
+                dadosOriginais.forEach(registro => {
+                    dadosRefeicoes.push({...registro});
+                });
+            } else {
+                console.log('Aplicando filtros específicos...');
+                // Aplicar filtros aos dados originais
+                dadosOriginais.forEach(registro => {
+                    let incluir = true;
+                    
+                    // Filtro por período
+                    if (filtrosAtivos.dataInicio && filtrosAtivos.dataFim) {
+                        // Converter data brasileira (DD/MM/YYYY) para formato Date
+                        const partesData = registro.data.split('/');
+                        const dataRegistro = new Date(partesData[2], partesData[1] - 1, partesData[0]);
+                        const inicio = new Date(filtrosAtivos.dataInicio);
+                        const fim = new Date(filtrosAtivos.dataFim);
+                        
+                        if (dataRegistro < inicio || dataRegistro > fim) {
+                            incluir = false;
+                        }
+                    }
+                    
+                    // Filtro por unidades - aplicar apenas se há filtro ativo
+                    if (filtrosAtivos.unidadesSelecionadas.length > 0) {
+                        const unidadeIncluida = filtrosAtivos.unidadesSelecionadas.some(unidadeSelecionada => {
+                            // Comparar nomes completos das unidades (exact match ou contains)
+                            const nomeRegistro = registro.unidade.toLowerCase().trim();
+                            const nomeSelecionado = unidadeSelecionada.toLowerCase().trim();
+                            
+                            console.log('Comparando:', nomeRegistro, 'vs', nomeSelecionado);
+                            
+                            // Exact match ou contains
+                            return nomeRegistro === nomeSelecionado || 
+                                   nomeRegistro.includes(nomeSelecionado) ||
+                                   nomeSelecionado.includes(nomeRegistro);
+                        });
+                        
+                        if (!unidadeIncluida) {
+                            incluir = false;
+                        }
+                    }
+                    
+                    if (incluir) {
+                        dadosRefeicoes.push({...registro});
+                    }
+                });
+            }
+            
+            console.log('Dados após filtros:', dadosRefeicoes.length);
+            console.log('=== FIM FILTROS ===\n');
+            
+            // Atualizar tabelas
+            carregarTabelaRefeicoes();
+            atualizarResumoEstatisticas();
+            atualizarIndicadorFiltros();
+        }
+        
+        // Função para atualizar indicador de filtros ativos
+        function atualizarIndicadorFiltros() {
+            const indicador = document.getElementById('indicador-filtros');
+            const totalOriginal = dadosOriginais.length;
+            const totalFiltrado = dadosRefeicoes.length;
+            
+            if (totalFiltrado < totalOriginal) {
+                indicador.style.display = 'block';
+                indicador.querySelector('span').textContent = 
+                    `📊 Exibindo ${totalFiltrado} de ${totalOriginal} registros`;
+            } else {
+                indicador.style.display = 'none';
+            }
+        }
+        
+        // Função para limpar todos os filtros
+        function limparTodosFiltros() {
+            // Reset filtros ativos - limpar completamente para mostrar todos os dados
+            filtrosAtivos.dataInicio = null;
+            filtrosAtivos.dataFim = null;
+            filtrosAtivos.unidadesSelecionadas = [];
+            
+            // Reset inputs de data
+            document.getElementById('data-inicio').value = '';
+            document.getElementById('data-fim').value = '';
+            document.getElementById('periodo-text').textContent = 'Selecionar período';
+            
+            // Reset checkboxes de unidades - selecionar todas
+            document.querySelectorAll('.unidade-checkbox').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            atualizarDisplayUnidades();
+            
+            // Aplicar filtros (que agora mostrará todos os dados)
+            aplicarFiltros();
+        }
 
         // Verificar autenticação
         window.addEventListener('load', function() {
@@ -479,8 +719,17 @@
             // Definir mês anterior como padrão no filtro
             setDefaultPreviousMonth();
             
-            // Carregar dados da tabela
-            carregarTabelaRefeicoes();
+            // Inicializar filtro de período
+            initPeriodoFilter();
+            
+            // Inicializar filtro de unidades
+            initUnidadesFilter();
+            
+            // Inicializar seletor de mês/ano da importação
+            initMesAnoImport();
+            
+            // Aplicar filtros iniciais e carregar dados da tabela
+            aplicarFiltros();
             
             // Inicializar sistema de abas
             initTabs();
@@ -488,25 +737,28 @@
 
         // Função removida - interface agora é inicializada pelo Flask com dados dinâmicos
 
-        // Função para definir o mês anterior como padrão
+        // Função para definir setembro/2025 como padrão (dados disponíveis)
         function setDefaultPreviousMonth() {
-            const now = new Date();
-            let previousMonth = now.getMonth(); // getMonth() retorna 0-11 (Janeiro=0)
-            let previousYear = now.getFullYear();
+            // Definir setembro de 2025 (mês com dados disponíveis)
+            const dataInicio = new Date(2025, 8, 1); // Setembro = mês 8 (0-indexed)
+            const dataFim = new Date(2025, 8, 30); // 30 de setembro
             
-            // Se estamos em Janeiro, o mês anterior é Dezembro do ano passado
-            if (previousMonth === 0) {
-                previousMonth = 12;
-                previousYear--;
-            }
+            // Definir valores nos inputs de data
+            const dataInicioInput = document.getElementById('data-inicio');
+            const dataFimInput = document.getElementById('data-fim');
             
-            // Selecionar o mês anterior no filtro
-            const filtroMes = document.getElementById('filtro-mes-detalhe');
-            const filtroAno = document.getElementById('filtro-ano-detalhe');
-            
-            if (filtroMes && filtroAno) {
-                filtroMes.value = previousMonth.toString();
-                filtroAno.value = previousYear.toString();
+            if (dataInicioInput && dataFimInput) {
+                const dataInicioStr = dataInicio.toISOString().split('T')[0];
+                const dataFimStr = dataFim.toISOString().split('T')[0];
+                
+                dataInicioInput.value = dataInicioStr;
+                dataFimInput.value = dataFimStr;
+                
+                // Definir filtros ativos
+                filtrosAtivos.dataInicio = dataInicioStr;
+                filtrosAtivos.dataFim = dataFimStr;
+                
+                atualizarDisplayPeriodo();
             }
         }
 
@@ -514,18 +766,59 @@
             carregarTabelaDados();
             carregarTabelaComparacao();
         }
+        
+        // Função para atualizar resumo de estatísticas
+        function atualizarResumoEstatisticas() {
+            let totalRefeicoes = 0;
+            let registrosConformes = 0;
+            let diferencasPequenas = 0;
+            let discrepanciasCriticas = 0;
+            
+            dadosRefeicoes.forEach(row => {
+                const totalDia = row.cafeInt + row.cafeFunc + row.almocoInt + row.almocoFunc + 
+                               row.lancheInt + row.lancheFunc + row.jantarInt + row.jantarFunc;
+                totalRefeicoes += totalDia;
+                
+                // SIISP simulado para cálculo
+                let siisp = 120;
+                if (row.unidade.includes('Norte')) siisp = 98;
+                else if (row.unidade.includes('Industrial')) siisp = 105;
+                
+                // Verificar cada refeição de internos
+                const refeicoes = [row.cafeInt, row.almocoInt, row.lancheInt, row.jantarInt];
+                refeicoes.forEach(refeicao => {
+                    const diferenca = refeicao - siisp;
+                    if (diferenca <= 0) {
+                        registrosConformes++;
+                    } else if (diferenca <= 5) {
+                        diferencasPequenas++;
+                    } else {
+                        discrepanciasCriticas++;
+                    }
+                });
+            });
+            
+            // Atualizar elementos na página
+            const elementos = document.querySelectorAll('.grid.grid-cols-4 > div');
+            if (elementos.length >= 4) {
+                elementos[0].querySelector('div:first-child').textContent = totalRefeicoes.toLocaleString('pt-BR');
+                elementos[1].querySelector('div:first-child').textContent = registrosConformes.toString();
+                elementos[2].querySelector('div:first-child').textContent = diferencasPequenas.toString();
+                elementos[3].querySelector('div:first-child').textContent = discrepanciasCriticas.toString();
+            }
+        }
 
         function carregarTabelaDados() {
             const tbody = document.getElementById('tbody-dados-refeicoes');
             tbody.innerHTML = '';
 
-            dadosSimulados.forEach(row => {
+            dadosRefeicoes.forEach(row => {
                 const tr = document.createElement('tr');
                 const totalDia = row.cafeInt + row.cafeFunc + row.almocoInt + row.almocoFunc + row.lancheInt + row.lancheFunc + row.jantarInt + row.jantarFunc;
                 
                 tr.innerHTML = `
                     <td>${row.data}</td>
-                    <td>${row.presidio}</td>
+                    <td>${row.unidade}</td>
                     <td style="text-align: center; background-color: var(--gray-50);">${row.cafeInt}</td>
                     <td style="text-align: center;">${row.cafeFunc}</td>
                     <td style="text-align: center; background-color: var(--gray-50);">${row.almocoInt}</td>
@@ -545,35 +838,41 @@
             const tbody = document.getElementById('tbody-comparacao-siisp');
             tbody.innerHTML = '';
 
-            dadosSimulados.forEach(row => {
+            dadosRefeicoes.forEach(row => {
                 const tr = document.createElement('tr');
                 
+                // SIISP simulado (valores médios por unidade)
+                let siisp = 120; // Valor padrão
+                if (row.unidade.includes('Norte')) siisp = 98;
+                else if (row.unidade.includes('Industrial')) siisp = 105;
+                else if (row.unidade.includes('Central')) siisp = 120;
+                
                 // Calcular diferenças e aplicar cores
-                const cafeClass = getClassificacao(row.cafeInt, row.siisp);
-                const almocoClass = getClassificacao(row.almocoInt, row.siisp);
-                const lancheClass = getClassificacao(row.lancheInt, row.siisp);
-                const jantarClass = getClassificacao(row.jantarInt, row.siisp);
+                const cafeClass = getClassificacao(row.cafeInt, siisp);
+                const almocoClass = getClassificacao(row.almocoInt, siisp);
+                const lancheClass = getClassificacao(row.lancheInt, siisp);
+                const jantarClass = getClassificacao(row.jantarInt, siisp);
 
                 tr.innerHTML = `
                     <td>${row.data}</td>
-                    <td>${row.presidio}</td>
-                    <td style="text-align: center; font-weight: 600; background-color: var(--gray-100);">${row.siisp}</td>
+                    <td>${row.unidade}</td>
+                    <td style="text-align: center; font-weight: 600; background-color: var(--gray-100);">${siisp}</td>
                     <td class="${cafeClass.class}" style="text-align: center; cursor: pointer;" onclick="toggleAnotacao(this)">
                         ${cafeClass.display}
                     </td>
-                    <td style="text-align: center; ${row.cafeFunc < row.siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.cafeFunc}</td>
+                    <td style="text-align: center; ${row.cafeFunc < siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.cafeFunc}</td>
                     <td class="${almocoClass.class}" style="text-align: center; cursor: pointer;" onclick="toggleAnotacao(this)">
                         ${almocoClass.display}
                     </td>
-                    <td style="text-align: center; ${row.almocoFunc < row.siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.almocoFunc}</td>
+                    <td style="text-align: center; ${row.almocoFunc < siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.almocoFunc}</td>
                     <td class="${lancheClass.class}" style="text-align: center; cursor: pointer;" onclick="toggleAnotacao(this)">
                         ${lancheClass.display}
                     </td>
-                    <td style="text-align: center; ${row.lancheFunc < row.siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.lancheFunc}</td>
+                    <td style="text-align: center; ${row.lancheFunc < siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.lancheFunc}</td>
                     <td class="${jantarClass.class}" style="text-align: center; cursor: pointer;" onclick="toggleAnotacao(this)">
                         ${jantarClass.display}
                     </td>
-                    <td style="text-align: center; ${row.jantarFunc < row.siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.jantarFunc}</td>
+                    <td style="text-align: center; ${row.jantarFunc < siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.jantarFunc}</td>
                     <td style="text-align: center; font-size: 0.875rem; color: var(--gray-500);">-</td>
                 `;
                 
@@ -669,30 +968,88 @@
             document.getElementById('secao-manual').style.display = 'none';
         });
 
+        // Inicializar seletor de mês/ano da importação
+        function initMesAnoImport() {
+            const mesSelect = document.getElementById('mes-import');
+            const anoInput = document.getElementById('ano-import');
+            const mesAnoDisplay = document.getElementById('mes-ano-display-import');
+            const mesAnoText = document.getElementById('mes-ano-text-import');
+            
+            // Definir mês anterior como padrão
+            const now = new Date();
+            let mesAnterior = now.getMonth(); // getMonth() retorna 0-11
+            let anoAnterior = now.getFullYear();
+            
+            if (mesAnterior === 0) {
+                mesAnterior = 12;
+                anoAnterior--;
+            }
+            
+            mesSelect.value = mesAnterior.toString();
+            anoInput.value = anoAnterior.toString();
+            atualizarDisplayMesAno();
+            
+            // Eventos para atualizar display quando valores mudarem
+            mesSelect.addEventListener('change', atualizarDisplayMesAno);
+            anoInput.addEventListener('input', atualizarDisplayMesAno);
+            
+            // Clique no display para focar no primeiro input
+            mesAnoDisplay.addEventListener('click', function() {
+                mesSelect.focus();
+            });
+            
+            function atualizarDisplayMesAno() {
+                const meses = [
+                    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+                ];
+                
+                const mesIndex = parseInt(mesSelect.value) - 1;
+                const mesNome = meses[mesIndex] || 'Mês';
+                const ano = anoInput.value || 'Ano';
+                
+                mesAnoText.textContent = `${mesNome}/${ano}`;
+            }
+        }
+        
         // Processar importação
         document.getElementById('btn-processar-import').addEventListener('click', function() {
-            const presidio = document.getElementById('select-presidio-import').value;
+            const unidade = document.getElementById('select-unidade-import').value;
             const textoPdf = document.getElementById('texto-pdf').value.trim();
+            const mes = document.getElementById('mes-import').value;
+            const ano = document.getElementById('ano-import').value;
             
-            if (!presidio || !textoPdf) {
-                alert('Por favor, selecione o presídio e forneça o texto do PDF.');
+            if (!unidade || !textoPdf) {
+                alert('Por favor, selecione a unidade e forneça o texto do PDF.');
                 return;
             }
             
-            alert('Dados processados com sucesso!\nNovos registros foram adicionados à tabela.');
+            if (!mes || !ano) {
+                alert('Por favor, defina o mês e ano de referência.');
+                return;
+            }
+            
+            const meses = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+            const mesNome = meses[parseInt(mes) - 1];
+            
+            alert(`Dados processados com sucesso!\nPeríodo: ${mesNome}/${ano}\nNovos registros foram adicionados à tabela.`);
             document.getElementById('secao-importacao').style.display = 'none';
             
             // Aqui seria implementada a lógica real de processamento
+            console.log('Importação processada:', { unidade, mes: mesNome, ano, textoPdf });
             carregarTabelaRefeicoes();
         });
 
         // Salvar entrada manual
         document.getElementById('btn-salvar-manual').addEventListener('click', function() {
-            const presidio = document.getElementById('select-presidio-manual').value;
+            const unidade = document.getElementById('select-unidade-manual').value;
             const data = document.getElementById('data-manual').value;
             
-            if (!presidio || !data) {
-                alert('Por favor, selecione o presídio e a data.');
+            if (!unidade || !data) {
+                alert('Por favor, selecione a unidade e a data.');
                 return;
             }
             
@@ -725,13 +1082,23 @@
 
         // Atualizar dados
         document.getElementById('btn-atualizar').addEventListener('click', function() {
+            // Aplicar filtros atuais
+            aplicarFiltros();
             alert('Dados atualizados com sucesso!');
-            carregarTabelaRefeicoes();
         });
 
         // Exportar tabela
         document.getElementById('btn-exportar-tabela').addEventListener('click', function() {
             alert('Funcionalidade de exportação será implementada em versões futuras.\n\nFormatos disponíveis: Excel, PDF, CSV');
+        });
+        
+        // Limpar filtros
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.id === 'btn-limpar-filtros') {
+                if (confirm('Deseja limpar todos os filtros e exibir todos os dados?')) {
+                    limparTodosFiltros();
+                }
+            }
         });
 
         // Logout
@@ -744,18 +1111,326 @@
             }
         });
 
-        // Filtros
-        document.getElementById('filtro-mes-detalhe').addEventListener('change', atualizarPeriodo);
-        document.getElementById('filtro-ano-detalhe').addEventListener('change', atualizarPeriodo);
-
-        function atualizarPeriodo() {
-            const mes = document.getElementById('filtro-mes-detalhe').value;
-            const ano = document.getElementById('filtro-ano-detalhe').value;
-            const nomesMeses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        // Controle do filtro de período
+        function initPeriodoFilter() {
+            const periodoDisplay = document.getElementById('periodo-display');
+            const calendarioPopup = document.getElementById('calendario-popup');
+            const calendarioOverlay = document.getElementById('calendario-overlay');
+            const dataInicio = document.getElementById('data-inicio');
+            const dataFim = document.getElementById('data-fim');
+            const btnAplicar = document.getElementById('btn-aplicar-periodo');
+            const btnCancelar = document.getElementById('btn-cancelar-periodo');
             
-            document.getElementById('periodo-atual').textContent = `${nomesMeses[mes]}/${ano}`;
-            document.querySelector('.card-header h3').textContent = `Mapas de Refeições - ${nomesMeses[mes]}/${ano}`;
+            // Abrir calendário
+            periodoDisplay.addEventListener('click', function() {
+                calendarioPopup.style.display = 'block';
+                calendarioOverlay.style.display = 'block';
+                periodoDisplay.classList.add('active');
+                atualizarInfoDias();
+            });
+            
+            // Fechar calendário
+            function fecharCalendario() {
+                calendarioPopup.style.display = 'none';
+                calendarioOverlay.style.display = 'none';
+                periodoDisplay.classList.remove('active');
+            }
+            
+            calendarioOverlay.addEventListener('click', fecharCalendario);
+            btnCancelar.addEventListener('click', fecharCalendario);
+            
+            // Aplicar período
+            btnAplicar.addEventListener('click', function() {
+                // Atualizar filtros ativos
+                filtrosAtivos.dataInicio = dataInicio.value;
+                filtrosAtivos.dataFim = dataFim.value;
+                
+                atualizarDisplayPeriodo();
+                atualizarTituloPeriodo();
+                fecharCalendario();
+                
+                // Aplicar filtros e atualizar tabela
+                console.log('Aplicando filtro de período:', dataInicio.value, 'até', dataFim.value);
+                console.log('Dados originais:', dadosOriginais.length, 'registros');
+                aplicarFiltros();
+                console.log('Dados filtrados:', dadosRefeicoes.length, 'registros');
+            });
+            
+            // Atualizar info de dias quando as datas mudarem
+            dataInicio.addEventListener('change', atualizarInfoDias);
+            dataFim.addEventListener('change', atualizarInfoDias);
+            
+            // Presets de período
+            document.querySelectorAll('[data-preset]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const preset = this.dataset.preset;
+                    aplicarPreset(preset);
+                    atualizarInfoDias();
+                });
+            });
+        }
+        
+        function aplicarPreset(preset) {
+            const now = new Date();
+            const dataInicio = document.getElementById('data-inicio');
+            const dataFim = document.getElementById('data-fim');
+            
+            let inicio, fim;
+            
+            switch(preset) {
+                case 'mes-atual':
+                    inicio = new Date(now.getFullYear(), now.getMonth(), 1);
+                    fim = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                    break;
+                case 'mes-anterior':
+                    // Usar setembro/2025 como "mês anterior" (dados disponíveis)
+                    inicio = new Date(2025, 8, 1); // Setembro = mês 8
+                    fim = new Date(2025, 8, 30);
+                    break;
+                case 'ultimos-30':
+                    // Usar setembro/2025 para mostrar dados disponíveis
+                    inicio = new Date(2025, 8, 1);
+                    fim = new Date(2025, 8, 30);
+                    break;
+                case 'ultimos-7':
+                    // Usar primeira semana de setembro/2025
+                    inicio = new Date(2025, 8, 1);
+                    fim = new Date(2025, 8, 7);
+                    break;
+                case 'trimestre':
+                    // Terceiro trimestre de 2025 (julho-setembro)
+                    inicio = new Date(2025, 6, 1);
+                    fim = new Date(2025, 8, 30);
+                    break;
+                case 'semestre':
+                    // Segundo semestre de 2025
+                    inicio = new Date(2025, 6, 1);
+                    fim = new Date(2025, 11, 31);
+                    break;
+                default:
+                    return;
+            }
+            
+            dataInicio.value = inicio.toISOString().split('T')[0];
+            dataFim.value = fim.toISOString().split('T')[0];
+        }
+        
+        function atualizarInfoDias() {
+            const dataInicioValue = document.getElementById('data-inicio').value;
+            const dataFimValue = document.getElementById('data-fim').value;
+            const diasInfo = document.getElementById('dias-periodo');
+            
+            if (dataInicioValue && dataFimValue) {
+                const dataInicio = new Date(dataInicioValue);
+                const dataFim = new Date(dataFimValue);
+                
+                if (dataInicio <= dataFim) {
+                    const diffTime = Math.abs(dataFim - dataInicio);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                    
+                    // Contar quantos registros estão no período - converter data brasileira
+                    const registrosNoPeriodo = dadosOriginais.filter(registro => {
+                        const partesData = registro.data.split('/');
+                        const dataRegistro = new Date(partesData[2], partesData[1] - 1, partesData[0]);
+                        return dataRegistro >= dataInicio && dataRegistro <= dataFim;
+                    }).length;
+                    
+                    diasInfo.textContent = `${diffDays} dias selecionados (${registrosNoPeriodo} registros)`;
+                } else {
+                    diasInfo.textContent = 'Data de início deve ser anterior à data de fim';
+                }
+            } else {
+                diasInfo.textContent = 'Selecione as datas de início e fim';
+            }
+        }
+        
+        function atualizarDisplayPeriodo() {
+            const dataInicio = document.getElementById('data-inicio').value;
+            const dataFim = document.getElementById('data-fim').value;
+            const periodoText = document.getElementById('periodo-text');
+            
+            if (dataInicio && dataFim) {
+                const inicio = new Date(dataInicio);
+                const fim = new Date(dataFim);
+                
+                const formatoData = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                const inicioFormatado = inicio.toLocaleDateString('pt-BR', formatoData);
+                const fimFormatado = fim.toLocaleDateString('pt-BR', formatoData);
+                
+                periodoText.textContent = `${inicioFormatado} - ${fimFormatado}`;
+            }
+        }
+        
+        function atualizarTituloPeriodo() {
+            const dataInicio = document.getElementById('data-inicio').value;
+            const dataFim = document.getElementById('data-fim').value;
+            const titulo = document.querySelector('.card-header h3');
+            
+            if (dataInicio && dataFim && titulo) {
+                const inicio = new Date(dataInicio);
+                const fim = new Date(dataFim);
+                
+                const formatoData = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                const inicioFormatado = inicio.toLocaleDateString('pt-BR', formatoData);
+                const fimFormatado = fim.toLocaleDateString('pt-BR', formatoData);
+                
+                titulo.textContent = `Mapas de Refeições - ${inicioFormatado} a ${fimFormatado}`;
+            }
+        }
+
+        // Controle do filtro de unidades multi-select
+        function initUnidadesFilter() {
+            const unidadesDisplay = document.getElementById('unidades-display');
+            const unidadesPopup = document.getElementById('unidades-popup');
+            const unidadesOverlay = document.getElementById('unidades-overlay');
+            const btnAplicar = document.getElementById('btn-aplicar-unidades');
+            const btnCancelar = document.getElementById('btn-cancelar-unidades');
+            const btnSelecionarTodas = document.getElementById('btn-selecionar-todas');
+            const btnLimparTodas = document.getElementById('btn-limpar-todas');
+            
+            let unidadesSelecionadasBackup = [];
+            
+            // Inicializar com todas as unidades selecionadas
+            const checkboxes = document.querySelectorAll('.unidade-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            
+            // Definir unidades nos filtros ativos - começar com todas selecionadas (sem filtro)
+            filtrosAtivos.unidadesSelecionadas = [];
+            atualizarDisplayUnidades();
+            
+            // Abrir popup de unidades
+            unidadesDisplay.addEventListener('click', function() {
+                // Fazer backup das seleções atuais
+                unidadesSelecionadasBackup = getUnidadesSelecionadas();
+                
+                unidadesPopup.style.display = 'block';
+                unidadesOverlay.style.display = 'block';
+                unidadesDisplay.classList.add('active');
+                atualizarCountUnidades();
+            });
+            
+            // Fechar popup de unidades
+            function fecharUnidadesPopup() {
+                unidadesPopup.style.display = 'none';
+                unidadesOverlay.style.display = 'none';
+                unidadesDisplay.classList.remove('active');
+            }
+            
+            unidadesOverlay.addEventListener('click', function() {
+                // Restaurar seleções anteriores ao cancelar
+                restaurarSelecoes(unidadesSelecionadasBackup);
+                fecharUnidadesPopup();
+            });
+            
+            btnCancelar.addEventListener('click', function() {
+                // Restaurar seleções anteriores ao cancelar
+                restaurarSelecoes(unidadesSelecionadasBackup);
+                fecharUnidadesPopup();
+            });
+            
+            // Aplicar seleção de unidades
+            btnAplicar.addEventListener('click', function() {
+                const unidadesSelecionadas = getUnidadesSelecionadas();
+                const totalCheckboxes = document.querySelectorAll('.unidade-checkbox').length;
+                
+                // Se todas as unidades estão selecionadas, limpar filtro (mostrar todas)
+                if (unidadesSelecionadas.length === totalCheckboxes) {
+                    filtrosAtivos.unidadesSelecionadas = [];
+                } else {
+                    filtrosAtivos.unidadesSelecionadas = unidadesSelecionadas;
+                }
+                
+                atualizarDisplayUnidades();
+                fecharUnidadesPopup();
+                
+                // Aplicar filtros e atualizar tabela
+                console.log('Aplicando filtro de unidades:', filtrosAtivos.unidadesSelecionadas);
+                console.log('Dados originais:', dadosOriginais.length, 'registros');
+                aplicarFiltros();
+                console.log('Dados filtrados:', dadosRefeicoes.length, 'registros');
+            });
+            
+            // Selecionar todas as unidades
+            btnSelecionarTodas.addEventListener('click', function() {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+                atualizarCountUnidades();
+            });
+            
+            // Limpar todas as seleções
+            btnLimparTodas.addEventListener('click', function() {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                atualizarCountUnidades();
+            });
+            
+            // Atualizar contador quando checkboxes mudarem
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', atualizarCountUnidades);
+            });
+            
+            // Permitir clicar no item todo para marcar/desmarcar
+            document.querySelectorAll('.unidade-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    if (e.target.type !== 'checkbox' && e.target.tagName !== 'LABEL') {
+                        const checkbox = this.querySelector('.unidade-checkbox');
+                        checkbox.checked = !checkbox.checked;
+                        atualizarCountUnidades();
+                    }
+                });
+            });
+        }
+        
+        function getUnidadesSelecionadas() {
+            const checkboxes = document.querySelectorAll('.unidade-checkbox:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+        
+        function restaurarSelecoes(unidades) {
+            const checkboxes = document.querySelectorAll('.unidade-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = unidades.includes(checkbox.value);
+            });
+            atualizarCountUnidades();
+        }
+        
+        function atualizarCountUnidades() {
+            const selecionadas = getUnidadesSelecionadas();
+            const countElement = document.getElementById('unidades-selecionadas-count');
+            const total = document.querySelectorAll('.unidade-checkbox').length;
+            
+            if (selecionadas.length === 0) {
+                countElement.textContent = 'Nenhuma unidade selecionada';
+            } else if (selecionadas.length === total) {
+                countElement.textContent = 'Todas as unidades selecionadas';
+            } else if (selecionadas.length === 1) {
+                countElement.textContent = '1 unidade selecionada';
+            } else {
+                countElement.textContent = `${selecionadas.length} unidades selecionadas`;
+            }
+        }
+        
+        function atualizarDisplayUnidades() {
+            const selecionadas = getUnidadesSelecionadas();
+            const unidadesText = document.getElementById('unidades-text');
+            const total = document.querySelectorAll('.unidade-checkbox').length;
+            
+            if (selecionadas.length === 0) {
+                unidadesText.textContent = 'Nenhuma unidade';
+            } else if (selecionadas.length === total) {
+                unidadesText.textContent = 'Todas as unidades';
+            } else if (selecionadas.length === 1) {
+                // Mostrar o nome da unidade selecionada
+                const checkbox = document.querySelector(`input[value="${selecionadas[0]}"]`);
+                const label = document.querySelector(`label[for="${checkbox.id}"]`);
+                unidadesText.textContent = label.textContent;
+            } else {
+                unidadesText.textContent = `${selecionadas.length} unidades`;
+            }
         }
 
         // Placeholder para links não implementados

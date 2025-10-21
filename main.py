@@ -63,6 +63,51 @@ def carregar_lotes():
     dados = carregar_dados_json('lotes.json')
     return dados.get('lotes', [])
 
+def carregar_unidades():
+    """Carrega unidades do arquivo JSON"""
+    dados = carregar_dados_json('unidades.json')
+    return dados.get('unidades', [])
+
+def carregar_mapas():
+    """Carrega mapas do arquivo JSON"""
+    dados = carregar_dados_json('mapas.json')
+    return dados.get('mapas', [])
+
+def obter_unidades_do_lote(lote_id):
+    """Obtém as unidades de um lote específico fazendo join dos dados"""
+    # Carregar dados dos dois arquivos
+    lotes = carregar_lotes()
+    unidades = carregar_unidades()
+    
+    # Encontrar o lote
+    lote = next((l for l in lotes if l['id'] == lote_id), None)
+    if not lote:
+        return []
+    
+    # Buscar as unidades do lote pelos IDs
+    unidades_do_lote = []
+    for unidade_id in lote.get('unidades', []):
+        unidade = next((u for u in unidades if u['id'] == unidade_id), None)
+        if unidade:
+            unidades_do_lote.append(unidade['nome'])
+    
+    return unidades_do_lote
+
+def obter_mapas_do_lote(lote_id, mes=None, ano=None):
+    """Obtém os mapas de um lote específico, opcionalmente filtrados por mês/ano"""
+    mapas = carregar_mapas()
+    
+    # Filtrar por lote
+    mapas_lote = [m for m in mapas if m['lote_id'] == lote_id]
+    
+    # Filtrar por mês/ano se fornecidos
+    if mes is not None:
+        mapas_lote = [m for m in mapas_lote if m['mes'] == mes]
+    if ano is not None:
+        mapas_lote = [m for m in mapas_lote if m['ano'] == ano]
+    
+    return mapas_lote
+
 def adicionar_usuario(dados_usuario):
     """Adiciona um novo usuário ao arquivo JSON"""
     usuarios = carregar_usuarios()
@@ -422,8 +467,16 @@ def lote_detalhes(lote_id):
         flash('Lote não encontrado!', 'error')
         return redirect(url_for('lotes'))
     
+    # Obter unidades do lote com join dos dados
+    unidades_lote = obter_unidades_do_lote(lote_id)
+    
+    # Obter mapas do lote (por padrão setembro/2025 que temos dados)
+    mapas_lote = obter_mapas_do_lote(lote_id, mes=9, ano=2025)
+    
     context = {
-        'lote': lote
+        'lote': lote,
+        'unidades_lote': unidades_lote,
+        'mapas_lote': mapas_lote
     }
     
     return render_template('lote-detalhes.html', **context)

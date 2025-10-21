@@ -623,6 +623,399 @@ footer {
     font-weight: 500;
 }
 
+/* === FILTRO DE PERÍODO COM CALENDÁRIO === */
+.periodo-filter-container {
+    position: relative;
+    min-width: 280px;
+}
+
+.periodo-display {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius);
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+}
+
+.periodo-display:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.1);
+}
+
+.periodo-display.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.1);
+}
+
+.periodo-text {
+    flex: 1;
+    color: var(--gray-700);
+}
+
+.periodo-icon {
+    margin-left: 0.5rem;
+    color: var(--gray-400);
+    font-size: 0.875rem;
+}
+
+.calendario-popup {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-xl);
+    z-index: 1000;
+    margin-top: 0.25rem;
+    display: none;
+    min-width: 320px;
+    max-width: 400px;
+}
+
+.calendario-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--gray-200);
+    background-color: var(--gray-50);
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+}
+
+.calendario-body {
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.periodo-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.date-input-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.date-input-label {
+    font-size: 0.75rem;
+    color: var(--gray-600);
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.date-input {
+    padding: 0.5rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius);
+    font-size: 0.875rem;
+    transition: border-color 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(44, 82, 130, 0.1);
+}
+
+.presets-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.preset-btn {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--gray-300);
+    background: white;
+    border-radius: var(--border-radius);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.preset-btn:hover {
+    background-color: var(--light-blue);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.calendario-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+.periodo-info {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-calendario {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--gray-300);
+    background: white;
+    border-radius: var(--border-radius);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-calendario.primary {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.btn-calendario:hover {
+    transform: translateY(-1px);
+}
+
+.btn-calendario.primary:hover {
+    background-color: var(--accent-color);
+}
+
+.calendario-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    display: none;
+}
+
+/* === FILTRO DE UNIDADES MULTI-SELECT === */
+.unidades-filter-container {
+    position: relative;
+    min-width: 200px;
+}
+
+.unidades-display {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius);
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+}
+
+.unidades-display:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.1);
+}
+
+.unidades-display.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.1);
+}
+
+.unidades-text {
+    flex: 1;
+    color: var(--gray-700);
+}
+
+.unidades-icon {
+    margin-left: 0.5rem;
+    color: var(--gray-400);
+    font-size: 0.875rem;
+}
+
+.unidades-popup {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-xl);
+    z-index: 1000;
+    margin-top: 0.25rem;
+    display: none;
+    min-width: 300px;
+    max-width: 400px;
+}
+
+.unidades-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--gray-200);
+    background-color: var(--gray-50);
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+}
+
+.unidades-body {
+    padding: 1rem;
+    box-sizing: border-box;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.unidades-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.unidade-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+.unidade-item:hover {
+    background-color: var(--gray-50);
+}
+
+.unidade-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.unidade-label {
+    flex: 1;
+    font-size: 0.875rem;
+    color: var(--gray-700);
+    cursor: pointer;
+}
+
+.unidades-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.control-btn {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--gray-300);
+    background: white;
+    border-radius: var(--border-radius);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.control-btn:hover {
+    background-color: var(--light-blue);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* Seletor de mês/ano para importação */
+.mes-ano-selector {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: var(--light-blue);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--primary-color-light);
+}
+
+.mes-ano-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    background-color: white;
+    border: 2px solid var(--primary-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    min-width: 180px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.mes-ano-display:hover {
+    background-color: var(--primary-color-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mes-ano-text {
+    margin-right: 0.5rem;
+}
+
+.mes-ano-inputs {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.mes-ano-input {
+    padding: 0.5rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius);
+    font-size: 0.875rem;
+    width: 80px;
+    text-align: center;
+}
+
+.mes-ano-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--primary-color-light);
+}
+
+.unidades-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+.unidades-info {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+}
+
+.unidades-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    display: none;
+}
+
 /* === PRINT STYLES === */
 @media print {
     header, footer, nav { display: none; }
@@ -634,5 +1027,10 @@ footer {
     
     .btn {
         display: none;
+    }
+    
+    .calendario-popup,
+    .calendario-overlay {
+        display: none !important;
     }
 }
