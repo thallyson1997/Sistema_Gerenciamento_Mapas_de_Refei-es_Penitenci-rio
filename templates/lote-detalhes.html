@@ -125,15 +125,27 @@
                                             <label class="date-input-label">� Fim</label>
                                             <input type="date" class="date-input" id="data-fim" value="2025-09-30">
                                         </div>
-                                    </div>
-                                    
-                                    <div class="presets-container">
-                                        <button class="preset-btn" data-preset="mes-atual">📅 Mês Atual</button>
-                                        <button class="preset-btn" data-preset="mes-anterior">⬅️ Mês Anterior</button>
-                                        <button class="preset-btn" data-preset="ultimos-30">📊 Últimos 30 dias</button>
-                                        <button class="preset-btn" data-preset="ultimos-7">📈 Últimos 7 dias</button>
-                                        <button class="preset-btn" data-preset="trimestre">📋 Trimestre Atual</button>
-                                        <button class="preset-btn" data-preset="semestre">📊 Semestre Atual</button>
+                                        <div class="date-input-group">
+                                            <label class="date-input-label">📅 Mês</label>
+                                            <select class="date-input" id="mes-periodo">
+                                                <option value="1">Janeiro</option>
+                                                <option value="2">Fevereiro</option>
+                                                <option value="3">Março</option>
+                                                <option value="4">Abril</option>
+                                                <option value="5">Maio</option>
+                                                <option value="6">Junho</option>
+                                                <option value="7">Julho</option>
+                                                <option value="8">Agosto</option>
+                                                <option value="9">Setembro</option>
+                                                <option value="10">Outubro</option>
+                                                <option value="11">Novembro</option>
+                                                <option value="12">Dezembro</option>
+                                            </select>
+                                        </div>
+                                        <div class="date-input-group">
+                                            <label class="date-input-label">📅 Ano</label>
+                                            <input type="number" class="date-input" id="ano-periodo" min="2020" max="2030">
+                                        </div>
                                     </div>
                                     
                                     <div class="calendario-actions">
@@ -206,6 +218,73 @@
                         <button class="btn btn-primary" id="btn-atualizar">
                             🔄 Atualizar
                         </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Resumo e Estatísticas -->
+            <section class="card" style="margin-bottom: 2rem;">
+                <div class="card-header">
+                    <h3>Resumo do Período</h3>
+                </div>
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 2rem; align-items: center;">
+                        <!-- Total Geral - Esquerda -->
+                        <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
+                            <div style="font-size: 2rem; color: var(--primary-color); font-weight: 600;" id="total-refeicoes">28,450</div>
+                            <div style="color: var(--gray-600); font-size: 0.875rem;">Total de Refeições</div>
+                        </div>
+
+                        <!-- Indicadores por Tipo de Refeição - Centro -->
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+                            <!-- Linha Superior -->
+                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-cafe-interno">0</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Café Interno</div>
+                            </div>
+                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-cafe-funcionario">0</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Café Funcionário</div>
+                            </div>
+                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-almoco-interno">0</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Almoço Interno</div>
+                            </div>
+                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-almoco-funcionario">0</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Almoço Funcionário</div>
+                            </div>
+                            
+                            <!-- Linha Inferior -->
+                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-lanche-interno">0</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Lanche Interno</div>
+                            </div>
+                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-lanche-funcionario">0</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Lanche Funcionário</div>
+                            </div>
+                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-jantar-interno">0</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Jantar Interno</div>
+                            </div>
+                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-jantar-funcionario">0</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Jantar Funcionário</div>
+                            </div>
+                        </div>
+
+                        <!-- Indicadores de Conformidade - Direita -->
+                        <div style="display: grid; grid-template-rows: 1fr 1fr; gap: 1rem;">
+                            <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
+                                <div style="font-size: 1.8rem; color: var(--warning-color); font-weight: 600;" id="diferencas-pequenas">23</div>
+                                <div style="color: var(--gray-600); font-size: 0.875rem;">Diferenças Pequenas</div>
+                            </div>
+                            <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
+                                <div style="font-size: 1.8rem; color: var(--danger-color); font-weight: 600;" id="discrepancias-criticas">8</div>
+                                <div style="color: var(--gray-600); font-size: 0.875rem;">Discrepâncias Críticas</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -452,7 +531,6 @@
                                             <th colspan="2">Almoço</th>
                                             <th colspan="2">Lanche</th>
                                             <th colspan="2">Jantar</th>
-                                            <th rowspan="2">Anotações</th>
                                         </tr>
                                         <tr>
                                             <th>Interno</th>
@@ -469,33 +547,6 @@
                                         <!-- Dados serão inseridos via JavaScript -->
                                     </tbody>
                                 </table>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Resumo e Estatísticas -->
-                <section class="card">
-                    <div class="card-header">
-                        <h3>Resumo do Período</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="grid grid-cols-4">
-                            <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                <div style="font-size: 2rem; color: var(--primary-color); font-weight: 600;">28,450</div>
-                                <div style="color: var(--gray-600); font-size: 0.875rem;">Total de Refeições</div>
-                            </div>
-                            <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                <div style="font-size: 2rem; color: var(--success-color); font-weight: 600;">892</div>
-                                <div style="color: var(--gray-600); font-size: 0.875rem;">Registros Conformes</div>
-                            </div>
-                            <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                <div style="font-size: 2rem; color: var(--warning-color); font-weight: 600;">23</div>
-                                <div style="color: var(--gray-600); font-size: 0.875rem;">Diferenças Pequenas</div>
-                            </div>
-                            <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                <div style="font-size: 2rem; color: var(--danger-color); font-weight: 600;">8</div>
-                                <div style="color: var(--gray-600); font-size: 0.875rem;">Discrepâncias Críticas</div>
                             </div>
                         </div>
                     </div>
@@ -527,14 +578,21 @@
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <div style="width: 30px; height: 30px; background-color: var(--danger-color); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem;">+8</div>
                     <div>
-                        <strong>Vermelho:</strong> Diferença > 5 refeições para internos (Crítico)
+                        <strong>Vermelho (Crítico):</strong> Diferença > 5 refeições para internos
                     </div>
                 </div>
                 
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="width: 30px; height: 30px; background-color: var(--annotation-color); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">📝</div>
+                    <div style="width: 30px; height: 30px; background-color: var(--success-color); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; font-weight: bold;">OK</div>
                     <div>
-                        <strong>Amarelo:</strong> Célula com anotação do usuário
+                        <strong>Verde (Funcionários):</strong> Valores negativos SIISP funcionários (normais)
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 30px; height: 30px; background-color: var(--danger-color); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem;">+5</div>
+                    <div>
+                        <strong>Vermelho (Funcionários):</strong> Valores positivos SIISP funcionários (anômalo)
                     </div>
                 </div>
             </div>
@@ -581,7 +639,15 @@
                     lancheInt: mapa.lanche_interno[i],
                     lancheFunc: mapa.lanche_funcionario[i],
                     jantarInt: mapa.jantar_interno[i],
-                    jantarFunc: mapa.jantar_funcionario[i]
+                    jantarFunc: mapa.jantar_funcionario[i],
+                    // Dados SIISP - usar n_siisp se disponível, senão 0
+                    siispInternos: (mapa.n_siisp && mapa.n_siisp.length > i) ? mapa.n_siisp[i] : 0,
+                    temSiisp: mapa.n_siisp && mapa.n_siisp.length > 0,
+                    // Dados SIISP dos funcionários
+                    cafeFuncSiisp: (mapa.cafe_funcionario_siisp && mapa.cafe_funcionario_siisp.length > i) ? mapa.cafe_funcionario_siisp[i] : null,
+                    almocoFuncSiisp: (mapa.almoco_funcionario_siisp && mapa.almoco_funcionario_siisp.length > i) ? mapa.almoco_funcionario_siisp[i] : null,
+                    lancheFuncSiisp: (mapa.lanche_funcionario_siisp && mapa.lanche_funcionario_siisp.length > i) ? mapa.lanche_funcionario_siisp[i] : null,
+                    jantarFuncSiisp: (mapa.jantar_funcionario_siisp && mapa.jantar_funcionario_siisp.length > i) ? mapa.jantar_funcionario_siisp[i] : null
                 };
                 dadosOriginais.push(registro);
                 dadosRefeicoes.push({...registro}); // Cópia para manipulação
@@ -621,6 +687,8 @@
                         const inicio = new Date(parseInt(anoInicio), parseInt(mesInicio) - 1, parseInt(diaInicio));
                         const fim = new Date(parseInt(anoFim), parseInt(mesFim) - 1, parseInt(diaFim));
                         
+
+                        
                         if (dataRegistro < inicio || dataRegistro > fim) {
                             incluir = false;
                         }
@@ -633,7 +701,7 @@
                             const nomeRegistro = registro.unidade.toLowerCase().trim();
                             const nomeSelecionado = unidadeSelecionada.toLowerCase().trim();
                             
-                            console.log('Comparando:', nomeRegistro, 'vs', nomeSelecionado);
+                            // console.log('Comparando:', nomeRegistro, 'vs', nomeSelecionado);
                             
                             // Exact match ou contains
                             return nomeRegistro === nomeSelecionado || 
@@ -774,42 +842,75 @@
         // Função para atualizar resumo de estatísticas
         function atualizarResumoEstatisticas() {
             let totalRefeicoes = 0;
-            let registrosConformes = 0;
+            let totalCafeInterno = 0;
+            let totalCafeFuncionario = 0;
+            let totalAlmocoInterno = 0;
+            let totalAlmocoFuncionario = 0;
+            let totalLancheInterno = 0;
+            let totalLancheFuncionario = 0;
+            let totalJantarInterno = 0;
+            let totalJantarFuncionario = 0;
             let diferencasPequenas = 0;
             let discrepanciasCriticas = 0;
             
             dadosRefeicoes.forEach(row => {
+                // Somar totais por tipo de refeição
+                totalCafeInterno += row.cafeInt;
+                totalCafeFuncionario += row.cafeFunc;
+                totalAlmocoInterno += row.almocoInt;
+                totalAlmocoFuncionario += row.almocoFunc;
+                totalLancheInterno += row.lancheInt;
+                totalLancheFuncionario += row.lancheFunc;
+                totalJantarInterno += row.jantarInt;
+                totalJantarFuncionario += row.jantarFunc;
+                
+                // Calcular total geral
                 const totalDia = row.cafeInt + row.cafeFunc + row.almocoInt + row.almocoFunc + 
                                row.lancheInt + row.lancheFunc + row.jantarInt + row.jantarFunc;
                 totalRefeicoes += totalDia;
                 
-                // SIISP simulado para cálculo
+                // SIISP simulado para cálculo de conformidade (mantido temporariamente)
                 let siisp = 120;
                 if (row.unidade.includes('Norte')) siisp = 98;
                 else if (row.unidade.includes('Industrial')) siisp = 105;
                 
-                // Verificar cada refeição de internos
+                // Verificar cada refeição de internos para diferenças
                 const refeicoes = [row.cafeInt, row.almocoInt, row.lancheInt, row.jantarInt];
                 refeicoes.forEach(refeicao => {
                     const diferenca = refeicao - siisp;
-                    if (diferenca <= 0) {
-                        registrosConformes++;
-                    } else if (diferenca <= 5) {
+                    if (diferenca > 0 && diferenca <= 5) {
                         diferencasPequenas++;
-                    } else {
+                    } else if (diferenca > 5) {
                         discrepanciasCriticas++;
                     }
                 });
             });
             
-            // Atualizar elementos na página
-            const elementos = document.querySelectorAll('.grid.grid-cols-4 > div');
-            if (elementos.length >= 4) {
-                elementos[0].querySelector('div:first-child').textContent = totalRefeicoes.toLocaleString('pt-BR');
-                elementos[1].querySelector('div:first-child').textContent = registrosConformes.toString();
-                elementos[2].querySelector('div:first-child').textContent = diferencasPequenas.toString();
-                elementos[3].querySelector('div:first-child').textContent = discrepanciasCriticas.toString();
-            }
+            // Atualizar elementos na página com os novos IDs
+            const totalRefeicoes_elemento = document.getElementById('total-refeicoes');
+            const totalCafeInterno_elemento = document.getElementById('total-cafe-interno');
+            const totalCafeFuncionario_elemento = document.getElementById('total-cafe-funcionario');
+            const totalAlmocoInterno_elemento = document.getElementById('total-almoco-interno');
+            const totalAlmocoFuncionario_elemento = document.getElementById('total-almoco-funcionario');
+            const totalLancheInterno_elemento = document.getElementById('total-lanche-interno');
+            const totalLancheFuncionario_elemento = document.getElementById('total-lanche-funcionario');
+            const totalJantarInterno_elemento = document.getElementById('total-jantar-interno');
+            const totalJantarFuncionario_elemento = document.getElementById('total-jantar-funcionario');
+            const diferencasPequenas_elemento = document.getElementById('diferencas-pequenas');
+            const discrepanciasCriticas_elemento = document.getElementById('discrepancias-criticas');
+            
+            // Atualizar valores
+            if (totalRefeicoes_elemento) totalRefeicoes_elemento.textContent = totalRefeicoes.toLocaleString('pt-BR');
+            if (totalCafeInterno_elemento) totalCafeInterno_elemento.textContent = totalCafeInterno.toLocaleString('pt-BR');
+            if (totalCafeFuncionario_elemento) totalCafeFuncionario_elemento.textContent = totalCafeFuncionario.toLocaleString('pt-BR');
+            if (totalAlmocoInterno_elemento) totalAlmocoInterno_elemento.textContent = totalAlmocoInterno.toLocaleString('pt-BR');
+            if (totalAlmocoFuncionario_elemento) totalAlmocoFuncionario_elemento.textContent = totalAlmocoFuncionario.toLocaleString('pt-BR');
+            if (totalLancheInterno_elemento) totalLancheInterno_elemento.textContent = totalLancheInterno.toLocaleString('pt-BR');
+            if (totalLancheFuncionario_elemento) totalLancheFuncionario_elemento.textContent = totalLancheFuncionario.toLocaleString('pt-BR');
+            if (totalJantarInterno_elemento) totalJantarInterno_elemento.textContent = totalJantarInterno.toLocaleString('pt-BR');
+            if (totalJantarFuncionario_elemento) totalJantarFuncionario_elemento.textContent = totalJantarFuncionario.toLocaleString('pt-BR');
+            if (diferencasPequenas_elemento) diferencasPequenas_elemento.textContent = diferencasPequenas.toString();
+            if (discrepanciasCriticas_elemento) discrepanciasCriticas_elemento.textContent = discrepanciasCriticas.toString();
         }
 
         function carregarTabelaDados() {
@@ -845,39 +946,64 @@
             dadosRefeicoes.forEach(row => {
                 const tr = document.createElement('tr');
                 
-                // SIISP simulado (valores médios por unidade)
-                let siisp = 120; // Valor padrão
-                if (row.unidade.includes('Norte')) siisp = 98;
-                else if (row.unidade.includes('Industrial')) siisp = 105;
-                else if (row.unidade.includes('Central')) siisp = 120;
+                // Usar dados reais do SIISP ou 0 se não disponível
+                const siisp = row.siispInternos || 0;
+                const statusSiisp = row.temSiisp ? 'Disponível' : 'Não disponível';
                 
-                // Calcular diferenças e aplicar cores
-                const cafeClass = getClassificacao(row.cafeInt, siisp);
-                const almocoClass = getClassificacao(row.almocoInt, siisp);
-                const lancheClass = getClassificacao(row.lancheInt, siisp);
-                const jantarClass = getClassificacao(row.jantarInt, siisp);
+                // Calcular diferenças e aplicar cores (somente se SIISP disponível)
+                const cafeClass = siisp > 0 ? getClassificacao(row.cafeInt, siisp) : { class: 'cell-na', display: 'N/A' };
+                const almocoClass = siisp > 0 ? getClassificacao(row.almocoInt, siisp) : { class: 'cell-na', display: 'N/A' };
+                const lancheClass = siisp > 0 ? getClassificacao(row.lancheInt, siisp) : { class: 'cell-na', display: 'N/A' };
+                const jantarClass = siisp > 0 ? getClassificacao(row.jantarInt, siisp) : { class: 'cell-na', display: 'N/A' };
+
+                // Função para formatar células de funcionários SIISP
+                function formatarCelulaFuncSiisp(valorFunc, valorSiisp) {
+                    if (valorSiisp === null || valorSiisp === undefined) {
+                        return {
+                            style: 'text-align: center; background-color: var(--gray-200); color: var(--gray-500);',
+                            value: 'N/A'
+                        };
+                    }
+                    
+                    // Para funcionários SIISP: valores negativos são normais (verde com "OK"), valores > 0 são problemáticos (vermelho com número)
+                    if (valorSiisp > 0) {
+                        return {
+                            style: 'text-align: center; background-color: var(--danger-color); color: white; font-weight: 600;',
+                            value: `+${valorSiisp}`
+                        };
+                    } else {
+                        return {
+                            style: 'text-align: center; background-color: var(--success-color); color: white; font-weight: 600;',
+                            value: 'OK'
+                        };
+                    }
+                }
+
+                const cafeFuncStyle = formatarCelulaFuncSiisp(row.cafeFunc, row.cafeFuncSiisp);
+                const almocoFuncStyle = formatarCelulaFuncSiisp(row.almocoFunc, row.almocoFuncSiisp);
+                const lancheFuncStyle = formatarCelulaFuncSiisp(row.lancheFunc, row.lancheFuncSiisp);
+                const jantarFuncStyle = formatarCelulaFuncSiisp(row.jantarFunc, row.jantarFuncSiisp);
 
                 tr.innerHTML = `
                     <td>${row.data}</td>
                     <td>${row.unidade}</td>
-                    <td style="text-align: center; font-weight: 600; background-color: var(--gray-100);">${siisp}</td>
-                    <td class="${cafeClass.class}" style="text-align: center; cursor: pointer;" onclick="toggleAnotacao(this)">
+                    <td style="text-align: center; font-weight: 600; background-color: ${siisp > 0 ? 'var(--success-light)' : 'var(--gray-100)'}; color: ${siisp > 0 ? 'var(--success-color)' : 'var(--gray-500)'}">${siisp}</td>
+                    <td class="${cafeClass.class}" style="text-align: center;">
                         ${cafeClass.display}
                     </td>
-                    <td style="text-align: center; ${row.cafeFunc < siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.cafeFunc}</td>
-                    <td class="${almocoClass.class}" style="text-align: center; cursor: pointer;" onclick="toggleAnotacao(this)">
+                    <td style="${cafeFuncStyle.style}">${cafeFuncStyle.value}</td>
+                    <td class="${almocoClass.class}" style="text-align: center;">
                         ${almocoClass.display}
                     </td>
-                    <td style="text-align: center; ${row.almocoFunc < siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.almocoFunc}</td>
-                    <td class="${lancheClass.class}" style="text-align: center; cursor: pointer;" onclick="toggleAnotacao(this)">
+                    <td style="${almocoFuncStyle.style}">${almocoFuncStyle.value}</td>
+                    <td class="${lancheClass.class}" style="text-align: center;">
                         ${lancheClass.display}
                     </td>
-                    <td style="text-align: center; ${row.lancheFunc < siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.lancheFunc}</td>
-                    <td class="${jantarClass.class}" style="text-align: center; cursor: pointer;" onclick="toggleAnotacao(this)">
+                    <td style="${lancheFuncStyle.style}">${lancheFuncStyle.value}</td>
+                    <td class="${jantarClass.class}" style="text-align: center;">
                         ${jantarClass.display}
                     </td>
-                    <td style="text-align: center; ${row.jantarFunc < siisp ? 'background-color: var(--success-color); color: white;' : 'background-color: var(--danger-color); color: white;'}">${row.jantarFunc}</td>
-                    <td style="text-align: center; font-size: 0.875rem; color: var(--gray-500);">-</td>
+                    <td style="${jantarFuncStyle.style}">${jantarFuncStyle.value}</td>
                 `;
                 
                 tbody.appendChild(tr);
@@ -896,13 +1022,7 @@
             }
         }
 
-        function toggleAnotacao(cell) {
-            if (cell.classList.contains('cell-annotated')) {
-                cell.classList.remove('cell-annotated');
-            } else {
-                cell.classList.add('cell-annotated');
-            }
-        }
+
 
         // Controle das Abas
         function initTabs() {
@@ -1164,59 +1284,46 @@
             dataInicio.addEventListener('change', atualizarInfoDias);
             dataFim.addEventListener('change', atualizarInfoDias);
             
-            // Presets de período
-            document.querySelectorAll('[data-preset]').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const preset = this.dataset.preset;
-                    aplicarPreset(preset);
-                    atualizarInfoDias();
-                });
-            });
-        }
-        
-        function aplicarPreset(preset) {
-            const now = new Date();
-            const dataInicio = document.getElementById('data-inicio');
-            const dataFim = document.getElementById('data-fim');
+            // Seletor de mês/ano
+            const mesPeriodo = document.getElementById('mes-periodo');
+            const anoPeriodo = document.getElementById('ano-periodo');
             
-            let inicio, fim;
+            // Definir mês anterior como padrão
+            const hoje = new Date();
+            let mesAnterior = hoje.getMonth(); // 0-11 (outubro = 9)
+            let anoAnterior = hoje.getFullYear();
             
-            switch(preset) {
-                case 'mes-atual':
-                    inicio = new Date(now.getFullYear(), now.getMonth(), 1);
-                    fim = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                    break;
-                case 'mes-anterior':
-                    // Usar setembro/2025 como "mês anterior" (dados disponíveis)
-                    inicio = new Date(2025, 8, 1); // Setembro = mês 8
-                    fim = new Date(2025, 8, 30);
-                    break;
-                case 'ultimos-30':
-                    // Usar setembro/2025 para mostrar dados disponíveis
-                    inicio = new Date(2025, 8, 1);
-                    fim = new Date(2025, 8, 30);
-                    break;
-                case 'ultimos-7':
-                    // Usar primeira semana de setembro/2025
-                    inicio = new Date(2025, 8, 1);
-                    fim = new Date(2025, 8, 7);
-                    break;
-                case 'trimestre':
-                    // Terceiro trimestre de 2025 (julho-setembro)
-                    inicio = new Date(2025, 6, 1);
-                    fim = new Date(2025, 8, 30);
-                    break;
-                case 'semestre':
-                    // Segundo semestre de 2025
-                    inicio = new Date(2025, 6, 1);
-                    fim = new Date(2025, 11, 31);
-                    break;
-                default:
-                    return;
+            if (mesAnterior === 0) {
+                mesAnterior = 12;
+                anoAnterior--;
             }
             
-            dataInicio.value = inicio.toISOString().split('T')[0];
-            dataFim.value = fim.toISOString().split('T')[0];
+            mesPeriodo.value = mesAnterior.toString();
+            anoPeriodo.value = anoAnterior.toString();
+            
+            // Função para atualizar as datas quando mês/ano mudarem
+            function atualizarDatasPorMesAno() {
+                const mes = parseInt(mesPeriodo.value);
+                const ano = parseInt(anoPeriodo.value);
+                
+                // Calcular primeiro e último dia do mês
+                const primeiroDia = new Date(ano, mes - 1, 1);
+                const ultimoDia = new Date(ano, mes, 0);
+                
+                // Definir valores nos inputs
+                dataInicio.value = primeiroDia.toISOString().split('T')[0];
+                dataFim.value = ultimoDia.toISOString().split('T')[0];
+                
+                // Atualizar display
+                atualizarInfoDias();
+            }
+            
+            // Event listeners para atualização automática
+            mesPeriodo.addEventListener('change', atualizarDatasPorMesAno);
+            anoPeriodo.addEventListener('change', atualizarDatasPorMesAno);
+            
+            // Aplicar o mês anterior inicial
+            atualizarDatasPorMesAno();
         }
         
         function atualizarInfoDias() {

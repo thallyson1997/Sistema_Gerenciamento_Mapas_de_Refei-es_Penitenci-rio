@@ -204,28 +204,28 @@
                     <div class="card fade-in">
                         <div class="card-body" style="text-align: center; padding: 2rem 1rem;">
                             <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🏢</div>
-                            <h3 style="color: var(--primary-color); margin-bottom: 0.25rem;">15</h3>
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.25rem;" id="resumo-unidades">15</h3>
                             <p style="color: var(--gray-600); margin: 0; font-size: 0.875rem;">Unidades Ativas</p>
                         </div>
                     </div>
                     <div class="card fade-in">
                         <div class="card-body" style="text-align: center; padding: 2rem 1rem;">
                             <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🍽️</div>
-                            <h3 style="color: var(--success-color); margin-bottom: 0.25rem;">124,350</h3>
+                            <h3 style="color: var(--success-color); margin-bottom: 0.25rem;" id="resumo-refeicoes">124,350</h3>
                             <p style="color: var(--gray-600); margin: 0; font-size: 0.875rem;">Refeições Servidas</p>
                         </div>
                     </div>
                     <div class="card fade-in">
                         <div class="card-body" style="text-align: center; padding: 2rem 1rem;">
                             <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">⚠️</div>
-                            <h3 style="color: var(--warning-color); margin-bottom: 0.25rem;">8</h3>
+                            <h3 style="color: var(--warning-color); margin-bottom: 0.25rem;" id="resumo-discrepancias">8</h3>
                             <p style="color: var(--gray-600); margin: 0; font-size: 0.875rem;">Discrepâncias</p>
                         </div>
                     </div>
                     <div class="card fade-in">
                         <div class="card-body" style="text-align: center; padding: 2rem 1rem;">
                             <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">✅</div>
-                            <h3 style="color: var(--success-color); margin-bottom: 0.25rem;">94.2%</h3>
+                            <h3 style="color: var(--success-color); margin-bottom: 0.25rem;" id="resumo-conformidade">94.2%</h3>
                             <p style="color: var(--gray-600); margin: 0; font-size: 0.875rem;">Conformidade</p>
                         </div>
                     </div>
@@ -244,7 +244,7 @@
                 <div class="lote-grid">
                     {% for lote in lotes %}
                     <!-- Lote {{ lote.id }} -->
-                    <a href="{{ url_for('lote_detalhes', lote_id=lote.id) }}" class="lote-card fade-in">
+                    <a href="{{ url_for('lote_detalhes', lote_id=lote.id) }}" class="lote-card fade-in" data-lote-id="{{ lote.id }}">
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
                             <div>
                                 <h3 style="margin-bottom: 0.25rem;">{{ lote.nome }}</h3>
@@ -259,30 +259,30 @@
                         
                         <div style="margin-bottom: 1rem;">
                             <p class="presidios-count" style="margin: 0;">
-                                <strong>{{ lote.unidades | length }} unidades</strong> • {{ lote.empresa }}
+                                <strong><span class="unidades-count" data-lote-id="{{ lote.id }}">{{ lote.unidades | length }}</span> unidades</strong> • {{ lote.empresa }}
                             </p>
                         </div>
 
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
                             <div style="text-align: center;">
                                 <div style="font-size: 1.5rem;">🍽️</div>
-                                <div style="font-size: 0.875rem; opacity: 0.9;">{{ "{:,}".format(lote.refeicoes | default(15000 + (lote.id * 2000), true)).replace(',', '.') }}</div>
+                                <div style="font-size: 0.875rem; opacity: 0.9;" class="refeicoes-count" data-lote-id="{{ lote.id }}">{{ "{:,}".format(lote.refeicoes | default(15000 + (lote.id * 2000), true)).replace(',', '.') }}</div>
                                 <div style="font-size: 0.75rem; opacity: 0.8;">Refeições</div>
                             </div>
                             <div style="text-align: center;">
                                 {% set conformidade = lote.conformidade | default(85 + (lote.id % 3 * 5), true) %}
-                                <div style="font-size: 1.5rem;">
+                                <div style="font-size: 1.5rem;" class="conformidade-icon" data-lote-id="{{ lote.id }}">
                                     {% if conformidade >= 95 %}✅{% elif conformidade >= 90 %}⚠️{% else %}🚨{% endif %}
                                 </div>
-                                <div style="font-size: 0.875rem; opacity: 0.9;">{{ conformidade }}%</div>
+                                <div style="font-size: 0.875rem; opacity: 0.9;" class="conformidade-percent" data-lote-id="{{ lote.id }}">{{ conformidade }}%</div>
                                 <div style="font-size: 0.75rem; opacity: 0.8;">Conformidade</div>
                             </div>
                             <div style="text-align: center;">
                                 {% set alertas = lote.alertas | default(lote.id % 4, true) %}
-                                <div style="font-size: 1.5rem;">
+                                <div style="font-size: 1.5rem;" class="alertas-icon" data-lote-id="{{ lote.id }}">
                                     {% if alertas == 0 %}✅{% else %}⚠️{% endif %}
                                 </div>
-                                <div style="font-size: 0.875rem; opacity: 0.9;">{{ alertas }}</div>
+                                <div style="font-size: 0.875rem; opacity: 0.9;" class="alertas-count" data-lote-id="{{ lote.id }}">{{ alertas }}</div>
                                 <div style="font-size: 0.75rem; opacity: 0.8;">Alertas</div>
                             </div>
                         </div>
@@ -391,6 +391,9 @@
     </footer>
 
     <script>
+        // Dados dos mapas vindos do Flask
+        const mapasDados = {{ mapas_dados | tojson }};
+        
         // Verificar se usuário está logado (simulação)
         window.addEventListener('load', function() {
             // Em uma aplicação real, isso verificaria o token de autenticação
@@ -406,6 +409,9 @@
             
             // Definir mês anterior como padrão no filtro
             setDefaultPreviousMonth();
+            
+            // Calcular resumo inicial baseado no filtro padrão
+            atualizarResumo();
         });
 
         // Função para definir o mês anterior como padrão
@@ -430,6 +436,234 @@
             }
         }
 
+        // Função para calcular e atualizar o resumo baseado nos filtros
+        function atualizarResumo() {
+            const mes = parseInt(document.getElementById('filtro-mes').value);
+            const ano = parseInt(document.getElementById('filtro-ano').value);
+            const busca = document.getElementById('filtro-busca').value.toLowerCase();
+            
+            console.log('Atualizando resumo para:', { mes, ano, busca });
+            
+            // Filtrar mapas baseado nos critérios
+            let mapasFiltrados = mapasDados;
+            
+            if (mes) {
+                mapasFiltrados = mapasFiltrados.filter(mapa => mapa.mes === mes);
+            }
+            
+            if (ano) {
+                mapasFiltrados = mapasFiltrados.filter(mapa => mapa.ano === ano);
+            }
+            
+            if (busca) {
+                mapasFiltrados = mapasFiltrados.filter(mapa => 
+                    mapa.nome_unidade.toLowerCase().includes(busca)
+                );
+            }
+            
+            console.log('Mapas filtrados:', mapasFiltrados.length);
+            
+            // Calcular estatísticas
+            const estatisticas = calcularEstatisticas(mapasFiltrados);
+            
+            // Atualizar interface do resumo
+            document.getElementById('resumo-unidades').textContent = estatisticas.unidades.toString();
+            document.getElementById('resumo-refeicoes').textContent = estatisticas.refeicoes.toLocaleString('pt-BR');
+            document.getElementById('resumo-discrepancias').textContent = estatisticas.discrepancias.toString();
+            document.getElementById('resumo-conformidade').textContent = estatisticas.conformidade + '%';
+            
+            // Atualizar cards dos lotes
+            atualizarCardsLotes();
+            
+            console.log('Resumo atualizado:', estatisticas);
+        }
+        
+        // Função para calcular estatísticas dos mapas filtrados
+        function calcularEstatisticas(mapas) {
+            if (!mapas || mapas.length === 0) {
+                return {
+                    unidades: 0,
+                    refeicoes: 0,
+                    discrepancias: 0,
+                    conformidade: '0.0'
+                };
+            }
+            
+            const unidadesUnicas = new Set();
+            let totalRefeicoes = 0;
+            let totalRegistros = 0;
+            let registrosComDiscrepancia = 0;
+            
+            mapas.forEach(mapa => {
+                unidadesUnicas.add(mapa.nome_unidade);
+                
+                // Calcular total de refeições para cada dia do mês
+                for (let i = 0; i < mapa.data.length; i++) {
+                    const refeicoesDia = 
+                        mapa.cafe_interno[i] + mapa.cafe_funcionario[i] +
+                        mapa.almoco_interno[i] + mapa.almoco_funcionario[i] +
+                        mapa.lanche_interno[i] + mapa.lanche_funcionario[i] +
+                        mapa.jantar_interno[i] + mapa.jantar_funcionario[i];
+                    
+                    totalRefeicoes += refeicoesDia;
+                    totalRegistros++;
+                    
+                    // Simular verificação de discrepâncias (baseado em limites simples)
+                    const temDiscrepancia = 
+                        mapa.cafe_interno[i] > 150 || 
+                        mapa.almoco_interno[i] > 150 ||
+                        mapa.lanche_interno[i] > 150 ||
+                        mapa.jantar_interno[i] > 150;
+                    
+                    if (temDiscrepancia) {
+                        registrosComDiscrepancia++;
+                    }
+                }
+            });
+            
+            const conformidade = totalRegistros > 0 ? 
+                (((totalRegistros - registrosComDiscrepancia) / totalRegistros) * 100).toFixed(1) : 
+                '0.0';
+            
+            return {
+                unidades: unidadesUnicas.size,
+                refeicoes: totalRefeicoes,
+                discrepancias: registrosComDiscrepancia,
+                conformidade: conformidade
+            };
+        }
+        
+        // Função para calcular estatísticas individuais de cada lote
+        function calcularEstatisticasLote(loteId, mapasFiltrados) {
+            // Filtrar mapas apenas para o lote específico
+            const mapasDoLote = mapasFiltrados.filter(mapa => mapa.lote_id === loteId);
+            
+            if (!mapasDoLote || mapasDoLote.length === 0) {
+                return {
+                    unidades: 0,
+                    refeicoes: 0,
+                    conformidade: '0.0',
+                    alertas: 0
+                };
+            }
+            
+            const unidadesUnicas = new Set();
+            let totalRefeicoes = 0;
+            let totalRegistros = 0;
+            let registrosComProblema = 0;
+            
+            mapasDoLote.forEach(mapa => {
+                unidadesUnicas.add(mapa.nome_unidade);
+                
+                // Calcular total de refeições para cada dia do mês
+                for (let i = 0; i < mapa.data.length; i++) {
+                    const refeicoesDia = 
+                        mapa.cafe_interno[i] + mapa.cafe_funcionario[i] +
+                        mapa.almoco_interno[i] + mapa.almoco_funcionario[i] +
+                        mapa.lanche_interno[i] + mapa.lanche_funcionario[i] +
+                        mapa.jantar_interno[i] + mapa.jantar_funcionario[i];
+                    
+                    totalRefeicoes += refeicoesDia;
+                    totalRegistros++;
+                    
+                    // Verificar problemas (valores muito altos ou muito baixos)
+                    const temProblema = 
+                        mapa.cafe_interno[i] > 150 || mapa.cafe_interno[i] < 50 ||
+                        mapa.almoco_interno[i] > 150 || mapa.almoco_interno[i] < 50 ||
+                        mapa.lanche_interno[i] > 150 || mapa.lanche_interno[i] < 50 ||
+                        mapa.jantar_interno[i] > 150 || mapa.jantar_interno[i] < 50;
+                    
+                    if (temProblema) {
+                        registrosComProblema++;
+                    }
+                }
+            });
+            
+            const conformidade = totalRegistros > 0 ? 
+                (((totalRegistros - registrosComProblema) / totalRegistros) * 100).toFixed(1) : 
+                '0.0';
+            
+            // Calcular alertas baseado na quantidade de problemas
+            const alertas = Math.min(Math.floor(registrosComProblema / 10), 9);
+            
+            return {
+                unidades: unidadesUnicas.size,
+                refeicoes: totalRefeicoes,
+                conformidade: parseFloat(conformidade),
+                alertas: alertas
+            };
+        }
+        
+        // Função para atualizar cards dos lotes
+        function atualizarCardsLotes() {
+            const mes = parseInt(document.getElementById('filtro-mes').value);
+            const ano = parseInt(document.getElementById('filtro-ano').value);
+            const busca = document.getElementById('filtro-busca').value.toLowerCase();
+            
+            // Filtrar mapas baseado nos critérios
+            let mapasFiltrados = mapasDados;
+            
+            if (mes) {
+                mapasFiltrados = mapasFiltrados.filter(mapa => mapa.mes === mes);
+            }
+            
+            if (ano) {
+                mapasFiltrados = mapasFiltrados.filter(mapa => mapa.ano === ano);
+            }
+            
+            if (busca) {
+                mapasFiltrados = mapasFiltrados.filter(mapa => 
+                    mapa.nome_unidade.toLowerCase().includes(busca)
+                );
+            }
+            
+            // Atualizar cada card de lote
+            document.querySelectorAll('.lote-card').forEach(card => {
+                const loteId = parseInt(card.getAttribute('data-lote-id'));
+                const estatisticas = calcularEstatisticasLote(loteId, mapasFiltrados);
+                
+                // Atualizar unidades
+                const unidadesElement = card.querySelector('.unidades-count');
+                if (unidadesElement) {
+                    unidadesElement.textContent = estatisticas.unidades;
+                }
+                
+                // Atualizar refeições
+                const refeicoesElement = card.querySelector('.refeicoes-count');
+                if (refeicoesElement) {
+                    refeicoesElement.textContent = estatisticas.refeicoes.toLocaleString('pt-BR');
+                }
+                
+                // Atualizar conformidade
+                const conformidadePercentElement = card.querySelector('.conformidade-percent');
+                const conformidadeIconElement = card.querySelector('.conformidade-icon');
+                if (conformidadePercentElement) {
+                    conformidadePercentElement.textContent = estatisticas.conformidade + '%';
+                }
+                if (conformidadeIconElement) {
+                    if (estatisticas.conformidade >= 95) {
+                        conformidadeIconElement.textContent = '✅';
+                    } else if (estatisticas.conformidade >= 90) {
+                        conformidadeIconElement.textContent = '⚠️';
+                    } else {
+                        conformidadeIconElement.textContent = '🚨';
+                    }
+                }
+                
+                // Atualizar alertas
+                const alertasCountElement = card.querySelector('.alertas-count');
+                const alertasIconElement = card.querySelector('.alertas-icon');
+                if (alertasCountElement) {
+                    alertasCountElement.textContent = estatisticas.alertas;
+                }
+                if (alertasIconElement) {
+                    alertasIconElement.textContent = estatisticas.alertas === 0 ? '✅' : '⚠️';
+                }
+            });
+            
+            console.log('Cards dos lotes atualizados baseado nos filtros');
+        }
+
         // Logout
         document.getElementById('logoutLink').addEventListener('click', function(e) {
             e.preventDefault();
@@ -446,7 +680,10 @@
             const ano = document.getElementById('filtro-ano').value;
             const busca = document.getElementById('filtro-busca').value;
 
-            // Simular aplicação de filtros
+            // Atualizar resumo com novos filtros
+            atualizarResumo();
+
+            // Mostrar feedback para o usuário
             let mensagem = 'Filtros aplicados:\n';
             if (mes) mensagem += `- Mês: ${getMonthName(mes)}\n`;
             if (ano) mensagem += `- Ano: ${ano}\n`;
@@ -456,10 +693,7 @@
                 mensagem = 'Nenhum filtro selecionado. Exibindo todos os dados.';
             }
 
-            alert(mensagem);
-
-            // Aqui seria implementada a lógica real de filtragem
-            // que atualizaria os cards dos lotes e estatísticas
+            alert(mensagem + '\nResumo do período atualizado!');
         });
 
         function getMonthName(month) {
@@ -473,8 +707,12 @@
         // Busca em tempo real
         document.getElementById('filtro-busca').addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase();
-            const loteCards = document.querySelectorAll('.lote-card');
             
+            // Atualizar resumo quando filtro de busca mudar
+            atualizarResumo();
+            
+            // Filtrar cards de lote visualmente
+            const loteCards = document.querySelectorAll('.lote-card');
             loteCards.forEach(card => {
                 const text = card.textContent.toLowerCase();
                 if (text.includes(searchTerm) || searchTerm === '') {
@@ -484,6 +722,10 @@
                 }
             });
         });
+        
+        // Event listeners para atualização automática do resumo
+        document.getElementById('filtro-mes').addEventListener('change', atualizarResumo);
+        document.getElementById('filtro-ano').addEventListener('change', atualizarResumo);
 
         // Animações de fade-in
         const observerOptions = {

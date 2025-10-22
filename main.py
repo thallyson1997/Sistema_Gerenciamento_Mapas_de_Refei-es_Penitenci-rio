@@ -68,10 +68,84 @@ def carregar_unidades():
     dados = carregar_dados_json('unidades.json')
     return dados.get('unidades', [])
 
+def calcular_colunas_siisp(mapa):
+    """
+    Calcula automaticamente as colunas _siisp baseado em n_siisp
+    Fórmula CORRIGIDA: campo_siisp = campo_original - n_siisp
+    """
+    # Verificar se tem dados SIISP para processar
+    n_siisp = mapa.get('n_siisp', [])
+    
+    if not n_siisp:  # Se n_siisp está vazio, manter colunas _siisp vazias
+        return mapa
+    
+    # Campos base para calcular as diferenças
+    campos_base = [
+        'cafe_interno', 'cafe_funcionario',
+        'almoco_interno', 'almoco_funcionario', 
+        'lanche_interno', 'lanche_funcionario',
+        'jantar_interno', 'jantar_funcionario'
+    ]
+    
+    # Calcular cada coluna _siisp
+    for campo in campos_base:
+        campo_siisp = f"{campo}_siisp"
+        valores_originais = mapa.get(campo, [])
+        
+        # Calcular diferenças: valores_originais - n_siisp (FÓRMULA CORRIGIDA)
+        if valores_originais and len(valores_originais) == len(n_siisp):
+            diferencas = []
+            for i in range(len(n_siisp)):
+                diferenca = valores_originais[i] - n_siisp[i]
+                diferencas.append(diferenca)
+            
+            mapa[campo_siisp] = diferencas
+        else:
+            # Se não há dados compatíveis, manter vazio
+            mapa[campo_siisp] = []
+    
+    return mapa
+
+def salvar_mapas_atualizados(mapas):
+    """Salva os mapas atualizados de volta no arquivo JSON"""
+    dados = {'mapas': mapas}
+    return salvar_dados_json('mapas.json', dados)
+
 def carregar_mapas():
-    """Carrega mapas do arquivo JSON"""
+    """Carrega mapas do arquivo JSON e calcula colunas SIISP automaticamente"""
     dados = carregar_dados_json('mapas.json')
-    return dados.get('mapas', [])
+    mapas = dados.get('mapas', [])
+    
+    # Processar cada mapa para calcular colunas SIISP
+    mapas_atualizados = []
+    houve_alteracoes = False
+    
+    for mapa in mapas:
+        mapa_original = mapa.copy()
+        mapa_calculado = calcular_colunas_siisp(mapa)
+        mapas_atualizados.append(mapa_calculado)
+        
+        # Verificar se houve mudanças nas colunas _siisp
+        campos_siisp = [
+            'cafe_interno_siisp', 'cafe_funcionario_siisp',
+            'almoco_interno_siisp', 'almoco_funcionario_siisp',
+            'lanche_interno_siisp', 'lanche_funcionario_siisp', 
+            'jantar_interno_siisp', 'jantar_funcionario_siisp'
+        ]
+        
+        for campo in campos_siisp:
+            if mapa_original.get(campo, []) != mapa_calculado.get(campo, []):
+                houve_alteracoes = True
+                break
+    
+    # Salvar de volta se houve alterações
+    if houve_alteracoes:
+        if salvar_mapas_atualizados(mapas_atualizados):
+            print("✅ Colunas SIISP calculadas e salvas automaticamente!")
+        else:
+            print("❌ Erro ao salvar colunas SIISP calculadas")
+    
+    return mapas_atualizados
 
 def obter_unidades_do_lote(lote_id):
     """Obtém as unidades de um lote específico fazendo join dos dados"""
@@ -420,8 +494,9 @@ def dashboard():
     # Capturar flag de login_sucesso antes de limpar
     mostrar_sucesso = session.pop('login_sucesso', False)
     
-    # Carregar lotes do arquivo JSON
+    # Carregar lotes e mapas do arquivo JSON
     lotes = carregar_lotes()
+    mapas = carregar_mapas()
     
     # Dados para o dashboard
     context = {
@@ -430,7 +505,8 @@ def dashboard():
         'lotes': lotes,
         'total_lotes': len(lotes),
         'lotes_ativos': len([l for l in lotes if l.get('ativo', False)]),
-        'total_unidades': sum(len(l.get('unidades', [])) for l in lotes)
+        'total_unidades': sum(len(l.get('unidades', [])) for l in lotes),
+        'mapas_dados': mapas  # Passar dados dos mapas para o frontend
     }
     
     return render_template('dashboard.html', **context)
@@ -470,8 +546,8 @@ def lote_detalhes(lote_id):
     # Obter unidades do lote com join dos dados
     unidades_lote = obter_unidades_do_lote(lote_id)
     
-    # Obter mapas do lote (por padrão setembro/2025 que temos dados)
-    mapas_lote = obter_mapas_do_lote(lote_id, mes=9, ano=2025)
+    # Obter TODOS os mapas do lote (todos os meses disponíveis)
+    mapas_lote = obter_mapas_do_lote(lote_id)
     
     context = {
         'lote': lote,
