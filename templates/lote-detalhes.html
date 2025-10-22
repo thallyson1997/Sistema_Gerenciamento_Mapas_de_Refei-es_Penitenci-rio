@@ -72,21 +72,53 @@
                                     </span>
                                 </div>
                             </div>
+                            
+                            <!-- Tabela de Preços das Refeições -->
+                            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-200);">
+                                <h4 style="margin: 0 0 1rem 0; color: var(--gray-700); font-size: 1rem;">💰 Preços das Refeições</h4>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem;">
+                                    {% if lote.precos %}
+                                    <div style="background-color: var(--gray-50); padding: 0.75rem; border-radius: var(--border-radius); text-align: center;">
+                                        <div style="font-weight: 600; color: var(--primary-color); margin-bottom: 0.25rem;">☕ Café</div>
+                                        <div style="font-size: 0.875rem;">
+                                            <span style="color: var(--gray-600);">Interno:</span> <strong>R$ {{ "%.2f"|format(lote.precos.cafe.interno) }}</strong><br>
+                                            <span style="color: var(--gray-600);">Func.:</span> <strong>R$ {{ "%.2f"|format(lote.precos.cafe.funcionario) }}</strong>
+                                        </div>
+                                    </div>
+                                    <div style="background-color: var(--gray-50); padding: 0.75rem; border-radius: var(--border-radius); text-align: center;">
+                                        <div style="font-weight: 600; color: var(--primary-color); margin-bottom: 0.25rem;">🍽️ Almoço</div>
+                                        <div style="font-size: 0.875rem;">
+                                            <span style="color: var(--gray-600);">Interno:</span> <strong>R$ {{ "%.2f"|format(lote.precos.almoco.interno) }}</strong><br>
+                                            <span style="color: var(--gray-600);">Func.:</span> <strong>R$ {{ "%.2f"|format(lote.precos.almoco.funcionario) }}</strong>
+                                        </div>
+                                    </div>
+                                    <div style="background-color: var(--gray-50); padding: 0.75rem; border-radius: var(--border-radius); text-align: center;">
+                                        <div style="font-weight: 600; color: var(--primary-color); margin-bottom: 0.25rem;">🥪 Lanche</div>
+                                        <div style="font-size: 0.875rem;">
+                                            <span style="color: var(--gray-600);">Interno:</span> <strong>R$ {{ "%.2f"|format(lote.precos.lanche.interno) }}</strong><br>
+                                            <span style="color: var(--gray-600);">Func.:</span> <strong>R$ {{ "%.2f"|format(lote.precos.lanche.funcionario) }}</strong>
+                                        </div>
+                                    </div>
+                                    <div style="background-color: var(--gray-50); padding: 0.75rem; border-radius: var(--border-radius); text-align: center;">
+                                        <div style="font-weight: 600; color: var(--primary-color); margin-bottom: 0.25rem;">🌙 Jantar</div>
+                                        <div style="font-size: 0.875rem;">
+                                            <span style="color: var(--gray-600);">Interno:</span> <strong>R$ {{ "%.2f"|format(lote.precos.jantar.interno) }}</strong><br>
+                                            <span style="color: var(--gray-600);">Func.:</span> <strong>R$ {{ "%.2f"|format(lote.precos.jantar.funcionario) }}</strong>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div style="grid-column: 1 / -1; text-align: center; color: var(--gray-500); font-style: italic; padding: 1rem;">
+                                        Preços das refeições não disponíveis para este lote
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                         
                         <div style="text-align: right;">
                             <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📊</div>
                             <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);" id="conformidade-geral">
-                                {% if lote.id == 1 %}96.8%
-                                {% elif lote.id == 2 %}91.5%
-                                {% elif lote.id == 3 %}98.2%
-                                {% elif lote.id == 4 %}89.7%
-                                {% elif lote.id == 5 %}94.3%
-                                {% elif lote.id == 6 %}87.9%
-                                {% elif lote.id == 7 %}92.1%
-                                {% elif lote.id == 8 %}95.6%
-                                {% elif lote.id == 9 %}93.4%
-                                {% else %}95.0%{% endif %}
+                                N/A
                             </div>
                             <div style="font-size: 0.875rem; color: var(--gray-600);">Conformidade Geral</div>
                         </div>
@@ -208,15 +240,18 @@
                         </div>
                     </div>
                     
-                    <div style="display: flex; gap: 0.75rem;">
-                        <button class="btn btn-secondary" id="btn-importar">
-                            📤 Importar Dados
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; max-width: 400px; margin-left: auto;">
+                        <button class="btn btn-primary" id="btn-adicionar-dados">
+                            📤 Adicionar Dados
                         </button>
                         <button class="btn btn-secondary" id="btn-entrada-manual">
                             ✏️ Entrada Manual
                         </button>
-                        <button class="btn btn-primary" id="btn-atualizar">
-                            🔄 Atualizar
+                        <button class="btn btn-danger" id="btn-excluir-dados">
+                            🗑️ Excluir Dados
+                        </button>
+                        <button class="btn btn-info" id="btn-adicionar-siisp">
+                            � Adicionar nº SIISP
                         </button>
                     </div>
                 </div>
@@ -289,12 +324,72 @@
                 </div>
             </section>
 
+            <!-- Resumo Financeiro -->
+            <section class="card" style="margin-bottom: 2rem;">
+                <div class="card-header">
+                    <h3>💰 Resumo Financeiro do Período</h3>
+                </div>
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr); gap: 2rem; align-items: start; overflow: hidden;">
+                        <!-- Valor Total - Esquerda -->
+                        <div style="text-align: center; padding: 1.5rem; background-color: #f0f9ff; border-radius: var(--border-radius); border: 2px solid var(--success-color); min-width: 0;">
+                            <div style="font-size: 2rem; color: var(--success-color); font-weight: 600; word-break: break-word;" id="valor-total">R$ 0,00</div>
+                            <div style="color: var(--gray-600); font-size: 0.875rem;">Valor Total</div>
+                        </div>
+
+                        <!-- Valores Parciais por Tipo de Refeição - Centro -->
+                        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; min-width: 0;">
+                            <!-- Linha Superior -->
+                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-cafe-interno">R$ 0,00</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Café Interno</div>
+                            </div>
+                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-cafe-funcionario">R$ 0,00</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Café Funcionário</div>
+                            </div>
+                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-almoco-interno">R$ 0,00</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Almoço Interno</div>
+                            </div>
+                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-almoco-funcionario">R$ 0,00</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Almoço Funcionário</div>
+                            </div>                            <!-- Linha Inferior -->
+                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-lanche-interno">R$ 0,00</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Lanche Interno</div>
+                            </div>
+                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-lanche-funcionario">R$ 0,00</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Lanche Funcionário</div>
+                            </div>
+                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-jantar-interno">R$ 0,00</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Jantar Interno</div>
+                            </div>
+                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-jantar-funcionario">R$ 0,00</div>
+                                <div style="color: var(--gray-600); font-size: 0.75rem;">Jantar Funcionário</div>
+                            </div>
+                        </div>
+
+                        <!-- Indicador de Desvio - Direita -->
+                        <div style="text-align: center; padding: 1.5rem; background-color: #fef2f2; border-radius: var(--border-radius); border: 2px solid var(--danger-color); min-width: 0;">
+                            <div style="font-size: 1.8rem; color: var(--danger-color); font-weight: 600; word-break: break-word;" id="valor-desvio">R$ 0,00</div>
+                            <div style="color: var(--gray-600); font-size: 0.875rem;">Desvio</div>
+                            <div style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem;">Valores Excedentes</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Seções Colapsáveis -->
             <div style="display: grid; gap: 2rem;">
-                <!-- Seção de Importação de Dados -->
+                <!-- Seção de Adição de Dados -->
                 <section class="card" id="secao-importacao" style="display: none;">
                     <div class="card-header">
-                        <h3>Importação de Dados via PDF</h3>
+                        <h3>Adicionar Dados via PDF</h3>
                     </div>
                     <div class="card-body">
                         <!-- Seletor de Mês e Ano -->
@@ -444,10 +539,7 @@
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <h3 id="titulo-tabela">Mapas de Refeições</h3>
-                            <div id="indicador-filtros" style="font-size: 0.875rem; color: var(--primary-color); margin-top: 0.25rem; display: none;">
-                                <span>📊 Dados filtrados</span>
-                                <button id="btn-limpar-filtros" style="margin-left: 0.5rem; background: none; border: none; color: var(--danger-color); text-decoration: underline; cursor: pointer; font-size: 0.875rem;">Limpar filtros</button>
-                            </div>
+
                         </div>
                         <div style="display: flex; gap: 0.5rem;">
                             <button class="btn btn-sm btn-secondary" id="btn-legenda">
@@ -614,6 +706,8 @@
     <script>
         // Dados reais dos mapas do lote - carregados do Flask
         const mapasLote = {{ mapas_lote | tojson }};
+        // Dados dos preços do lote
+        const precosLote = {{ lote.precos | tojson }};
         
         // Variáveis globais para controle dos filtros
         let filtrosAtivos = {
@@ -726,23 +820,9 @@
             // Atualizar tabelas
             carregarTabelaRefeicoes();
             atualizarResumoEstatisticas();
-            atualizarIndicadorFiltros();
         }
         
-        // Função para atualizar indicador de filtros ativos
-        function atualizarIndicadorFiltros() {
-            const indicador = document.getElementById('indicador-filtros');
-            const totalOriginal = dadosOriginais.length;
-            const totalFiltrado = dadosRefeicoes.length;
-            
-            if (totalFiltrado < totalOriginal) {
-                indicador.style.display = 'block';
-                indicador.querySelector('span').textContent = 
-                    `📊 Exibindo ${totalFiltrado} de ${totalOriginal} registros`;
-            } else {
-                indicador.style.display = 'none';
-            }
-        }
+
         
         // Função para limpar todos os filtros
         function limparTodosFiltros() {
@@ -850,8 +930,15 @@
             let totalLancheFuncionario = 0;
             let totalJantarInterno = 0;
             let totalJantarFuncionario = 0;
+            // Contar células azuis (diferenças pequenas) e vermelhas (discrepâncias críticas) na tabela de comparação SIISP
             let diferencasPequenas = 0;
             let discrepanciasCriticas = 0;
+            // Contar células OK (verdes) e total de células com dados SIISP para calcular conformidade geral
+            let celulasOk = 0;
+            let totalCelulasComSiisp = 0;
+            // Variáveis para cálculo do desvio (valores monetários dos excedentes)
+            let totalExcedentesInternos = 0;
+            let totalExcedentesFuncionarios = 0;
             
             dadosRefeicoes.forEach(row => {
                 // Somar totais por tipo de refeição
@@ -869,21 +956,82 @@
                                row.lancheInt + row.lancheFunc + row.jantarInt + row.jantarFunc;
                 totalRefeicoes += totalDia;
                 
-                // SIISP simulado para cálculo de conformidade (mantido temporariamente)
-                let siisp = 120;
-                if (row.unidade.includes('Norte')) siisp = 98;
-                else if (row.unidade.includes('Industrial')) siisp = 105;
+                // Contar células azuis (cell-warning) e vermelhas (cell-danger) da tabela de comparação SIISP
+                // Só contar se há dados SIISP disponíveis para comparação
+                const siisp = row.siispInternos || 0;
                 
-                // Verificar cada refeição de internos para diferenças
-                const refeicoes = [row.cafeInt, row.almocoInt, row.lancheInt, row.jantarInt];
-                refeicoes.forEach(refeicao => {
-                    const diferenca = refeicao - siisp;
-                    if (diferenca > 0 && diferenca <= 5) {
-                        diferencasPequenas++;
-                    } else if (diferenca > 5) {
-                        discrepanciasCriticas++;
-                    }
-                });
+                if (siisp > 0) {
+                    // Verificar cada tipo de refeição de internos para células coloridas
+                    const tiposRefeicaoInternos = [
+                        { refeicoes: row.cafeInt, siisp: siisp },
+                        { refeicoes: row.almocoInt, siisp: siisp },
+                        { refeicoes: row.lancheInt, siisp: siisp },
+                        { refeicoes: row.jantarInt, siisp: siisp }
+                    ];
+                    
+                    // Calcular excedentes por tipo específico de refeição com preços individuais
+                    const tiposRefeicaoDetalhados = [
+                        {valor: row.cafeInt, siisp: siisp, tipo: 'cafe'},
+                        {valor: row.almocoInt, siisp: siisp, tipo: 'almoco'},
+                        {valor: row.lancheInt, siisp: siisp, tipo: 'lanche'},
+                        {valor: row.jantarInt, siisp: siisp, tipo: 'jantar'}
+                    ];
+                    
+                    tiposRefeicaoDetalhados.forEach(tipo => {
+                        const classificacao = getClassificacao(tipo.valor, tipo.siisp);
+                        const diferenca = tipo.valor - tipo.siisp;
+                        totalCelulasComSiisp++; // Contar total de células com dados SIISP
+                        
+                        if (classificacao.class === 'cell-warning') {
+                            diferencasPequenas++; // Contar célula azul
+                            // Somar valor monetário do excedente usando preço específico da refeição
+                            if (precosLote && diferenca > 0) {
+                                totalExcedentesInternos += diferenca * precosLote[tipo.tipo].interno;
+                            }
+                        } else if (classificacao.class === 'cell-danger') {
+                            discrepanciasCriticas++; // Contar célula vermelha
+                            // Somar valor monetário do excedente usando preço específico da refeição
+                            if (precosLote && diferenca > 0) {
+                                totalExcedentesInternos += diferenca * precosLote[tipo.tipo].interno;
+                            }
+                        } else if (classificacao.class === 'cell-ok') {
+                            celulasOk++; // Contar célula verde (OK)
+                        }
+                    });
+                    
+                    // Verificar células de funcionários SIISP (café, almoço, lanche, jantar)
+                    const funcionariosSiisp = [
+                        row.cafeFuncSiisp,
+                        row.almocoFuncSiisp, 
+                        row.lancheFuncSiisp,
+                        row.jantarFuncSiisp
+                    ];
+                    
+                    // Funcionários SIISP com tipos específicos de refeição e preços individuais
+                    const funcionariosSiispDetalhados = [
+                        {valorSiisp: row.cafeFuncSiisp, tipo: 'cafe'},
+                        {valorSiisp: row.almocoFuncSiisp, tipo: 'almoco'},
+                        {valorSiisp: row.lancheFuncSiisp, tipo: 'lanche'},
+                        {valorSiisp: row.jantarFuncSiisp, tipo: 'jantar'}
+                    ];
+                    
+                    funcionariosSiispDetalhados.forEach(func => {
+                        if (func.valorSiisp !== null && func.valorSiisp !== undefined) {
+                            totalCelulasComSiisp++; // Contar célula de funcionário
+                            
+                            // Para funcionários: valores <= 0 são OK (verde), valores > 0 são críticos (vermelho)
+                            if (func.valorSiisp <= 0) {
+                                celulasOk++; // Células verdes (OK)
+                            } else {
+                                discrepanciasCriticas++; // Células vermelhas (críticas)
+                                // Somar valor monetário do excedente usando preço específico da refeição
+                                if (precosLote) {
+                                    totalExcedentesFuncionarios += func.valorSiisp * precosLote[func.tipo].funcionario;
+                                }
+                            }
+                        }
+                    });
+                }
             });
             
             // Atualizar elementos na página com os novos IDs
@@ -898,6 +1046,56 @@
             const totalJantarFuncionario_elemento = document.getElementById('total-jantar-funcionario');
             const diferencasPequenas_elemento = document.getElementById('diferencas-pequenas');
             const discrepanciasCriticas_elemento = document.getElementById('discrepancias-criticas');
+            const conformidadeGeral_elemento = document.getElementById('conformidade-geral');
+            const valorTotal_elemento = document.getElementById('valor-total');
+            const valorDesvio_elemento = document.getElementById('valor-desvio');
+            
+            // Elementos dos valores parciais
+            const valorCafeInterno_elemento = document.getElementById('valor-cafe-interno');
+            const valorCafeFuncionario_elemento = document.getElementById('valor-cafe-funcionario');
+            const valorAlmocoInterno_elemento = document.getElementById('valor-almoco-interno');
+            const valorAlmocoFuncionario_elemento = document.getElementById('valor-almoco-funcionario');
+            const valorLancheInterno_elemento = document.getElementById('valor-lanche-interno');
+            const valorLancheFuncionario_elemento = document.getElementById('valor-lanche-funcionario');
+            const valorJantarInterno_elemento = document.getElementById('valor-jantar-interno');
+            const valorJantarFuncionario_elemento = document.getElementById('valor-jantar-funcionario');
+            
+            // Calcular valor total das refeições e valores parciais
+            let valorTotal = 0;
+            let valorCafeInterno = 0;
+            let valorCafeFuncionario = 0;
+            let valorAlmocoInterno = 0;
+            let valorAlmocoFuncionario = 0;
+            let valorLancheInterno = 0;
+            let valorLancheFuncionario = 0;
+            let valorJantarInterno = 0;
+            let valorJantarFuncionario = 0;
+            let valorDesvio = 0;
+            
+            if (precosLote) {
+                valorCafeInterno = totalCafeInterno * precosLote.cafe.interno;
+                valorCafeFuncionario = totalCafeFuncionario * precosLote.cafe.funcionario;
+                valorAlmocoInterno = totalAlmocoInterno * precosLote.almoco.interno;
+                valorAlmocoFuncionario = totalAlmocoFuncionario * precosLote.almoco.funcionario;
+                valorLancheInterno = totalLancheInterno * precosLote.lanche.interno;
+                valorLancheFuncionario = totalLancheFuncionario * precosLote.lanche.funcionario;
+                valorJantarInterno = totalJantarInterno * precosLote.jantar.interno;
+                valorJantarFuncionario = totalJantarFuncionario * precosLote.jantar.funcionario;
+                
+                valorTotal = valorCafeInterno + valorCafeFuncionario + valorAlmocoInterno + valorAlmocoFuncionario + 
+                           valorLancheInterno + valorLancheFuncionario + valorJantarInterno + valorJantarFuncionario;
+                
+                // Calcular valor total do desvio (já calculado com preços específicos)
+                valorDesvio = totalExcedentesInternos + totalExcedentesFuncionarios;
+            }
+            
+            // Calcular conformidade geral: (valor geral - desvio) / valor geral * 100
+            let conformidadeGeral = 0;
+            if (precosLote && valorTotal > 0) {
+                conformidadeGeral = ((valorTotal - valorDesvio) / valorTotal) * 100;
+                // Garantir que não seja negativo
+                conformidadeGeral = Math.max(0, conformidadeGeral);
+            }
             
             // Atualizar valores
             if (totalRefeicoes_elemento) totalRefeicoes_elemento.textContent = totalRefeicoes.toLocaleString('pt-BR');
@@ -911,6 +1109,96 @@
             if (totalJantarFuncionario_elemento) totalJantarFuncionario_elemento.textContent = totalJantarFuncionario.toLocaleString('pt-BR');
             if (diferencasPequenas_elemento) diferencasPequenas_elemento.textContent = diferencasPequenas.toString();
             if (discrepanciasCriticas_elemento) discrepanciasCriticas_elemento.textContent = discrepanciasCriticas.toString();
+            if (conformidadeGeral_elemento) {
+                if (precosLote && valorTotal > 0) {
+                    conformidadeGeral_elemento.textContent = conformidadeGeral.toFixed(1) + '%';
+                } else {
+                    conformidadeGeral_elemento.textContent = 'N/A';
+                }
+            }
+            
+            // Atualizar valor total formatado como moeda brasileira
+            if (valorTotal_elemento) {
+                if (precosLote) {
+                    valorTotal_elemento.textContent = valorTotal.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    });
+                } else {
+                    valorTotal_elemento.textContent = 'N/A';
+                }
+            }
+            
+            // Atualizar valor de desvio formatado como moeda brasileira
+            if (valorDesvio_elemento) {
+                if (precosLote) {
+                    valorDesvio_elemento.textContent = valorDesvio.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    });
+                } else {
+                    valorDesvio_elemento.textContent = 'N/A';
+                }
+            }
+            
+            // Atualizar valores parciais formatados como moeda brasileira
+            if (precosLote) {
+                if (valorCafeInterno_elemento) {
+                    valorCafeInterno_elemento.textContent = valorCafeInterno.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    });
+                }
+                if (valorCafeFuncionario_elemento) {
+                    valorCafeFuncionario_elemento.textContent = valorCafeFuncionario.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    });
+                }
+                if (valorAlmocoInterno_elemento) {
+                    valorAlmocoInterno_elemento.textContent = valorAlmocoInterno.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    });
+                }
+                if (valorAlmocoFuncionario_elemento) {
+                    valorAlmocoFuncionario_elemento.textContent = valorAlmocoFuncionario.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    });
+                }
+                if (valorLancheInterno_elemento) {
+                    valorLancheInterno_elemento.textContent = valorLancheInterno.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    });
+                }
+                if (valorLancheFuncionario_elemento) {
+                    valorLancheFuncionario_elemento.textContent = valorLancheFuncionario.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    });
+                }
+                if (valorJantarInterno_elemento) {
+                    valorJantarInterno_elemento.textContent = valorJantarInterno.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    });
+                }
+                if (valorJantarFuncionario_elemento) {
+                    valorJantarFuncionario_elemento.textContent = valorJantarFuncionario.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    });
+                }
+            } else {
+                // Se não há preços, mostrar N/A para todos os valores parciais e desvio
+                [valorCafeInterno_elemento, valorCafeFuncionario_elemento, valorAlmocoInterno_elemento, 
+                 valorAlmocoFuncionario_elemento, valorLancheInterno_elemento, valorLancheFuncionario_elemento,
+                 valorJantarInterno_elemento, valorJantarFuncionario_elemento, valorDesvio_elemento].forEach(elemento => {
+                    if (elemento) elemento.textContent = 'N/A';
+                });
+            }
         }
 
         function carregarTabelaDados() {
@@ -1068,8 +1356,10 @@
         }
 
         // Controles das seções
-        document.getElementById('btn-importar').addEventListener('click', mostrarSecaoImportacao);
+        document.getElementById('btn-adicionar-dados').addEventListener('click', mostrarSecaoImportacao);
         document.getElementById('btn-entrada-manual').addEventListener('click', mostrarSecaoManual);
+        document.getElementById('btn-excluir-dados').addEventListener('click', mostrarSecaoExcluir);
+        document.getElementById('btn-adicionar-siisp').addEventListener('click', mostrarSecaoSiisp);
 
         function mostrarSecaoImportacao() {
             document.getElementById('secao-importacao').style.display = 'block';
@@ -1081,6 +1371,26 @@
             document.getElementById('secao-importacao').style.display = 'none';
             document.getElementById('secao-manual').style.display = 'block';
             document.getElementById('secao-manual').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function mostrarSecaoExcluir() {
+            if (confirm('Tem certeza que deseja excluir dados? Esta ação não pode ser desfeita.')) {
+                alert('Funcionalidade de exclusão de dados será implementada em versões futuras.');
+            }
+        }
+
+        function mostrarSecaoSiisp() {
+            alert('Funcionalidade para adicionar números SIISP será implementada em versões futuras.');
+        }
+
+        function mostrarSecaoExcluir() {
+            if (confirm('Tem certeza que deseja excluir dados? Esta ação não pode ser desfeita.')) {
+                alert('Funcionalidade de exclusão de dados será implementada em versões futuras.');
+            }
+        }
+
+        function mostrarSecaoSiisp() {
+            alert('Funcionalidade para adicionar números SIISP será implementada em versões futuras.');
         }
 
         // Botões de cancelar
@@ -1204,26 +1514,14 @@
             }
         });
 
-        // Atualizar dados
-        document.getElementById('btn-atualizar').addEventListener('click', function() {
-            // Aplicar filtros atuais
-            aplicarFiltros();
-            alert('Dados atualizados com sucesso!');
-        });
+
 
         // Exportar tabela
         document.getElementById('btn-exportar-tabela').addEventListener('click', function() {
             alert('Funcionalidade de exportação será implementada em versões futuras.\n\nFormatos disponíveis: Excel, PDF, CSV');
         });
         
-        // Limpar filtros
-        document.addEventListener('click', function(e) {
-            if (e.target && e.target.id === 'btn-limpar-filtros') {
-                if (confirm('Deseja limpar todos os filtros e exibir todos os dados?')) {
-                    limparTodosFiltros();
-                }
-            }
-        });
+
 
         // Logout
         document.getElementById('logoutLink').addEventListener('click', function(e) {

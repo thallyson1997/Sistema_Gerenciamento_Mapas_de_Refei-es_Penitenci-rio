@@ -185,14 +185,13 @@
                         </select>
                     </div>
                     <div style="flex: 2;">
-                        <label for="filtro-busca" class="form-label">Buscar Presídio/Lote</label>
-                        <input type="text" id="filtro-busca" class="form-input" placeholder="Digite o nome do presídio ou lote">
-                    </div>
-                    <div>
-                        <label class="form-label">&nbsp;</label>
-                        <button class="btn btn-primary" id="aplicar-filtros">
-                            Aplicar Filtros
-                        </button>
+                        <label for="filtro-lote" class="form-label">Lote</label>
+                        <select id="filtro-lote" class="form-select">
+                            <option value="">Todos os lotes</option>
+                            {% for lote in lotes %}
+                            <option value="{{ lote.id }}">{{ lote.nome }} - {{ lote.empresa }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
             </section>
@@ -282,8 +281,8 @@
                                 <div style="font-size: 1.5rem;" class="alertas-icon" data-lote-id="{{ lote.id }}">
                                     {% if alertas == 0 %}✅{% else %}⚠️{% endif %}
                                 </div>
-                                <div style="font-size: 0.875rem; opacity: 0.9;" class="alertas-count" data-lote-id="{{ lote.id }}">{{ alertas }}</div>
-                                <div style="font-size: 0.75rem; opacity: 0.8;">Alertas</div>
+                                <div style="font-size: 0.875rem; opacity: 0.9;" class="discrepancias-count" data-lote-id="{{ lote.id }}">{{ alertas }}</div>
+                                <div style="font-size: 0.75rem; opacity: 0.8;">Discrepâncias</div>
                             </div>
                         </div>
 
@@ -440,9 +439,9 @@
         function atualizarResumo() {
             const mes = parseInt(document.getElementById('filtro-mes').value);
             const ano = parseInt(document.getElementById('filtro-ano').value);
-            const busca = document.getElementById('filtro-busca').value.toLowerCase();
+            const loteId = parseInt(document.getElementById('filtro-lote').value);
             
-            console.log('Atualizando resumo para:', { mes, ano, busca });
+            console.log('Atualizando resumo para:', { mes, ano, loteId });
             
             // Filtrar mapas baseado nos critérios
             let mapasFiltrados = mapasDados;
@@ -455,10 +454,8 @@
                 mapasFiltrados = mapasFiltrados.filter(mapa => mapa.ano === ano);
             }
             
-            if (busca) {
-                mapasFiltrados = mapasFiltrados.filter(mapa => 
-                    mapa.nome_unidade.toLowerCase().includes(busca)
-                );
+            if (loteId) {
+                mapasFiltrados = mapasFiltrados.filter(mapa => mapa.lote_id === loteId);
             }
             
             console.log('Mapas filtrados:', mapasFiltrados.length);
@@ -494,10 +491,21 @@
             let totalRegistros = 0;
             let registrosComDiscrepancia = 0;
             
+            // Preços simulados (mesmos do lote-detalhes.html)
+            const precos = {
+                cafe: { interno: 4.50, funcionario: 5.00 },
+                almoco: { interno: 12.00, funcionario: 13.50 },
+                lanche: { interno: 6.00, funcionario: 6.50 },
+                jantar: { interno: 10.00, funcionario: 11.00 }
+            };
+            
+            let valorTotal = 0;
+            let valorDesvio = 0;
+            
             mapas.forEach(mapa => {
                 unidadesUnicas.add(mapa.nome_unidade);
                 
-                // Calcular total de refeições para cada dia do mês
+                // Calcular total de refeições e valores financeiros para cada dia do mês
                 for (let i = 0; i < mapa.data.length; i++) {
                     const refeicoesDia = 
                         mapa.cafe_interno[i] + mapa.cafe_funcionario[i] +
@@ -508,21 +516,74 @@
                     totalRefeicoes += refeicoesDia;
                     totalRegistros++;
                     
-                    // Simular verificação de discrepâncias (baseado em limites simples)
-                    const temDiscrepancia = 
-                        mapa.cafe_interno[i] > 150 || 
-                        mapa.almoco_interno[i] > 150 ||
-                        mapa.lanche_interno[i] > 150 ||
-                        mapa.jantar_interno[i] > 150;
+                    // Calcular valores financeiros
+                    const valorDia = 
+                        (mapa.cafe_interno[i] * precos.cafe.interno) +
+                        (mapa.cafe_funcionario[i] * precos.cafe.funcionario) +
+                        (mapa.almoco_interno[i] * precos.almoco.interno) +
+                        (mapa.almoco_funcionario[i] * precos.almoco.funcionario) +
+                        (mapa.lanche_interno[i] * precos.lanche.interno) +
+                        (mapa.lanche_funcionario[i] * precos.lanche.funcionario) +
+                        (mapa.jantar_interno[i] * precos.jantar.interno) +
+                        (mapa.jantar_funcionario[i] * precos.jantar.funcionario);
                     
-                    if (temDiscrepancia) {
-                        registrosComDiscrepancia++;
+                    valorTotal += valorDia;
+                    
+                    // Calcular desvios financeiros (excedentes acima do esperado)
+                    const siisp = (mapa.n_siisp && mapa.n_siisp.length > i) ? mapa.n_siisp[i] : 0;
+                    
+                    if (siisp > 0) {
+                        // Verificar excedentes por tipo de refeição
+                        const excedenteCafe = Math.max(0, mapa.cafe_interno[i] - siisp);
+                        const excedenteAlmoco = Math.max(0, mapa.almoco_interno[i] - siisp);
+                        const excedenteLanche = Math.max(0, mapa.lanche_interno[i] - siisp);
+                        const excedenteJantar = Math.max(0, mapa.jantar_interno[i] - siisp);
+                        
+                        valorDesvio += 
+                            (excedenteCafe * precos.cafe.interno) +
+                            (excedenteAlmoco * precos.almoco.interno) +
+                            (excedenteLanche * precos.lanche.interno) +
+                            (excedenteJantar * precos.jantar.interno);
+                        
+                        // Contar discrepâncias críticas individualmente (mesma lógica do lote-detalhes.html)
+                        // Cada tipo de refeição é contado separadamente se diferença > 5
+                        const tiposRefeicaoDetalhados = [
+                            {valor: mapa.cafe_interno[i], siisp: siisp, tipo: 'cafe'},
+                            {valor: mapa.almoco_interno[i], siisp: siisp, tipo: 'almoco'},
+                            {valor: mapa.lanche_interno[i], siisp: siisp, tipo: 'lanche'},
+                            {valor: mapa.jantar_interno[i], siisp: siisp, tipo: 'jantar'}
+                        ];
+                        
+                        tiposRefeicaoDetalhados.forEach(tipo => {
+                            const diferenca = tipo.valor - tipo.siisp;
+                            if (diferenca > 5) {
+                                registrosComDiscrepancia++; // Contar célula vermelha (discrepância crítica)
+                            }
+                        });
                     }
+                    
+                    // Verificar funcionários SIISP (mesma lógica do lote-detalhes.html)
+                    const funcionariosSiispDetalhados = [
+                        {valorSiisp: mapa.cafe_funcionario_siisp && mapa.cafe_funcionario_siisp[i], tipo: 'cafe'},
+                        {valorSiisp: mapa.almoco_funcionario_siisp && mapa.almoco_funcionario_siisp[i], tipo: 'almoco'},
+                        {valorSiisp: mapa.lanche_funcionario_siisp && mapa.lanche_funcionario_siisp[i], tipo: 'lanche'},
+                        {valorSiisp: mapa.jantar_funcionario_siisp && mapa.jantar_funcionario_siisp[i], tipo: 'jantar'}
+                    ];
+                    
+                    funcionariosSiispDetalhados.forEach(func => {
+                        if (func.valorSiisp !== null && func.valorSiisp !== undefined) {
+                            // Para funcionários: valores > 0 são críticos (vermelhos)
+                            if (func.valorSiisp > 0) {
+                                registrosComDiscrepancia++; // Células vermelhas (críticas)
+                            }
+                        }
+                    });
                 }
             });
             
-            const conformidade = totalRegistros > 0 ? 
-                (((totalRegistros - registrosComDiscrepancia) / totalRegistros) * 100).toFixed(1) : 
+            // Calcular conformidade baseada em impacto financeiro
+            const conformidade = valorTotal > 0 ? 
+                Math.max(0, ((valorTotal - valorDesvio) / valorTotal) * 100).toFixed(1) : 
                 '0.0';
             
             return {
@@ -543,7 +604,7 @@
                     unidades: 0,
                     refeicoes: 0,
                     conformidade: '0.0',
-                    alertas: 0
+                    discrepancias: 0
                 };
             }
             
@@ -552,10 +613,21 @@
             let totalRegistros = 0;
             let registrosComProblema = 0;
             
+            // Preços simulados (mesmos do lote-detalhes.html)
+            const precos = {
+                cafe: { interno: 4.50, funcionario: 5.00 },
+                almoco: { interno: 12.00, funcionario: 13.50 },
+                lanche: { interno: 6.00, funcionario: 6.50 },
+                jantar: { interno: 10.00, funcionario: 11.00 }
+            };
+            
+            let valorTotal = 0;
+            let valorDesvio = 0;
+            
             mapasDoLote.forEach(mapa => {
                 unidadesUnicas.add(mapa.nome_unidade);
                 
-                // Calcular total de refeições para cada dia do mês
+                // Calcular total de refeições e valores financeiros para cada dia do mês
                 for (let i = 0; i < mapa.data.length; i++) {
                     const refeicoesDia = 
                         mapa.cafe_interno[i] + mapa.cafe_funcionario[i] +
@@ -566,31 +638,84 @@
                     totalRefeicoes += refeicoesDia;
                     totalRegistros++;
                     
-                    // Verificar problemas (valores muito altos ou muito baixos)
-                    const temProblema = 
-                        mapa.cafe_interno[i] > 150 || mapa.cafe_interno[i] < 50 ||
-                        mapa.almoco_interno[i] > 150 || mapa.almoco_interno[i] < 50 ||
-                        mapa.lanche_interno[i] > 150 || mapa.lanche_interno[i] < 50 ||
-                        mapa.jantar_interno[i] > 150 || mapa.jantar_interno[i] < 50;
+                    // Calcular valores financeiros
+                    const valorDia = 
+                        (mapa.cafe_interno[i] * precos.cafe.interno) +
+                        (mapa.cafe_funcionario[i] * precos.cafe.funcionario) +
+                        (mapa.almoco_interno[i] * precos.almoco.interno) +
+                        (mapa.almoco_funcionario[i] * precos.almoco.funcionario) +
+                        (mapa.lanche_interno[i] * precos.lanche.interno) +
+                        (mapa.lanche_funcionario[i] * precos.lanche.funcionario) +
+                        (mapa.jantar_interno[i] * precos.jantar.interno) +
+                        (mapa.jantar_funcionario[i] * precos.jantar.funcionario);
                     
-                    if (temProblema) {
-                        registrosComProblema++;
+                    valorTotal += valorDia;
+                    
+                    // Calcular desvios financeiros (excedentes acima do esperado)
+                    const siisp = (mapa.n_siisp && mapa.n_siisp.length > i) ? mapa.n_siisp[i] : 0;
+                    
+                    if (siisp > 0) {
+                        // Verificar excedentes por tipo de refeição
+                        const excedenteCafe = Math.max(0, mapa.cafe_interno[i] - siisp);
+                        const excedenteAlmoco = Math.max(0, mapa.almoco_interno[i] - siisp);
+                        const excedenteLanche = Math.max(0, mapa.lanche_interno[i] - siisp);
+                        const excedenteJantar = Math.max(0, mapa.jantar_interno[i] - siisp);
+                        
+                        valorDesvio += 
+                            (excedenteCafe * precos.cafe.interno) +
+                            (excedenteAlmoco * precos.almoco.interno) +
+                            (excedenteLanche * precos.lanche.interno) +
+                            (excedenteJantar * precos.jantar.interno);
+                        
+                        // Contar discrepâncias críticas individualmente (mesma lógica do lote-detalhes.html)
+                        // Cada tipo de refeição é contado separadamente se diferença > 5
+                        const tiposRefeicaoDetalhados = [
+                            {valor: mapa.cafe_interno[i], siisp: siisp, tipo: 'cafe'},
+                            {valor: mapa.almoco_interno[i], siisp: siisp, tipo: 'almoco'},
+                            {valor: mapa.lanche_interno[i], siisp: siisp, tipo: 'lanche'},
+                            {valor: mapa.jantar_interno[i], siisp: siisp, tipo: 'jantar'}
+                        ];
+                        
+                        tiposRefeicaoDetalhados.forEach(tipo => {
+                            const diferenca = tipo.valor - tipo.siisp;
+                            if (diferenca > 5) {
+                                registrosComProblema++; // Contar célula vermelha (discrepância crítica)
+                            }
+                        });
                     }
+                    
+                    // Verificar funcionários SIISP (mesma lógica do lote-detalhes.html)
+                    const funcionariosSiispDetalhados = [
+                        {valorSiisp: mapa.cafe_funcionario_siisp && mapa.cafe_funcionario_siisp[i], tipo: 'cafe'},
+                        {valorSiisp: mapa.almoco_funcionario_siisp && mapa.almoco_funcionario_siisp[i], tipo: 'almoco'},
+                        {valorSiisp: mapa.lanche_funcionario_siisp && mapa.lanche_funcionario_siisp[i], tipo: 'lanche'},
+                        {valorSiisp: mapa.jantar_funcionario_siisp && mapa.jantar_funcionario_siisp[i], tipo: 'jantar'}
+                    ];
+                    
+                    funcionariosSiispDetalhados.forEach(func => {
+                        if (func.valorSiisp !== null && func.valorSiisp !== undefined) {
+                            // Para funcionários: valores > 0 são críticos (vermelhos)
+                            if (func.valorSiisp > 0) {
+                                registrosComProblema++; // Células vermelhas (críticas)
+                            }
+                        }
+                    });
                 }
             });
             
-            const conformidade = totalRegistros > 0 ? 
-                (((totalRegistros - registrosComProblema) / totalRegistros) * 100).toFixed(1) : 
+            // Calcular conformidade baseada em impacto financeiro
+            const conformidade = valorTotal > 0 ? 
+                Math.max(0, ((valorTotal - valorDesvio) / valorTotal) * 100).toFixed(1) : 
                 '0.0';
             
-            // Calcular alertas baseado na quantidade de problemas
-            const alertas = Math.min(Math.floor(registrosComProblema / 10), 9);
+            // Retornar discrepâncias críticas calculadas
+            const discrepancias = registrosComProblema;
             
             return {
                 unidades: unidadesUnicas.size,
                 refeicoes: totalRefeicoes,
                 conformidade: parseFloat(conformidade),
-                alertas: alertas
+                discrepancias: discrepancias
             };
         }
         
@@ -598,7 +723,7 @@
         function atualizarCardsLotes() {
             const mes = parseInt(document.getElementById('filtro-mes').value);
             const ano = parseInt(document.getElementById('filtro-ano').value);
-            const busca = document.getElementById('filtro-busca').value.toLowerCase();
+            const loteId = parseInt(document.getElementById('filtro-lote').value);
             
             // Filtrar mapas baseado nos critérios
             let mapasFiltrados = mapasDados;
@@ -611,10 +736,8 @@
                 mapasFiltrados = mapasFiltrados.filter(mapa => mapa.ano === ano);
             }
             
-            if (busca) {
-                mapasFiltrados = mapasFiltrados.filter(mapa => 
-                    mapa.nome_unidade.toLowerCase().includes(busca)
-                );
+            if (loteId) {
+                mapasFiltrados = mapasFiltrados.filter(mapa => mapa.lote_id === loteId);
             }
             
             // Atualizar cada card de lote
@@ -650,14 +773,14 @@
                     }
                 }
                 
-                // Atualizar alertas
-                const alertasCountElement = card.querySelector('.alertas-count');
-                const alertasIconElement = card.querySelector('.alertas-icon');
-                if (alertasCountElement) {
-                    alertasCountElement.textContent = estatisticas.alertas;
+                // Atualizar discrepâncias
+                const discrepanciasCountElement = card.querySelector('.discrepancias-count');
+                const discrepanciasIconElement = card.querySelector('.alertas-icon'); // Mantém classe antiga para compatibilidade
+                if (discrepanciasCountElement) {
+                    discrepanciasCountElement.textContent = estatisticas.discrepancias;
                 }
-                if (alertasIconElement) {
-                    alertasIconElement.textContent = estatisticas.alertas === 0 ? '✅' : '⚠️';
+                if (discrepanciasIconElement) {
+                    discrepanciasIconElement.textContent = estatisticas.discrepancias === 0 ? '✅' : '⚠️';
                 }
             });
             
@@ -674,48 +797,22 @@
             }
         });
 
-        // Aplicar filtros
-        document.getElementById('aplicar-filtros').addEventListener('click', function() {
-            const mes = document.getElementById('filtro-mes').value;
-            const ano = document.getElementById('filtro-ano').value;
-            const busca = document.getElementById('filtro-busca').value;
 
-            // Atualizar resumo com novos filtros
-            atualizarResumo();
 
-            // Mostrar feedback para o usuário
-            let mensagem = 'Filtros aplicados:\n';
-            if (mes) mensagem += `- Mês: ${getMonthName(mes)}\n`;
-            if (ano) mensagem += `- Ano: ${ano}\n`;
-            if (busca) mensagem += `- Busca: ${busca}\n`;
+
+
+        // Filtro de lote em tempo real
+        document.getElementById('filtro-lote').addEventListener('change', function() {
+            const loteId = parseInt(this.value);
             
-            if (!mes && !ano && !busca) {
-                mensagem = 'Nenhum filtro selecionado. Exibindo todos os dados.';
-            }
-
-            alert(mensagem + '\nResumo do período atualizado!');
-        });
-
-        function getMonthName(month) {
-            const months = [
-                '', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-            ];
-            return months[parseInt(month)];
-        }
-
-        // Busca em tempo real
-        document.getElementById('filtro-busca').addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            
-            // Atualizar resumo quando filtro de busca mudar
+            // Atualizar resumo quando filtro de lote mudar
             atualizarResumo();
             
             // Filtrar cards de lote visualmente
             const loteCards = document.querySelectorAll('.lote-card');
             loteCards.forEach(card => {
-                const text = card.textContent.toLowerCase();
-                if (text.includes(searchTerm) || searchTerm === '') {
+                const cardLoteId = parseInt(card.getAttribute('data-lote-id'));
+                if (!loteId || cardLoteId === loteId) {
                     card.style.display = 'block';
                 } else {
                     card.style.display = 'none';
@@ -726,6 +823,7 @@
         // Event listeners para atualização automática do resumo
         document.getElementById('filtro-mes').addEventListener('change', atualizarResumo);
         document.getElementById('filtro-ano').addEventListener('change', atualizarResumo);
+        document.getElementById('filtro-lote').addEventListener('change', atualizarResumo);
 
         // Animações de fade-in
         const observerOptions = {
