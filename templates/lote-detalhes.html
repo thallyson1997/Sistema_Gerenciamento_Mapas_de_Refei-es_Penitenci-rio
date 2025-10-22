@@ -364,7 +364,7 @@
                 <section class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <h3 id="titulo-tabela">Mapas de Refeições - Setembro/2025</h3>
+                            <h3 id="titulo-tabela">Mapas de Refeições</h3>
                             <div id="indicador-filtros" style="font-size: 0.875rem; color: var(--primary-color); margin-top: 0.25rem; display: none;">
                                 <span>📊 Dados filtrados</span>
                                 <button id="btn-limpar-filtros" style="margin-left: 0.5rem; background: none; border: none; color: var(--danger-color); text-decoration: underline; cursor: pointer; font-size: 0.875rem;">Limpar filtros</button>
@@ -614,8 +614,12 @@
                         // Converter data brasileira (DD/MM/YYYY) para formato Date
                         const partesData = registro.data.split('/');
                         const dataRegistro = new Date(partesData[2], partesData[1] - 1, partesData[0]);
-                        const inicio = new Date(filtrosAtivos.dataInicio);
-                        const fim = new Date(filtrosAtivos.dataFim);
+                        
+                        // Converter strings ISO para Date de forma consistente
+                        const [anoInicio, mesInicio, diaInicio] = filtrosAtivos.dataInicio.split('-');
+                        const [anoFim, mesFim, diaFim] = filtrosAtivos.dataFim.split('-');
+                        const inicio = new Date(parseInt(anoInicio), parseInt(mesInicio) - 1, parseInt(diaInicio));
+                        const fim = new Date(parseInt(anoFim), parseInt(mesFim) - 1, parseInt(diaFim));
                         
                         if (dataRegistro < inicio || dataRegistro > fim) {
                             incluir = false;
@@ -1221,8 +1225,11 @@
             const diasInfo = document.getElementById('dias-periodo');
             
             if (dataInicioValue && dataFimValue) {
-                const dataInicio = new Date(dataInicioValue);
-                const dataFim = new Date(dataFimValue);
+                // Converter strings ISO para Date de forma consistente
+                const [anoInicio, mesInicio, diaInicio] = dataInicioValue.split('-');
+                const [anoFim, mesFim, diaFim] = dataFimValue.split('-');
+                const dataInicio = new Date(parseInt(anoInicio), parseInt(mesInicio) - 1, parseInt(diaInicio));
+                const dataFim = new Date(parseInt(anoFim), parseInt(mesFim) - 1, parseInt(diaFim));
                 
                 if (dataInicio <= dataFim) {
                     const diffTime = Math.abs(dataFim - dataInicio);
@@ -1250,12 +1257,12 @@
             const periodoText = document.getElementById('periodo-text');
             
             if (dataInicio && dataFim) {
-                const inicio = new Date(dataInicio);
-                const fim = new Date(dataFim);
+                // Usar split para evitar problemas de timezone
+                const [anoInicio, mesInicio, diaInicio] = dataInicio.split('-');
+                const [anoFim, mesFim, diaFim] = dataFim.split('-');
                 
-                const formatoData = { day: '2-digit', month: '2-digit', year: 'numeric' };
-                const inicioFormatado = inicio.toLocaleDateString('pt-BR', formatoData);
-                const fimFormatado = fim.toLocaleDateString('pt-BR', formatoData);
+                const inicioFormatado = `${diaInicio}/${mesInicio}/${anoInicio}`;
+                const fimFormatado = `${diaFim}/${mesFim}/${anoFim}`;
                 
                 periodoText.textContent = `${inicioFormatado} - ${fimFormatado}`;
             }
@@ -1267,12 +1274,12 @@
             const titulo = document.querySelector('.card-header h3');
             
             if (dataInicio && dataFim && titulo) {
-                const inicio = new Date(dataInicio);
-                const fim = new Date(dataFim);
+                // Usar split para evitar problemas de timezone
+                const [anoInicio, mesInicio, diaInicio] = dataInicio.split('-');
+                const [anoFim, mesFim, diaFim] = dataFim.split('-');
                 
-                const formatoData = { day: '2-digit', month: '2-digit', year: 'numeric' };
-                const inicioFormatado = inicio.toLocaleDateString('pt-BR', formatoData);
-                const fimFormatado = fim.toLocaleDateString('pt-BR', formatoData);
+                const inicioFormatado = `${diaInicio}/${mesInicio}/${anoInicio}`;
+                const fimFormatado = `${diaFim}/${mesFim}/${anoFim}`;
                 
                 titulo.textContent = `Mapas de Refeições - ${inicioFormatado} a ${fimFormatado}`;
             }
