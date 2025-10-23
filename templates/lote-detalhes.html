@@ -433,7 +433,7 @@
                                     <select id="select-unidade-import" class="form-select" required>
                                         <option value="">Selecione a unidade</option>
                                         {% for unidade in unidades_lote %}
-                                        <option value="unidade{{ loop.index }}">{{ unidade }}</option>
+                                        <option value="{{ unidade }}">{{ unidade }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -490,7 +490,7 @@
                             <select id="select-unidade-manual" class="form-select" required>
                                 <option value="">Selecione a unidade</option>
                                 {% for unidade in unidades_lote %}
-                                <option value="unidade{{ loop.index }}">{{ unidade }}</option>
+                                <option value="{{ unidade }}">{{ unidade }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -708,6 +708,8 @@
         const mapasLote = {{ mapas_lote | tojson }};
         // Dados dos preços do lote
         const precosLote = {{ lote.precos | tojson }};
+        // ID do lote atual
+        const loteId = {{ lote.id }};
         
         // Variáveis globais para controle dos filtros
         let filtrosAtivos = {
@@ -1449,12 +1451,24 @@
         // Processar importação
         document.getElementById('btn-processar-import').addEventListener('click', function() {
             const unidade = document.getElementById('select-unidade-import').value;
-            const textoPdf = document.getElementById('texto-pdf').value.trim();
+            
+            // Debug: verificar se o elemento existe
+            const textoElement = document.getElementById('texto-pdf');
+            console.log('🔍 Debug - Elemento texto-pdf encontrado:', textoElement);
+            
+            // Capturar texto SEM trim() para preservar espaços e quebras de linha
+            const textoPdf = textoElement ? textoElement.value : '';
             const mes = document.getElementById('mes-import').value;
             const ano = document.getElementById('ano-import').value;
+            const dadosSiisp = document.getElementById('dados-siisp').value.trim();
             
-            if (!unidade || !textoPdf) {
-                alert('Por favor, selecione a unidade e forneça o texto do PDF.');
+            // Debug: verificar se o texto está sendo capturado (mostrar caracteres especiais)
+            console.log('🔍 Debug - Texto capturado (raw):', JSON.stringify(textoPdf));
+            console.log('🔍 Debug - Tamanho do texto:', textoPdf.length);
+            console.log('🔍 Debug - Primeiros 100 chars:', textoPdf.substring(0, 100));
+            
+            if (!unidade) {
+                alert('Por favor, selecione a unidade.');
                 return;
             }
             
@@ -1463,18 +1477,100 @@
                 return;
             }
             
-            const meses = [
-                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-            ];
-            const mesNome = meses[parseInt(mes) - 1];
+            // Preparar dados para enviar à API
+            const dadosParaApi = {
+                lote_id: loteId,
+                mes: parseInt(mes),
+                ano: parseInt(ano),
+                unidade: unidade,
+                dados_siisp: dadosSiisp,  // Enviar dados SIISP como string original
+                texto: textoPdf
+            };
             
-            alert(`Dados processados com sucesso!\nPeríodo: ${mesNome}/${ano}\nNovos registros foram adicionados à tabela.`);
-            document.getElementById('secao-importacao').style.display = 'none';
+            console.log('Enviando dados para API:', dadosParaApi);
             
-            // Aqui seria implementada a lógica real de processamento
-            console.log('Importação processada:', { unidade, mes: mesNome, ano, textoPdf });
-            carregarTabelaRefeicoes();
+            // Chamar API para salvar dados
+            fetch('/api/adicionar-dados', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dadosParaApi)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(JSON.stringify(errorData));
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('🔍 Debug - Resposta da API:', data);
+                
+                if (data.success) {
+                    const meses = [
+                        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+                    ];
+                    const mesNome = meses[parseInt(mes) - 1];
+                    
+                    // Acessar dados de validação corretamente
+                    const refeicoes = data.validacao.refeicoes;
+                    const siisp = data.validacao.siisp;
+                    
+                    alert(`✅ Dados salvos com sucesso!\n\n` +
+                          `📅 Período: ${mesNome}/${ano}\n` +
+                          `🏢 Unidade: ${unidade}\n` +
+                          `📊 Refeições: ${refeicoes.registros_processados} registros processados\n` +
+                          `📋 Dias no mês: ${refeicoes.dias_esperados}\n` +
+                          `🔢 SIISP: ${siisp.mensagem}\n\n` +
+                          `✅ ${data.validacao.mensagem_geral}`);
+                    
+                    document.getElementById('secao-importacao').style.display = 'none';
+                    
+                    // Limpar formulário
+                    document.getElementById('texto-pdf').value = '';
+                    document.getElementById('dados-siisp').value = '';
+                    
+                    // Recarregar página para mostrar novos dados
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                    
+                    console.log('✅ Dados salvos:', data.registro);
+                } else {
+                    alert('❌ Erro ao salvar dados: ' + (data.error || 'Erro desconhecido'));
+                    console.error('❌ Erro da API:', data);
+                }
+            })
+            .catch(error => {
+                console.error('❌ Erro completo:', error);
+                
+                try {
+                    // Tentar fazer parse do erro para ver se é erro de validação
+                    const errorData = JSON.parse(error.message);
+                    
+                    if (errorData.validacao && !errorData.validacao.valido) {
+                        // Erro de validação - mostrar popup detalhado
+                        alert(`🚨 DADOS REJEITADOS - INCONSISTÊNCIA DETECTADA\n\n` +
+                              `❌ ${errorData.validacao.detalhes}\n\n` +
+                              `📊 Detalhes:\n` +
+                              `• Registros encontrados: ${errorData.validacao.registros_processados}\n` +
+                              `• Dias esperados no mês: ${errorData.validacao.dias_esperados}\n\n` +
+                              `💡 Por favor, revise os dados e tente novamente.\n` +
+                              `Os dados devem conter exatamente ${errorData.validacao.dias_esperados} linhas.`);
+                    } else {
+                        // Outro tipo de erro
+                        alert(`❌ Erro: ${errorData.error || 'Erro desconhecido do servidor'}`);
+                    }
+                } catch (parseError) {
+                    // Erro de conexão ou outro tipo
+                    alert('❌ Erro de conexão com o servidor!\n\nVerifique sua conexão e tente novamente.');
+                }
+                
+                console.error('❌ Erro de rede:', error);
+            });
         });
 
         // Salvar entrada manual

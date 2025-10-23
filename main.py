@@ -10,6 +10,7 @@ Data: Outubro 2025
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from datetime import datetime, timedelta
+import calendar
 import os
 import json
 
@@ -67,6 +68,239 @@ def carregar_unidades():
     """Carrega unidades do arquivo JSON"""
     dados = carregar_dados_json('unidades.json')
     return dados.get('unidades', [])
+
+def gerar_datas_do_mes(mes, ano):
+    """
+    Gera lista com todas as datas do mês no formato DD/MM/AAAA
+    
+    Args:
+        mes (int): Mês (1-12)
+        ano (int): Ano (ex: 2025)
+    
+    Returns:
+        list: Lista de strings com todas as datas do mês
+    """
+    # Descobrir quantos dias tem o mês
+    dias_no_mes = calendar.monthrange(ano, mes)[1]
+    
+    # Gerar lista de datas
+    datas = []
+    for dia in range(1, dias_no_mes + 1):
+        data_formatada = f"{dia:02d}/{mes:02d}/{ano}"
+        datas.append(data_formatada)
+    
+    return datas
+
+def processar_dados_tabulares(texto, dias_esperados=None):
+    """
+    Converte o campo texto tabular em campos separados por refeição
+    
+    Args:
+        texto (str): Texto com dados tabulares separados por tabs
+        dias_esperados (int): Número de dias esperados (opcional)
+        
+    Returns:
+        dict: Dicionário com as listas numéricas e informações de validação
+    """
+    if not texto or texto.strip() == "":
+        return {
+            'cafe_interno': [],
+            'cafe_funcionario': [],
+            'almoco_interno': [],
+            'almoco_funcionario': [],
+            'lanche_interno': [],
+            'lanche_funcionario': [],
+            'jantar_interno': [],
+            'jantar_funcionario': [],
+            'validacao': {
+                'registros_processados': 0,
+                'dias_esperados': dias_esperados or 0,
+                'valido': True,
+                'mensagem': 'Nenhum dado para processar'
+            }
+        }
+    
+    # Inicializar listas
+    campos = {
+        'cafe_interno': [],        # coluna 2
+        'cafe_funcionario': [],    # coluna 3
+        'almoco_interno': [],      # coluna 4
+        'almoco_funcionario': [],  # coluna 5
+        'lanche_interno': [],      # coluna 6
+        'lanche_funcionario': [],  # coluna 7
+        'jantar_interno': [],      # coluna 8
+        'jantar_funcionario': []   # coluna 9
+    }
+    
+    # Processar linha por linha
+    linhas = texto.strip().split('\n')
+    registros_processados = 0
+    
+    for linha in linhas:
+        if linha.strip():  # Ignorar linhas vazias
+            colunas = linha.split('\t')
+            
+            # Verificar se tem pelo menos 9 colunas (ignoramos primeira e qualquer após a nona)
+            if len(colunas) >= 9:
+                try:
+                    # Extrair valores das colunas 2-9 (índices 1-8)
+                    campos['cafe_interno'].append(int(colunas[1]))
+                    campos['cafe_funcionario'].append(int(colunas[2]))
+                    campos['almoco_interno'].append(int(colunas[3]))
+                    campos['almoco_funcionario'].append(int(colunas[4]))
+                    campos['lanche_interno'].append(int(colunas[5]))
+                    campos['lanche_funcionario'].append(int(colunas[6]))
+                    campos['jantar_interno'].append(int(colunas[7]))
+                    campos['jantar_funcionario'].append(int(colunas[8]))
+                    registros_processados += 1
+                except ValueError:
+                    # Se houver erro na conversão, pular esta linha
+                    print(f"⚠️ Erro ao processar linha: {linha}")
+                    continue
+    
+    # Validação do número de registros
+    validacao = {
+        'registros_processados': registros_processados,
+        'dias_esperados': dias_esperados or registros_processados,
+        'valido': True,
+        'mensagem': 'Dados processados com sucesso'
+    }
+    
+    if dias_esperados and registros_processados != dias_esperados:
+        validacao['valido'] = False
+        if registros_processados > dias_esperados:
+            validacao['mensagem'] = f'ATENÇÃO: Foram encontrados {registros_processados} registros, mas o mês possui apenas {dias_esperados} dias. Dados excedentes foram incluídos, mas podem estar incorretos.'
+        else:
+            validacao['mensagem'] = f'ATENÇÃO: Foram encontrados apenas {registros_processados} registros, mas o mês possui {dias_esperados} dias. Alguns dias podem estar faltando.'
+    
+    campos['validacao'] = validacao
+    return campos
+
+def processar_dados_siisp(texto_siisp, dias_esperados):
+    """
+    Processa dados SIISP opcionais de uma string separada por quebras de linha
+    
+    Args:
+        texto_siisp (str): String com valores SIISP separados por \n (opcional)
+        dias_esperados (int): Número de dias esperados no mês
+        
+    Returns:
+        dict: Dicionário com lista n_siisp e informações de validação
+    """
+    resultado = {
+        'n_siisp': [],
+        'validacao': {
+            'valido': True,
+            'mensagem': 'Dados SIISP não fornecidos - campos SIISP ficarão vazios'
+        }
+    }
+    
+    # Se não há dados SIISP, retornar lista vazia (válido)
+    if not texto_siisp or texto_siisp.strip() == "":
+        return resultado
+    
+    # Processar linha por linha
+    linhas = texto_siisp.strip().split('\n')
+    valores_siisp = []
+    
+    for linha in linhas:
+        linha_limpa = linha.strip()
+        if linha_limpa:  # Ignorar linhas vazias
+            try:
+                valor = int(linha_limpa)
+                valores_siisp.append(valor)
+            except ValueError:
+                resultado['validacao'] = {
+                    'valido': False,
+                    'mensagem': f'Valor SIISP inválido encontrado: "{linha_limpa}". Todos os valores devem ser números inteiros.'
+                }
+                return resultado
+    
+    # Validar quantidade de registros
+    if len(valores_siisp) != dias_esperados:
+        resultado['validacao'] = {
+            'valido': False,
+            'mensagem': f'Dados SIISP: encontrados {len(valores_siisp)} valores, mas o mês possui {dias_esperados} dias. Deve ter exatamente {dias_esperados} valores ou estar vazio.'
+        }
+        return resultado
+    
+    # Se chegou até aqui, dados são válidos
+    resultado['n_siisp'] = valores_siisp
+    resultado['validacao'] = {
+        'valido': True,
+        'mensagem': f'Dados SIISP processados com sucesso - {len(valores_siisp)} valores'
+    }
+    
+    return resultado
+
+def migrar_dados_existentes():
+    """
+    Verifica se há dados em mapas_teste.json para migrar para mapas.json
+    e depois remove o arquivo de teste
+    """
+    try:
+        # Verificar se existe arquivo de teste
+        dados_teste = carregar_dados_json('mapas_teste.json')
+        if not dados_teste or 'registros' not in dados_teste or not dados_teste['registros']:
+            print("ℹ️ Nenhum dado de teste encontrado para migrar")
+            return True
+        
+        print(f"🔄 Migrando {len(dados_teste['registros'])} registros de mapas_teste.json para mapas.json...")
+        
+        # Carregar dados existentes do mapas.json
+        dados_mapas = carregar_dados_json('mapas.json')
+        if 'mapas' not in dados_mapas:
+            dados_mapas['mapas'] = []
+        
+        # Migrar cada registro
+        registros_migrados = 0
+        for registro in dados_teste['registros']:
+            # Verificar se já existe no mapas.json
+            ja_existe = any(
+                m.get('id') == registro.get('id') and 
+                m.get('nome_unidade') == registro.get('nome_unidade') and
+                m.get('mes') == registro.get('mes') and
+                m.get('ano') == registro.get('ano') and
+                m.get('lote_id') == registro.get('lote_id')
+                for m in dados_mapas['mapas']
+            )
+            
+            if not ja_existe:
+                # Remover campo data_criacao se existir (não está na estrutura padrão)
+                if 'data_criacao' in registro:
+                    del registro['data_criacao']
+                
+                dados_mapas['mapas'].append(registro)
+                registros_migrados += 1
+                print(f"   ✅ Migrado: {registro.get('nome_unidade')} - {registro.get('mes')}/{registro.get('ano')}")
+            else:
+                print(f"   ⚠️ Já existe: {registro.get('nome_unidade')} - {registro.get('mes')}/{registro.get('ano')}")
+        
+        # Salvar dados migrados
+        if registros_migrados > 0:
+            if salvar_dados_json('mapas.json', dados_mapas):
+                print(f"✅ {registros_migrados} registros migrados com sucesso!")
+                
+                # Remover arquivo de teste após migração bem-sucedida
+                import os
+                caminho_teste = os.path.join(DADOS_DIR, 'mapas_teste.json')
+                try:
+                    os.remove(caminho_teste)
+                    print("🗑️ Arquivo mapas_teste.json removido com sucesso!")
+                except OSError:
+                    print("⚠️ Não foi possível remover mapas_teste.json")
+                
+                return True
+            else:
+                print("❌ Erro ao salvar dados migrados")
+                return False
+        else:
+            print("ℹ️ Nenhum registro novo para migrar")
+            return True
+            
+    except Exception as e:
+        print(f"❌ Erro na migração: {e}")
+        return False
 
 def calcular_colunas_siisp(mapa):
     """
@@ -621,6 +855,233 @@ def revogar_usuario(user_id):
 
 # ===== ROTAS DE API (JSON) =====
 
+@app.route('/api/adicionar-dados', methods=['POST'])
+def api_adicionar_dados():
+    """API para adicionar novos dados de mapas"""
+    if 'usuario_id' not in session:
+        return jsonify({'error': 'Acesso negado'}), 403
+    
+    try:
+        # Receber dados do formulário
+        dados = request.get_json()
+        
+        # Log para debug
+        print(f"📥 Dados recebidos na API:")
+        print(f"   Dados completos: {dados}")
+        
+        lote_id = dados.get('lote_id')
+        mes = dados.get('mes')
+        ano = dados.get('ano')
+        nome_unidade = dados.get('unidade')  # Frontend ainda envia como 'unidade'
+        texto = dados.get('texto', '')  # Texto extraído do PDF
+        dados_siisp = dados.get('dados_siisp', '')  # Dados SIISP opcionais
+        
+        # Log específico para o campo texto (com escape para ver caracteres especiais)
+        print(f"   Campo texto recebido (raw): {repr(texto)}")
+        print(f"   Tamanho do texto: {len(texto)}")
+        print(f"   Campo dados_siisp recebido: {repr(dados_siisp)}")
+        print(f"   Tamanho dados_siisp: {len(dados_siisp)}")
+        if len(texto) > 0:
+            print(f"   Primeiros 100 chars texto: {repr(texto[:100])}")
+        else:
+            print(f"   ⚠️ Texto está vazio ou não foi enviado!")
+        
+        if len(dados_siisp) > 0:
+            print(f"   Primeiros 50 chars SIISP: {repr(dados_siisp[:50])}")
+        else:
+            print(f"   ℹ️ Dados SIISP não fornecidos (campos SIISP ficarão vazios)")
+        
+        # Validações básicas
+        if not lote_id or not mes or not ano or not nome_unidade:
+            return jsonify({'error': 'Lote ID, mês, ano e unidade são obrigatórios'}), 400
+        
+        # Converter para tipos apropriados
+        try:
+            lote_id = int(lote_id)
+            mes = int(mes)
+            ano = int(ano)
+        except ValueError:
+            return jsonify({'error': 'Lote ID, mês e ano devem ser números'}), 400
+        
+        # Carregar dados existentes do arquivo mapas.json
+        dados_mapas = carregar_dados_json('mapas.json')
+        if 'mapas' not in dados_mapas:
+            dados_mapas['mapas'] = []
+        
+        # Verificar se já existe registro para esta unidade, mês, ano e lote
+        registro_existente_index = None
+        for i, registro in enumerate(dados_mapas['mapas']):
+            if (registro.get('nome_unidade') == nome_unidade and 
+                registro.get('mes') == mes and 
+                registro.get('ano') == ano and
+                registro.get('lote_id') == lote_id):
+                registro_existente_index = i
+                break
+        
+        # Se existe registro para esta unidade/mês/ano/lote, usar o mesmo ID
+        if registro_existente_index is not None:
+            # Manter o ID do registro existente
+            id_a_usar = dados_mapas['mapas'][registro_existente_index].get('id', 1)
+            # Remover o registro antigo
+            dados_mapas['mapas'].pop(registro_existente_index)
+            print(f"🔄 Substituindo registro existente para {nome_unidade} - {mes}/{ano} (Lote {lote_id})")
+        else:
+            # Gerar novo ID único (baseado no maior ID existente + 1)
+            maior_id = 0
+            for registro in dados_mapas['mapas']:
+                if 'id' in registro and registro['id'] > maior_id:
+                    maior_id = registro['id']
+            id_a_usar = maior_id + 1
+            print(f"✨ Criando novo registro para {nome_unidade} - {mes}/{ano} (Lote {lote_id})")
+        
+        # Gerar lista de datas do mês
+        datas_do_mes = gerar_datas_do_mes(mes, ano)
+        dias_esperados = len(datas_do_mes)  # Usar o tamanho da lista de datas como referência
+        
+        # Processar dados tabulares do campo texto
+        dados_refeicoes = processar_dados_tabulares(texto, dias_esperados)
+        
+        # Processar dados SIISP opcionais
+        dados_siisp_processados = processar_dados_siisp(dados_siisp, dias_esperados)
+        
+        # Validação dos dados de refeições - VERIFICAR ANTES DE SALVAR
+        validacao_refeicoes = dados_refeicoes.get('validacao', {})
+        validacao_siisp = dados_siisp_processados.get('validacao', {})
+        
+        # SE HÁ PROBLEMAS DE VALIDAÇÃO EM REFEIÇÕES, NÃO SALVAR E RETORNAR ERRO
+        if not validacao_refeicoes.get('valido', True):
+            print(f"❌ Dados rejeitados por problemas de validação nas REFEIÇÕES:")
+            print(f"   Registros processados: {validacao_refeicoes.get('registros_processados', 0)}")
+            print(f"   Dias esperados: {validacao_refeicoes.get('dias_esperados', 0)}")
+            print(f"   Mensagem: {validacao_refeicoes.get('mensagem', '')}")
+            
+            return jsonify({
+                'success': False,
+                'error': 'Dados de refeições rejeitados por inconsistência',
+                'validacao': {
+                    'valido': False,
+                    'tipo': 'refeicoes',
+                    'registros_processados': validacao_refeicoes.get('registros_processados', 0),
+                    'dias_esperados': validacao_refeicoes.get('dias_esperados', 0),
+                    'mensagem': validacao_refeicoes.get('mensagem', '')
+                }
+            }), 400
+        
+        # SE HÁ PROBLEMAS DE VALIDAÇÃO EM SIISP, NÃO SALVAR E RETORNAR ERRO
+        if not validacao_siisp.get('valido', True):
+            print(f"❌ Dados rejeitados por problemas de validação nos dados SIISP:")
+            print(f"   Mensagem: {validacao_siisp.get('mensagem', '')}")
+            
+            return jsonify({
+                'success': False,
+                'error': 'Dados SIISP rejeitados por inconsistência',
+                'validacao': {
+                    'valido': False,
+                    'tipo': 'siisp',
+                    'mensagem': validacao_siisp.get('mensagem', '')
+                }
+            }), 400
+        
+        # SE DADOS VÁLIDOS, PREPARAR E SALVAR
+        novo_registro = {
+            'id': id_a_usar,
+            'lote_id': lote_id,
+            'mes': mes,
+            'ano': ano,
+            'nome_unidade': nome_unidade,
+            'data': datas_do_mes,
+            'data_criacao': datetime.now().isoformat(),
+            'cafe_interno': dados_refeicoes['cafe_interno'],
+            'cafe_funcionario': dados_refeicoes['cafe_funcionario'],
+            'almoco_interno': dados_refeicoes['almoco_interno'],
+            'almoco_funcionario': dados_refeicoes['almoco_funcionario'],
+            'lanche_interno': dados_refeicoes['lanche_interno'],
+            'lanche_funcionario': dados_refeicoes['lanche_funcionario'],
+            'jantar_interno': dados_refeicoes['jantar_interno'],
+            'jantar_funcionario': dados_refeicoes['jantar_funcionario'],
+            'n_siisp': dados_siisp_processados['n_siisp']
+        }
+        
+        # CALCULAR COLUNAS SIISP AUTOMATICAMENTE
+        n_siisp = dados_siisp_processados['n_siisp']
+        
+        if n_siisp and len(n_siisp) > 0:
+            # Se há dados SIISP, calcular as diferenças para cada tipo de refeição
+            print(f"🔢 Calculando colunas SIISP automaticamente...")
+            
+            # Lista dos campos de refeições para calcular as diferenças
+            campos_refeicoes = [
+                'cafe_interno', 'cafe_funcionario',
+                'almoco_interno', 'almoco_funcionario', 
+                'lanche_interno', 'lanche_funcionario',
+                'jantar_interno', 'jantar_funcionario'
+            ]
+            
+            for campo in campos_refeicoes:
+                campo_siisp = f"{campo}_siisp"
+                valores_refeicoes = novo_registro[campo]
+                
+                # Calcular diferença: valor_refeicao - n_siisp para cada dia
+                diferencas = []
+                for i in range(len(valores_refeicoes)):
+                    if i < len(n_siisp):
+                        diferenca = valores_refeicoes[i] - n_siisp[i]
+                        diferencas.append(diferenca)
+                    else:
+                        # Caso de segurança (não deveria acontecer devido à validação)
+                        diferencas.append(valores_refeicoes[i])
+                
+                novo_registro[campo_siisp] = diferencas
+                print(f"   ✅ {campo_siisp}: calculado {len(diferencas)} valores")
+        else:
+            # Se não há dados SIISP, manter colunas vazias
+            print(f"ℹ️ Dados SIISP não fornecidos - colunas SIISP permanecerão vazias")
+            novo_registro['cafe_interno_siisp'] = []
+            novo_registro['cafe_funcionario_siisp'] = []
+            novo_registro['almoco_interno_siisp'] = []
+            novo_registro['almoco_funcionario_siisp'] = []
+            novo_registro['lanche_interno_siisp'] = []
+            novo_registro['lanche_funcionario_siisp'] = []
+            novo_registro['jantar_interno_siisp'] = []
+            novo_registro['jantar_funcionario_siisp'] = []
+        
+        # Adicionar novo registro
+        dados_mapas['mapas'].append(novo_registro)
+        
+        # Salvar no arquivo mapas.json
+        if salvar_dados_json('mapas.json', dados_mapas):
+            print(f"✅ Dados salvos com sucesso em mapas.json:")
+            print(f"   Lote ID: {lote_id}")
+            print(f"   Mês: {mes}, Ano: {ano} ({dias_esperados} dias)")
+            print(f"   Unidade: {nome_unidade}")
+            print(f"   📊 Refeições: ✅ {validacao_refeicoes.get('registros_processados', 0)} registros processados")
+            print(f"   📊 SIISP: ✅ {validacao_siisp.get('mensagem', 'Dados não fornecidos')}")
+            
+            return jsonify({
+                'success': True,
+                'message': 'Dados salvos com sucesso!',
+                'registro': novo_registro,
+                'validacao': {
+                    'valido': True,
+                    'refeicoes': {
+                        'registros_processados': validacao_refeicoes.get('registros_processados', 0),
+                        'dias_esperados': validacao_refeicoes.get('dias_esperados', 0),
+                        'mensagem': validacao_refeicoes.get('mensagem', '')
+                    },
+                    'siisp': {
+                        'valores_processados': len(dados_siisp_processados['n_siisp']),
+                        'mensagem': validacao_siisp.get('mensagem', '')
+                    },
+                    'mensagem_geral': 'Dados processados e validados com sucesso'
+                }
+            })
+        else:
+            return jsonify({'error': 'Erro ao salvar dados'}), 500
+            
+    except Exception as e:
+        print(f"❌ Erro ao adicionar dados: {e}")
+        return jsonify({'error': 'Erro interno do servidor'}), 500
+
 @app.route('/api/lotes')
 def api_lotes():
     """API para listar lotes (JSON)"""
@@ -749,6 +1210,11 @@ if __name__ == '__main__':
     print(f"📄 Templates: {os.path.join(BASE_DIR, 'templates')}")
     print(f"🎨 Arquivos estáticos: {os.path.join(BASE_DIR, 'static')}")
     print(f"💾 Dados JSON: {DADOS_DIR}")
+    
+    # Executar migração de dados se necessário
+    print("🔄 Verificando migração de dados...")
+    migrar_dados_existentes()
+    
     print("🔗 Acesse: http://localhost:5000")
     print("👤 Admin: admin@seap.gov.br (ou 'admin') | Senha: admin123")
     print("📋 Usuários: /admin/usuarios (apenas admin)")
