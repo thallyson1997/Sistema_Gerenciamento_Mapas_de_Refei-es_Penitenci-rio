@@ -6,6 +6,222 @@
     <title>Detalhes do Lote - SGMRP</title>
     <meta name="description" content="Detalhes do lote contratual com mapas de refeições e indicadores">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Notificações estilizadas */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        .notification-content {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 300px;
+            max-width: 450px;
+            color: white;
+        }
+
+        .notification-success .notification-content {
+            background: #16a34a;
+        }
+
+        .notification-warning .notification-content {
+            background: #f59e0b;
+        }
+
+        .notification-error .notification-content {
+            background: #dc2626;
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .notification-text {
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 0.5rem;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        .notification.closing {
+            animation: slideOutRight 0.3s ease-in forwards;
+        }
+
+        /* Responsividade */
+        @media (max-width: 480px) {
+            .notification {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+            }
+            
+            .notification-content {
+                min-width: auto;
+                max-width: none;
+            }
+        }
+
+        /* Estilos para tabela editável estilo Excel */
+        .tabela-manual {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 0.875rem;
+            margin-top: 1.5rem;
+            background: white;
+            border: 2px solid var(--gray-300);
+        }
+
+        .tabela-manual th {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .tabela-manual td {
+            border: 1px solid var(--gray-300);
+            padding: 0;
+            position: relative;
+        }
+
+        .tabela-manual td.data-column {
+            background: var(--gray-50);
+            text-align: center;
+            font-weight: 500;
+            color: var(--gray-700);
+            padding: 0.5rem;
+            width: 100px;
+        }
+
+        .tabela-manual input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            text-align: center;
+            background: transparent;
+            min-height: 40px;
+        }
+
+        .tabela-manual input:focus {
+            background: #e3f2fd;
+            box-shadow: inset 0 0 0 2px var(--primary-color);
+        }
+
+        .tabela-manual input:hover {
+            background: var(--gray-50);
+        }
+
+        .tabela-manual tr:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .tabela-container {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+        }
+
+        .tabela-manual tbody tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .tabela-manual tbody tr:nth-child(even):hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        /* Estilos para células selecionadas */
+        .tabela-manual input.selected {
+            background: #e3f2fd !important;
+            box-shadow: inset 0 0 0 2px var(--primary-color) !important;
+        }
+
+        .tabela-manual input.paste-highlight {
+            background: #d4edda !important;
+            animation: pasteFlash 1s ease-out;
+        }
+
+        @keyframes pasteFlash {
+            0% { background: #28a745 !important; }
+            100% { background: #d4edda !important; }
+        }
+
+        /* Adicionar dica visual para paste */
+        .paste-hint {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tabela-manual td:hover .paste-hint {
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -257,130 +473,144 @@
                 </div>
             </section>
 
-            <!-- Resumo e Estatísticas -->
+            <!-- Container de Resumos com Sub-abas -->
             <section class="card" style="margin-bottom: 2rem;">
                 <div class="card-header">
-                    <h3>Resumo do Período</h3>
+                    <h3>📊 Resumos do Período</h3>
                 </div>
+                
+                <!-- Sub-abas de Resumos -->
+                <div style="border-bottom: 2px solid var(--gray-200); background-color: var(--gray-50);">
+                    <div style="display: flex; padding: 0 1rem;">
+                        <button class="resumo-tab-button active" data-resumo-tab="resumo-refeicoes" style="padding: 1rem 1.5rem; border: none; background: none; cursor: pointer; font-weight: 500; color: var(--gray-600); border-bottom: 3px solid transparent; transition: all 0.3s ease;">
+                            🍽️ Resumo Refeições
+                        </button>
+                        <button class="resumo-tab-button" data-resumo-tab="resumo-financeiro" style="padding: 1rem 1.5rem; border: none; background: none; cursor: pointer; font-weight: 500; color: var(--gray-600); border-bottom: 3px solid transparent; transition: all 0.3s ease;">
+                            💰 Resumo Financeiro
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Conteúdo das Sub-abas -->
                 <div class="card-body">
-                    <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 2rem; align-items: center;">
-                        <!-- Total Geral - Esquerda -->
-                        <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                            <div style="font-size: 2rem; color: var(--primary-color); font-weight: 600;" id="total-refeicoes">28,450</div>
-                            <div style="color: var(--gray-600); font-size: 0.875rem;">Total de Refeições</div>
-                        </div>
-
-                        <!-- Indicadores por Tipo de Refeição - Centro -->
-                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
-                            <!-- Linha Superior -->
-                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
-                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-cafe-interno">0</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Café Interno</div>
-                            </div>
-                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
-                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-cafe-funcionario">0</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Café Funcionário</div>
-                            </div>
-                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
-                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-almoco-interno">0</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Almoço Interno</div>
-                            </div>
-                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
-                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-almoco-funcionario">0</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Almoço Funcionário</div>
-                            </div>
-                            
-                            <!-- Linha Inferior -->
-                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
-                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-lanche-interno">0</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Lanche Interno</div>
-                            </div>
-                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
-                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-lanche-funcionario">0</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Lanche Funcionário</div>
-                            </div>
-                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
-                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-jantar-interno">0</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Jantar Interno</div>
-                            </div>
-                            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
-                                <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-jantar-funcionario">0</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Jantar Funcionário</div>
-                            </div>
-                        </div>
-
-                        <!-- Indicadores de Conformidade - Direita -->
-                        <div style="display: grid; grid-template-rows: 1fr 1fr; gap: 1rem;">
+                    
+                    <!-- Sub-aba 1: Resumo de Refeições -->
+                    <div id="resumo-tab-resumo-refeicoes" class="resumo-tab-content" style="display: block;">
+                        <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 2rem; align-items: center;">
+                            <!-- Total Geral - Esquerda -->
                             <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                <div style="font-size: 1.8rem; color: var(--warning-color); font-weight: 600;" id="diferencas-pequenas">23</div>
-                                <div style="color: var(--gray-600); font-size: 0.875rem;">Diferenças Pequenas</div>
+                                <div style="font-size: 2rem; color: var(--primary-color); font-weight: 600;" id="total-refeicoes">28,450</div>
+                                <div style="color: var(--gray-600); font-size: 0.875rem;">Total de Refeições</div>
                             </div>
-                            <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                <div style="font-size: 1.8rem; color: var(--danger-color); font-weight: 600;" id="discrepancias-criticas">8</div>
-                                <div style="color: var(--gray-600); font-size: 0.875rem;">Discrepâncias Críticas</div>
+
+                            <!-- Indicadores por Tipo de Refeição - Centro -->
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+                                <!-- Linha Superior -->
+                                <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                    <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-cafe-interno">0</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Café Interno</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                    <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-cafe-funcionario">0</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Café Funcionário</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                    <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-almoco-interno">0</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Almoço Interno</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                    <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-almoco-funcionario">0</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Almoço Funcionário</div>
+                                </div>
+                                
+                                <!-- Linha Inferior -->
+                                <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                    <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-lanche-interno">0</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Lanche Interno</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                    <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-lanche-funcionario">0</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Lanche Funcionário</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                    <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-jantar-interno">0</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Jantar Interno</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: var(--border-radius);">
+                                    <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: 600;" id="total-jantar-funcionario">0</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Jantar Funcionário</div>
+                                </div>
+                            </div>
+
+                            <!-- Indicadores de Conformidade - Direita -->
+                            <div style="display: grid; grid-template-rows: 1fr 1fr; gap: 1rem;">
+                                <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
+                                    <div style="font-size: 1.8rem; color: var(--warning-color); font-weight: 600;" id="diferencas-pequenas">23</div>
+                                    <div style="color: var(--gray-600); font-size: 0.875rem;">Diferenças Pequenas</div>
+                                </div>
+                                <div style="text-align: center; padding: 1.5rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
+                                    <div style="font-size: 1.8rem; color: var(--danger-color); font-weight: 600;" id="discrepancias-criticas">8</div>
+                                    <div style="color: var(--gray-600); font-size: 0.875rem;">Discrepâncias Críticas</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
 
-            <!-- Resumo Financeiro -->
-            <section class="card" style="margin-bottom: 2rem;">
-                <div class="card-header">
-                    <h3>💰 Resumo Financeiro do Período</h3>
-                </div>
-                <div class="card-body">
-                    <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr); gap: 2rem; align-items: start; overflow: hidden;">
-                        <!-- Valor Total - Esquerda -->
-                        <div style="text-align: center; padding: 1.5rem; background-color: #f0f9ff; border-radius: var(--border-radius); border: 2px solid var(--success-color); min-width: 0;">
-                            <div style="font-size: 2rem; color: var(--success-color); font-weight: 600; word-break: break-word;" id="valor-total">R$ 0,00</div>
-                            <div style="color: var(--gray-600); font-size: 0.875rem;">Valor Total</div>
-                        </div>
+                    <!-- Sub-aba 2: Resumo Financeiro -->
+                    <div id="resumo-tab-resumo-financeiro" class="resumo-tab-content" style="display: none;">
+                        <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr); gap: 2rem; align-items: start; overflow: hidden;">
+                            <!-- Valor Total - Esquerda -->
+                            <div style="text-align: center; padding: 1rem; background-color: #f0f9ff; border-radius: var(--border-radius); border: 2px solid var(--success-color); min-width: 0;">
+                                <div style="font-size: 2rem; color: var(--success-color); font-weight: 600; word-break: break-word;" id="valor-total">R$ 0,00</div>
+                                <div style="color: var(--gray-600); font-size: 0.875rem;">Valor Total</div>
+                            </div>
 
-                        <!-- Valores Parciais por Tipo de Refeição - Centro -->
-                        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; min-width: 0;">
-                            <!-- Linha Superior -->
-                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
-                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-cafe-interno">R$ 0,00</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Café Interno</div>
+                            <!-- Valores Parciais por Tipo de Refeição - Centro -->
+                            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; min-width: 0;">
+                                <!-- Linha Superior -->
+                                <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                    <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-cafe-interno">R$ 0,00</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Café Interno</div>
+                                </div>
+                                <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                    <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-cafe-funcionario">R$ 0,00</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Café Funcionário</div>
+                                </div>
+                                <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                    <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-almoco-interno">R$ 0,00</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Almoço Interno</div>
+                                </div>
+                                <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                    <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-almoco-funcionario">R$ 0,00</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Almoço Funcionário</div>
+                                </div>                            <!-- Linha Inferior -->
+                                <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                    <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-lanche-interno">R$ 0,00</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Lanche Interno</div>
+                                </div>
+                                <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                    <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-lanche-funcionario">R$ 0,00</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Lanche Funcionário</div>
+                                </div>
+                                <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                    <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-jantar-interno">R$ 0,00</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Jantar Interno</div>
+                                </div>
+                                <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
+                                    <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-jantar-funcionario">R$ 0,00</div>
+                                    <div style="color: var(--gray-600); font-size: 0.75rem;">Jantar Funcionário</div>
+                                </div>
                             </div>
-                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
-                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-cafe-funcionario">R$ 0,00</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Café Funcionário</div>
-                            </div>
-                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
-                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-almoco-interno">R$ 0,00</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Almoço Interno</div>
-                            </div>
-                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
-                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-almoco-funcionario">R$ 0,00</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Almoço Funcionário</div>
-                            </div>                            <!-- Linha Inferior -->
-                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
-                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-lanche-interno">R$ 0,00</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Lanche Interno</div>
-                            </div>
-                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
-                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-lanche-funcionario">R$ 0,00</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Lanche Funcionário</div>
-                            </div>
-                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
-                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-jantar-interno">R$ 0,00</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Jantar Interno</div>
-                            </div>
-                            <div style="text-align: center; padding: 0.4rem; background-color: #fef3c7; border-radius: var(--border-radius); min-width: 0;">
-                                <div style="font-size: 1rem; color: #d97706; font-weight: 600; word-break: break-word;" id="valor-jantar-funcionario">R$ 0,00</div>
-                                <div style="color: var(--gray-600); font-size: 0.75rem;">Jantar Funcionário</div>
-                            </div>
-                        </div>
 
-                        <!-- Indicador de Desvio - Direita -->
-                        <div style="text-align: center; padding: 1.5rem; background-color: #fef2f2; border-radius: var(--border-radius); border: 2px solid var(--danger-color); min-width: 0;">
-                            <div style="font-size: 1.8rem; color: var(--danger-color); font-weight: 600; word-break: break-word;" id="valor-desvio">R$ 0,00</div>
-                            <div style="color: var(--gray-600); font-size: 0.875rem;">Desvio</div>
-                            <div style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem;">Valores Excedentes</div>
+                            <!-- Indicador de Desvio - Direita -->
+                            <div style="text-align: center; padding: 1rem; background-color: #fef2f2; border-radius: var(--border-radius); border: 2px solid var(--danger-color); min-width: 0;">
+                                <div style="font-size: 1.8rem; color: var(--danger-color); font-weight: 600; word-break: break-word;" id="valor-desvio">R$ 0,00</div>
+                                <div style="color: var(--gray-600); font-size: 0.875rem;">Desvio</div>
+                                <div style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem;">Valores Excedentes</div>
+                            </div>
                         </div>
                     </div>
+                    
                 </div>
             </section>
 
@@ -439,12 +669,12 @@
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="texto-pdf" class="form-label">Texto extraído do PDF</label>
+                                    <label for="texto-pdf" class="form-label">Texto extraído do PDF ou Excel</label>
                                     <textarea 
                                         id="texto-pdf" 
                                         class="form-textarea" 
-                                        rows="8" 
-                                        placeholder="Cole aqui o texto extraído do PDF com os dados de refeições..."
+                                        rows="12" 
+                                        placeholder="Cole aqui o texto extraído do PDF ou Excel com os dados de refeições..."
                                     ></textarea>
                                     <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.25rem;">
                                         Formato esperado: Data, tipo de refeição e quantidade por linha
@@ -464,17 +694,33 @@
                                 </div>
                                 
                                 <div style="padding: 1.5rem; background-color: var(--light-blue); border-radius: var(--border-radius); margin-bottom: 1rem;">
-                                    <h4 style="color: var(--primary-color); margin-bottom: 1rem;">Exemplo de formato:</h4>
-                                    <pre style="font-size: 0.75rem; color: var(--gray-700); margin: 0; white-space: pre-wrap;">01/10/2025 - Café Interno: 120, Funcionário: 15
-01/10/2025 - Almoço Interno: 118, Funcionário: 14
-01/10/2025 - Jantar Interno: 119, Funcionário: 15</pre>
+                                    <h4 style="color: var(--primary-color); margin-bottom: 1rem;">📋 Formato dos Dados:</h4>
+                                    <p style="font-size: 0.875rem; color: var(--gray-700); margin-bottom: 1rem;">
+                                        Cole os dados separados por <strong>TAB</strong> ou <strong>ESPAÇOS</strong>. O sistema detecta automaticamente o separador.
+                                    </p>
+                                    
+                                    <h5 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 0.875rem;">✅ Formato com TAB (recomendado):</h5>
+                                    <pre style="font-family: 'Courier New', monospace; font-size: 0.75rem; color: var(--gray-700); margin: 0 0 1rem 0; background-color: #f8f9fa; padding: 0.75rem; border-radius: 4px; white-space: pre-wrap;">01/09/2025	915	12	915	70	915	58	915	12	909
+02/09/2025	914	12	914	70	914	58	914	12	909
+03/09/2025	901	12	901	70	901	58	904	12	896</pre>
+                                    
+                                    <h5 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 0.875rem;">✅ Formato com ESPAÇOS (também aceito):</h5>
+                                    <pre style="font-family: 'Courier New', monospace; font-size: 0.75rem; color: var(--gray-700); margin: 0; background-color: #f8f9fa; padding: 0.75rem; border-radius: 4px; white-space: pre-wrap;">01/09/2025 915 12 915 70 915 58 915 12 909
+02/09/2025 914 12 914 70 914 58 914 12 909
+03/09/2025 901 12 901 70 901 58 904 12 896</pre>
+                                    
+                                    <div style="margin-top: 1rem; padding: 0.75rem; background-color: #fff3cd; border-radius: 4px; border-left: 4px solid #ffc107;">
+                                        <p style="font-size: 0.75rem; margin: 0; color: #856404;">
+                                            <strong>💡 Dica:</strong> Dados copiados do Excel usam TAB. Dados copiados de PDFs usam espaços. Ambos funcionam!
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
                         <div style="display: flex; gap: 0.75rem; justify-content: end; margin-top: 1rem;">
                             <button class="btn btn-secondary" id="btn-cancelar-import">Cancelar</button>
-                            <button class="btn btn-primary" id="btn-processar-import">Processar Dados</button>
+                            <button class="btn btn-primary" id="btn-processar-import">Adicionar</button>
                         </div>
                     </div>
                 </section>
@@ -485,8 +731,42 @@
                         <h3>Entrada Manual de Dados</h3>
                     </div>
                     <div class="card-body">
+                        <!-- Seletor de Mês e Ano -->
+                        <div class="mes-ano-selector">
+                            <div style="display: flex; align-items: center; gap: 1rem; flex: 1;">
+                                <label class="form-label" style="margin: 0; font-weight: 600; color: var(--primary-color);">📅 Período de Referência:</label>
+                                <div class="mes-ano-display" id="mes-ano-display-manual">
+                                    <span class="mes-ano-text" id="mes-ano-text-manual">Setembro/2025</span>
+                                    <span class="mes-ano-icon">📅</span>
+                                </div>
+                            </div>
+                            <div class="mes-ano-inputs">
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; color: var(--gray-600); margin-bottom: 0.25rem;">Mês</label>
+                                    <select id="mes-manual" class="mes-ano-input">
+                                        <option value="1">Jan</option>
+                                        <option value="2">Fev</option>
+                                        <option value="3">Mar</option>
+                                        <option value="4">Abr</option>
+                                        <option value="5">Mai</option>
+                                        <option value="6">Jun</option>
+                                        <option value="7">Jul</option>
+                                        <option value="8">Ago</option>
+                                        <option value="9" selected>Set</option>
+                                        <option value="10">Out</option>
+                                        <option value="11">Nov</option>
+                                        <option value="12">Dez</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; color: var(--gray-600); margin-bottom: 0.25rem;">Ano</label>
+                                    <input type="number" id="ano-manual" class="mes-ano-input" value="2025" min="2020" max="2030">
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="form-group">
-                            <label for="select-presidio-manual" class="form-label">Unidade</label>
+                            <label for="select-unidade-manual" class="form-label">Unidade</label>
                             <select id="select-unidade-manual" class="form-select" required>
                                 <option value="">Selecione a unidade</option>
                                 {% for unidade in unidades_lote %}
@@ -494,52 +774,188 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Data</label>
-                            <input type="date" id="data-manual" class="form-input" value="2025-10-19">
+
+                        <!-- Tabela de entrada manual -->
+                        <div style="margin-top: 1rem; padding: 0.75rem; background-color: #e3f2fd; border-radius: 4px; border-left: 4px solid var(--primary-color);">
+                            <p style="font-size: 0.75rem; margin: 0; color: var(--primary-color);">
+                                <strong>💡 Dica:</strong> Você pode copiar dados do Excel e colar diretamente na tabela. Os dados se espalharão automaticamente pelas células corretas (incluindo datas)!
+                            </p>
                         </div>
                         
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
-                            <div class="form-group">
-                                <label for="cafe-interno" class="form-label">Café - Internos</label>
-                                <input type="number" id="cafe-interno" class="form-input" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label for="cafe-funcionario" class="form-label">Café - Funcionários</label>
-                                <input type="number" id="cafe-funcionario" class="form-input" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label for="almoco-interno" class="form-label">Almoço - Internos</label>
-                                <input type="number" id="almoco-interno" class="form-input" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label for="almoco-funcionario" class="form-label">Almoço - Funcionários</label>
-                                <input type="number" id="almoco-funcionario" class="form-input" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label for="jantar-interno" class="form-label">Jantar - Internos</label>
-                                <input type="number" id="jantar-interno" class="form-input" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label for="jantar-funcionario" class="form-label">Jantar - Funcionários</label>
-                                <input type="number" id="jantar-funcionario" class="form-input" min="0">
-                            </div>
+                        <div class="tabela-container">
+                            <table class="tabela-manual" id="tabela-entrada-manual">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 100px;">Data</th>
+                                        <th style="width: 90px;">Café<br>Interno</th>
+                                        <th style="width: 90px;">Café<br>Funcionário</th>
+                                        <th style="width: 90px;">Almoço<br>Interno</th>
+                                        <th style="width: 90px;">Almoço<br>Funcionário</th>
+                                        <th style="width: 90px;">Lanche<br>Interno</th>
+                                        <th style="width: 90px;">Lanche<br>Funcionário</th>
+                                        <th style="width: 90px;">Jantar<br>Interno</th>
+                                        <th style="width: 90px;">Jantar<br>Funcionário</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-entrada-manual">
+                                    <!-- Linhas serão geradas dinamicamente pelo JavaScript -->
+                                </tbody>
+                            </table>
                         </div>
                         
-                        <div style="display: flex; gap: 0.75rem; justify-content: end;">
+                        <div style="display: flex; gap: 0.75rem; justify-content: end; margin-top: 1rem;">
                             <button class="btn btn-secondary" id="btn-cancelar-manual">Cancelar</button>
                             <button class="btn btn-primary" id="btn-salvar-manual">Salvar Dados</button>
                         </div>
                     </div>
                 </section>
 
-                <!-- Sistema de Abas para Tabelas -->
+                <!-- Seção de Exclusão de Dados -->
+                <section class="card" id="secao-exclusao" style="display: none;">
+                    <div class="card-header">
+                        <h3>Excluir Dados</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; align-items: end; margin-bottom: 2rem;">
+                            <div class="form-group">
+                                <label for="select-unidade-exclusao" class="form-label">Unidade</label>
+                                <select id="select-unidade-exclusao" class="form-select" required>
+                                    <option value="">Selecione a unidade</option>
+                                    {% for unidade in unidades_lote %}
+                                    <option value="{{ unidade }}">{{ unidade }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="mes-exclusao" class="form-label">Mês</label>
+                                <select id="mes-exclusao" class="form-select" required>
+                                    <option value="">Selecione o mês</option>
+                                    <option value="1">Janeiro</option>
+                                    <option value="2">Fevereiro</option>
+                                    <option value="3">Março</option>
+                                    <option value="4">Abril</option>
+                                    <option value="5">Maio</option>
+                                    <option value="6">Junho</option>
+                                    <option value="7">Julho</option>
+                                    <option value="8">Agosto</option>
+                                    <option value="9">Setembro</option>
+                                    <option value="10">Outubro</option>
+                                    <option value="11">Novembro</option>
+                                    <option value="12">Dezembro</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="ano-exclusao" class="form-label">Ano</label>
+                                <input type="number" id="ano-exclusao" class="form-input" min="2020" max="2030" value="2025" required>
+                            </div>
+                        </div>
+                        
+                        <div style="padding: 1rem; background-color: #fff3cd; border-radius: 4px; border-left: 4px solid #ffc107; margin-bottom: 1.5rem;">
+                            <p style="font-size: 0.875rem; margin: 0; color: #856404;">
+                                <strong>⚠️ Atenção:</strong> Esta ação excluirá permanentemente todos os dados de refeições da unidade selecionada para o mês/ano especificado. Esta ação não pode ser desfeita.
+                            </p>
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.75rem; justify-content: end;">
+                            <button class="btn btn-secondary" id="btn-cancelar-exclusao">Cancelar</button>
+                            <button class="btn btn-danger" id="btn-confirmar-exclusao">Excluir Dados</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Seção de Adição de Números SIISP -->
+                <section class="card" id="secao-siisp" style="display: none;">
+                    <div class="card-header">
+                        <h3>Adicionar Números SIISP</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Seletor de Mês e Ano -->
+                        <div class="mes-ano-selector">
+                            <div style="display: flex; align-items: center; gap: 1rem; flex: 1;">
+                                <span class="form-label" style="margin: 0; min-width: 120px; font-weight: 500;">Mês/Ano:</span>
+                                <div id="mes-ano-display-siisp" class="mes-ano-display">
+                                    <span id="mes-ano-text-siisp">Selecionar mês e ano</span>
+                                    <i style="font-size: 1rem; color: var(--gray-500);">📅</i>
+                                </div>
+                            </div>
+                            <div class="mes-ano-inputs">
+                                <div class="form-group" style="margin: 0;">
+                                    <label for="mes-siisp" class="form-label">Mês</label>
+                                    <select id="mes-siisp" class="form-select" required>
+                                        <option value="1">Janeiro</option>
+                                        <option value="2">Fevereiro</option>
+                                        <option value="3">Março</option>
+                                        <option value="4">Abril</option>
+                                        <option value="5">Maio</option>
+                                        <option value="6">Junho</option>
+                                        <option value="7">Julho</option>
+                                        <option value="8">Agosto</option>
+                                        <option value="9">Setembro</option>
+                                        <option value="10">Outubro</option>
+                                        <option value="11">Novembro</option>
+                                        <option value="12">Dezembro</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label for="ano-siisp" class="form-label">Ano</label>
+                                    <input type="number" id="ano-siisp" class="form-input" placeholder="2025" min="2020" max="2030" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="select-unidade-siisp" class="form-label">Unidade</label>
+                            <select id="select-unidade-siisp" class="form-select" required>
+                                <option value="">Selecione a unidade...</option>
+                                {% for unidade in unidades_lote %}
+                                <option value="{{ unidade }}">{{ unidade }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="numeros-siisp" class="form-label">Números SIISP</label>
+                            <textarea id="numeros-siisp" class="form-textarea" rows="15" placeholder="Cole os números SIISP aqui (um por linha)&#10;&#10;Exemplo:&#10;1250&#10;1189&#10;1205&#10;1178&#10;1192&#10;..."></textarea>
+                            <div class="form-help">
+                                <p style="font-size: 0.875rem; color: var(--gray-600); margin: 0.5rem 0 0;">
+                                    💡 <strong>Instruções:</strong> Cole os números SIISP, um por linha. Deve haver um número para cada dia do mês selecionado.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Informações e Instruções -->
+                        <div style="margin-top: 1.5rem;">
+                            <div style="padding: 1rem; background-color: #e3f2fd; border-radius: 4px; border-left: 4px solid var(--primary-color); margin-bottom: 1rem;">
+                                <h4 style="color: var(--primary-color); margin-bottom: 0.75rem; font-size: 1rem;">ℹ️ Como funciona</h4>
+                                <ul style="font-size: 0.875rem; margin: 0; color: var(--primary-color); padding-left: 1.25rem;">
+                                    <li>Os números SIISP são usados para calcular as diferenças com os dados de refeições</li>
+                                    <li>Deve haver exatamente um número para cada dia do mês</li>
+                                    <li>Os números serão aplicados aos registros existentes da unidade selecionada</li>
+                                    <li>Se não existirem dados de refeições para a unidade/período, nada será alterado</li>
+                                </ul>
+                            </div>
+                            
+                            <div style="padding: 1rem; background-color: #fff3cd; border-radius: 4px; border-left: 4px solid #ffc107;">
+                                <p style="font-size: 0.875rem; margin: 0; color: #856404;">
+                                    <strong>⚠️ Atenção:</strong> Esta operação irá sobrescrever os números SIISP existentes para a unidade e período selecionados.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.75rem; justify-content: end; margin-top: 1.5rem;">
+                            <button class="btn btn-secondary" id="btn-cancelar-siisp">Cancelar</button>
+                            <button class="btn btn-primary" id="btn-processar-siisp">Adicionar SIISP</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sistema de Abas para Dados -->
                 <section class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <h3 id="titulo-tabela">Mapas de Refeições</h3>
-
+                            <h3 id="titulo-tabela">📋 Dados Detalhados</h3>
                         </div>
                         <div style="display: flex; gap: 0.5rem;">
                             <button class="btn btn-sm btn-secondary" id="btn-legenda">
@@ -695,6 +1111,28 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="modal-confirmacao-exclusao" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: var(--border-radius-xl); padding: 2rem; max-width: 600px; width: 90%;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div style="width: 80px; height: 80px; background: #dc2626; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: white; font-size: 2rem;">🗑️</div>
+                <h3 style="margin-bottom: 1rem; color: #dc2626;">Confirmar Exclusão</h3>
+                <p id="mensagem-confirmacao" style="margin: 0; color: var(--gray-700); line-height: 1.5; font-size: 1rem;"></p>
+            </div>
+            
+            <div style="padding: 1rem; background-color: #fef2f2; border-radius: 8px; border-left: 4px solid #dc2626; margin-bottom: 2rem;">
+                <p style="font-size: 0.875rem; margin: 0; color: #991b1b;">
+                    <strong>⚠️ Atenção:</strong> Esta ação excluirá permanentemente todos os dados de refeições. Esta operação não pode ser desfeita.
+                </p>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button class="btn btn-secondary" id="btn-cancelar-confirmacao" style="min-width: 120px;">Cancelar</button>
+                <button class="btn btn-danger" id="btn-confirmar-confirmacao" style="min-width: 120px;">Excluir Dados</button>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="container text-center">
             <p style="margin: 0; color: var(--gray-400); font-size: 0.875rem;">
@@ -704,6 +1142,54 @@
     </footer>
 
     <script>
+        // Sistema de Notificações
+        function showNotification(type, title, message, autoClose = true) {
+            // Remover notificação existente se houver
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            
+            let icon = '📢';
+            if (type === 'success') icon = '✅';
+            else if (type === 'warning') icon = '⚠️';
+            else if (type === 'error') icon = '❌';
+            
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <div class="notification-icon">${icon}</div>
+                    <div class="notification-text">
+                        <strong>${title}</strong>
+                        ${message ? '<br>' + message : ''}
+                    </div>
+                    <button type="button" class="notification-close" onclick="closeNotification(this)">×</button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-fechar após tempo determinado
+            if (autoClose) {
+                const duration = type === 'error' ? 8000 : 5000; // Erros ficam mais tempo
+                setTimeout(() => {
+                    closeNotification(notification.querySelector('.notification-close'));
+                }, duration);
+            }
+        }
+
+        function closeNotification(button) {
+            const notification = button.closest('.notification');
+            if (notification) {
+                notification.classList.add('closing');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }
+        }
+
         // Dados reais dos mapas do lote - carregados do Flask
         const mapasLote = {{ mapas_lote | tojson }};
         // Dados dos preços do lote
@@ -738,7 +1224,13 @@
                     jantarFunc: mapa.jantar_funcionario[i],
                     // Dados SIISP - usar n_siisp se disponível, senão 0
                     siispInternos: (mapa.n_siisp && mapa.n_siisp.length > i) ? mapa.n_siisp[i] : 0,
-                    temSiisp: mapa.n_siisp && mapa.n_siisp.length > 0,
+                    temSiisp: (mapa.n_siisp && mapa.n_siisp.length > 0) || 
+                              (mapa.cafe_interno_siisp && mapa.cafe_interno_siisp.length > 0),
+                    // Dados SIISP dos internos (colunas calculadas)
+                    cafeIntSiisp: (mapa.cafe_interno_siisp && mapa.cafe_interno_siisp.length > i) ? mapa.cafe_interno_siisp[i] : null,
+                    almocoIntSiisp: (mapa.almoco_interno_siisp && mapa.almoco_interno_siisp.length > i) ? mapa.almoco_interno_siisp[i] : null,
+                    lancheIntSiisp: (mapa.lanche_interno_siisp && mapa.lanche_interno_siisp.length > i) ? mapa.lanche_interno_siisp[i] : null,
+                    jantarIntSiisp: (mapa.jantar_interno_siisp && mapa.jantar_interno_siisp.length > i) ? mapa.jantar_interno_siisp[i] : null,
                     // Dados SIISP dos funcionários
                     cafeFuncSiisp: (mapa.cafe_funcionario_siisp && mapa.cafe_funcionario_siisp.length > i) ? mapa.cafe_funcionario_siisp[i] : null,
                     almocoFuncSiisp: (mapa.almoco_funcionario_siisp && mapa.almoco_funcionario_siisp.length > i) ? mapa.almoco_funcionario_siisp[i] : null,
@@ -852,8 +1344,10 @@
         window.addEventListener('load', function() {
             const usuarioSalvo = localStorage.getItem('sgmrp_usuario');
             if (!usuarioSalvo) {
-                alert('Sessão expirada. Redirecionando para login.');
-                window.location.href = 'login.html';
+                showNotification('warning', 'Sessão expirada', 'Redirecionando para a página de login...', false);
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
                 return;
             }
 
@@ -887,6 +1381,9 @@
             
             // Inicializar sistema de abas
             initTabs();
+            
+            // Inicializar sub-abas de resumos
+            initResumoTabs();
         });
 
         // Função removida - interface agora é inicializada pelo Flask com dados dinâmicos
@@ -959,57 +1456,41 @@
                 totalRefeicoes += totalDia;
                 
                 // Contar células azuis (cell-warning) e vermelhas (cell-danger) da tabela de comparação SIISP
-                // Só contar se há dados SIISP disponíveis para comparação
+                // Usar detecção de colunas _siisp calculadas em vez de siisp > 0
                 const siisp = row.siispInternos || 0;
+                const temColunasSiisp = row.cafeIntSiisp !== null && row.cafeIntSiisp !== undefined;
                 
-                if (siisp > 0) {
-                    // Verificar cada tipo de refeição de internos para células coloridas
-                    const tiposRefeicaoInternos = [
-                        { refeicoes: row.cafeInt, siisp: siisp },
-                        { refeicoes: row.almocoInt, siisp: siisp },
-                        { refeicoes: row.lancheInt, siisp: siisp },
-                        { refeicoes: row.jantarInt, siisp: siisp }
+                if (temColunasSiisp) {
+                    // USAR VALORES _SIISP JÁ CALCULADOS para estatísticas
+                    const tiposRefeicaoSiisp = [
+                        { valorSiisp: row.cafeIntSiisp, tipo: 'cafe' },
+                        { valorSiisp: row.almocoIntSiisp, tipo: 'almoco' },
+                        { valorSiisp: row.lancheIntSiisp, tipo: 'lanche' },
+                        { valorSiisp: row.jantarIntSiisp, tipo: 'jantar' }
                     ];
                     
-                    // Calcular excedentes por tipo específico de refeição com preços individuais
-                    const tiposRefeicaoDetalhados = [
-                        {valor: row.cafeInt, siisp: siisp, tipo: 'cafe'},
-                        {valor: row.almocoInt, siisp: siisp, tipo: 'almoco'},
-                        {valor: row.lancheInt, siisp: siisp, tipo: 'lanche'},
-                        {valor: row.jantarInt, siisp: siisp, tipo: 'jantar'}
-                    ];
-                    
-                    tiposRefeicaoDetalhados.forEach(tipo => {
-                        const classificacao = getClassificacao(tipo.valor, tipo.siisp);
-                        const diferenca = tipo.valor - tipo.siisp;
+                    tiposRefeicaoSiisp.forEach(refeicao => {
+                        const classificacao = getClassificacaoSiisp(refeicao.valorSiisp);
                         totalCelulasComSiisp++; // Contar total de células com dados SIISP
                         
                         if (classificacao.class === 'cell-warning') {
-                            diferencasPequenas++; // Contar célula azul
+                            diferencasPequenas++; // Contar célula azul (diferença pequena)
                             // Somar valor monetário do excedente usando preço específico da refeição
-                            if (precosLote && diferenca > 0) {
-                                totalExcedentesInternos += diferenca * precosLote[tipo.tipo].interno;
+                            if (precosLote && refeicao.valorSiisp > 0) {
+                                totalExcedentesInternos += refeicao.valorSiisp * precosLote[refeicao.tipo].interno;
                             }
                         } else if (classificacao.class === 'cell-danger') {
-                            discrepanciasCriticas++; // Contar célula vermelha
+                            discrepanciasCriticas++; // Contar célula vermelha (discrepância crítica)
                             // Somar valor monetário do excedente usando preço específico da refeição
-                            if (precosLote && diferenca > 0) {
-                                totalExcedentesInternos += diferenca * precosLote[tipo.tipo].interno;
+                            if (precosLote && refeicao.valorSiisp > 0) {
+                                totalExcedentesInternos += refeicao.valorSiisp * precosLote[refeicao.tipo].interno;
                             }
                         } else if (classificacao.class === 'cell-ok') {
                             celulasOk++; // Contar célula verde (OK)
                         }
                     });
                     
-                    // Verificar células de funcionários SIISP (café, almoço, lanche, jantar)
-                    const funcionariosSiisp = [
-                        row.cafeFuncSiisp,
-                        row.almocoFuncSiisp, 
-                        row.lancheFuncSiisp,
-                        row.jantarFuncSiisp
-                    ];
-                    
-                    // Funcionários SIISP com tipos específicos de refeição e preços individuais
+                    // Verificar células de funcionários SIISP usando colunas calculadas
                     const funcionariosSiispDetalhados = [
                         {valorSiisp: row.cafeFuncSiisp, tipo: 'cafe'},
                         {valorSiisp: row.almocoFuncSiisp, tipo: 'almoco'},
@@ -1238,13 +1719,20 @@
                 
                 // Usar dados reais do SIISP ou 0 se não disponível
                 const siisp = row.siispInternos || 0;
-                const statusSiisp = row.temSiisp ? 'Disponível' : 'Não disponível';
                 
-                // Calcular diferenças e aplicar cores (somente se SIISP disponível)
-                const cafeClass = siisp > 0 ? getClassificacao(row.cafeInt, siisp) : { class: 'cell-na', display: 'N/A' };
-                const almocoClass = siisp > 0 ? getClassificacao(row.almocoInt, siisp) : { class: 'cell-na', display: 'N/A' };
-                const lancheClass = siisp > 0 ? getClassificacao(row.lancheInt, siisp) : { class: 'cell-na', display: 'N/A' };
-                const jantarClass = siisp > 0 ? getClassificacao(row.jantarInt, siisp) : { class: 'cell-na', display: 'N/A' };
+                // Verificar se há colunas SIISP calculadas (mesmo com n_siisp = 0)
+                const temColunasSiisp = row.cafeIntSiisp !== null && row.cafeIntSiisp !== undefined;
+                const statusSiisp = temColunasSiisp ? 'Calculado' : 'Não disponível';
+                
+                // USAR COLUNAS _SIISP JÁ CALCULADAS em vez de calcular manualmente
+                const cafeClass = temColunasSiisp ? 
+                    getClassificacaoSiisp(row.cafeIntSiisp) : { class: 'cell-na', display: 'N/A' };
+                const almocoClass = temColunasSiisp ? 
+                    getClassificacaoSiisp(row.almocoIntSiisp) : { class: 'cell-na', display: 'N/A' };
+                const lancheClass = temColunasSiisp ? 
+                    getClassificacaoSiisp(row.lancheIntSiisp) : { class: 'cell-na', display: 'N/A' };
+                const jantarClass = temColunasSiisp ? 
+                    getClassificacaoSiisp(row.jantarIntSiisp) : { class: 'cell-na', display: 'N/A' };
 
                 // Função para formatar células de funcionários SIISP
                 function formatarCelulaFuncSiisp(valorFunc, valorSiisp) {
@@ -1277,7 +1765,9 @@
                 tr.innerHTML = `
                     <td>${row.data}</td>
                     <td>${row.unidade}</td>
-                    <td style="text-align: center; font-weight: 600; background-color: ${siisp > 0 ? 'var(--success-light)' : 'var(--gray-100)'}; color: ${siisp > 0 ? 'var(--success-color)' : 'var(--gray-500)'}">${siisp}</td>
+                    <td style="text-align: center; font-weight: 600; background-color: ${temColunasSiisp ? 'var(--success-light)' : 'var(--gray-100)'}; color: ${temColunasSiisp ? 'var(--success-color)' : 'var(--gray-500)'}">
+                        ${temColunasSiisp ? (siisp > 0 ? siisp : '') : 'N/A'}
+                    </td>
                     <td class="${cafeClass.class}" style="text-align: center;">
                         ${cafeClass.display}
                     </td>
@@ -1309,6 +1799,18 @@
                 return { class: 'cell-warning', display: `+${diferenca}` };
             } else {
                 return { class: 'cell-danger', display: `+${diferenca}` };
+            }
+        }
+
+        // Nova função para classificar baseada nos valores _siisp já calculados
+        function getClassificacaoSiisp(valorSiisp) {
+            // valorSiisp já é a diferença (refeicoes - n_siisp)
+            if (valorSiisp <= 0) {
+                return { class: 'cell-ok', display: 'OK' };
+            } else if (valorSiisp <= 5) {
+                return { class: 'cell-warning', display: `+${valorSiisp}` };
+            } else {
+                return { class: 'cell-danger', display: `+${valorSiisp}` };
             }
         }
 
@@ -1357,6 +1859,49 @@
             }
         }
 
+        // Controle das Sub-abas de Resumos
+        function initResumoTabs() {
+            const resumoTabButtons = document.querySelectorAll('.resumo-tab-button');
+            const resumoTabContents = document.querySelectorAll('.resumo-tab-content');
+
+            resumoTabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetTab = this.dataset.resumoTab;
+                    
+                    // Remover classe active de todos os botões
+                    resumoTabButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.style.borderBottomColor = 'transparent';
+                        btn.style.color = 'var(--gray-600)';
+                        btn.style.backgroundColor = 'transparent';
+                    });
+                    
+                    // Adicionar classe active ao botão clicado
+                    this.classList.add('active');
+                    this.style.borderBottomColor = 'var(--primary-color)';
+                    this.style.color = 'var(--primary-color)';
+                    this.style.backgroundColor = 'white';
+                    this.style.marginBottom = '-2px';
+                    
+                    // Esconder todos os conteúdos
+                    resumoTabContents.forEach(content => {
+                        content.style.display = 'none';
+                    });
+                    
+                    // Mostrar o conteúdo da sub-aba selecionada
+                    const targetContent = document.getElementById('resumo-tab-' + targetTab);
+                    if (targetContent) {
+                        targetContent.style.display = 'block';
+                    }
+                });
+            });
+
+            // Ativar a primeira sub-aba por padrão
+            if (resumoTabButtons.length > 0) {
+                resumoTabButtons[0].click();
+            }
+        }
+
         // Controles das seções
         document.getElementById('btn-adicionar-dados').addEventListener('click', mostrarSecaoImportacao);
         document.getElementById('btn-entrada-manual').addEventListener('click', mostrarSecaoManual);
@@ -1371,28 +1916,45 @@
 
         function mostrarSecaoManual() {
             document.getElementById('secao-importacao').style.display = 'none';
+            document.getElementById('secao-exclusao').style.display = 'none';
             document.getElementById('secao-manual').style.display = 'block';
             document.getElementById('secao-manual').scrollIntoView({ behavior: 'smooth' });
+            
+            // Inicializar seletor de mês/ano da entrada manual
+            initMesAnoManual();
         }
 
         function mostrarSecaoExcluir() {
-            if (confirm('Tem certeza que deseja excluir dados? Esta ação não pode ser desfeita.')) {
-                alert('Funcionalidade de exclusão de dados será implementada em versões futuras.');
+            document.getElementById('secao-importacao').style.display = 'none';
+            document.getElementById('secao-manual').style.display = 'none';
+            document.getElementById('secao-exclusao').style.display = 'block';
+            document.getElementById('secao-exclusao').scrollIntoView({ behavior: 'smooth' });
+            
+            // Definir mês anterior como padrão
+            const now = new Date();
+            let mesAnterior = now.getMonth() + 1; // getMonth() retorna 0-11, queremos 1-12
+            let anoAnterior = now.getFullYear();
+            
+            if (mesAnterior === 1) {
+                mesAnterior = 12;
+                anoAnterior--;
+            } else {
+                mesAnterior--;
             }
+            
+            document.getElementById('mes-exclusao').value = mesAnterior.toString();
+            document.getElementById('ano-exclusao').value = anoAnterior.toString();
         }
 
         function mostrarSecaoSiisp() {
-            alert('Funcionalidade para adicionar números SIISP será implementada em versões futuras.');
-        }
-
-        function mostrarSecaoExcluir() {
-            if (confirm('Tem certeza que deseja excluir dados? Esta ação não pode ser desfeita.')) {
-                alert('Funcionalidade de exclusão de dados será implementada em versões futuras.');
-            }
-        }
-
-        function mostrarSecaoSiisp() {
-            alert('Funcionalidade para adicionar números SIISP será implementada em versões futuras.');
+            document.getElementById('secao-importacao').style.display = 'none';
+            document.getElementById('secao-manual').style.display = 'none';
+            document.getElementById('secao-exclusao').style.display = 'none';
+            document.getElementById('secao-siisp').style.display = 'block';
+            document.getElementById('secao-siisp').scrollIntoView({ behavior: 'smooth' });
+            
+            // Inicializar seletor de mês/ano do SIISP
+            initMesAnoSiisp();
         }
 
         // Botões de cancelar
@@ -1402,6 +1964,147 @@
 
         document.getElementById('btn-cancelar-manual').addEventListener('click', function() {
             document.getElementById('secao-manual').style.display = 'none';
+        });
+
+        document.getElementById('btn-cancelar-exclusao').addEventListener('click', function() {
+            document.getElementById('secao-exclusao').style.display = 'none';
+        });
+
+        document.getElementById('btn-cancelar-siisp').addEventListener('click', function() {
+            document.getElementById('secao-siisp').style.display = 'none';
+        });
+
+        // Processar adição de números SIISP
+        document.getElementById('btn-processar-siisp').addEventListener('click', function() {
+            const unidade = document.getElementById('select-unidade-siisp').value;
+            const mes = document.getElementById('mes-siisp').value;
+            const ano = document.getElementById('ano-siisp').value;
+            const numerosSiisp = document.getElementById('numeros-siisp').value;
+            
+            // Validação da unidade
+            if (!unidade) {
+                showNotification('warning', 'Campo obrigatório', 'Por favor, selecione a unidade.');
+                return;
+            }
+            
+            // Validação do mês e ano
+            if (!mes || !ano) {
+                showNotification('warning', 'Campos obrigatórios', 'Por favor, selecione o mês e ano.');
+                return;
+            }
+            
+            // Validação dos números SIISP
+            if (!numerosSiisp || numerosSiisp.trim() === '') {
+                showNotification('warning', 'Campo obrigatório', 'Por favor, cole os números SIISP.');
+                return;
+            }
+            
+            console.log('Dados SIISP coletados:', {
+                unidade: unidade,
+                mes: mes,
+                ano: ano,
+                numerosSiisp: numerosSiisp.substring(0, 100) + '...' // Log truncado
+            });
+            
+            // Preparar dados para enviar à API
+            const dadosParaApi = {
+                lote_id: loteId,
+                mes: parseInt(mes),
+                ano: parseInt(ano),
+                unidade: unidade,
+                numeros_siisp: numerosSiisp
+            };
+            
+            console.log('Enviando dados SIISP para API:', dadosParaApi);
+            
+            // Chamar API para adicionar números SIISP
+            fetch('/api/adicionar-siisp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dadosParaApi)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Erro no servidor');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Mostrar notificação de sucesso
+                    const stats = data.estatisticas || {};
+                    const mensagem = `${stats.numeros_adicionados || 0} números SIISP adicionados para ${unidade} em ${mes}/${ano}. ${stats.colunas_calculadas || 0} colunas de diferenças calculadas automaticamente.`;
+                    
+                    showNotification('success', 'SIISP adicionado com sucesso!', mensagem);
+                    
+                    // Fechar seção e limpar formulário
+                    document.getElementById('secao-siisp').style.display = 'none';
+                    document.getElementById('select-unidade-siisp').value = '';
+                    document.getElementById('numeros-siisp').value = '';
+                    
+                    // Log de sucesso
+                    console.log('✅ Números SIISP adicionados:', data.registro);
+                    
+                    // Recarregar a página para mostrar os novos dados
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                    
+                } else {
+                    // Erro retornado pela API
+                    showNotification('error', 'Erro ao adicionar SIISP', data.error || 'Erro desconhecido na API.');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Erro ao adicionar números SIISP:', error);
+                
+                // Mostrar notificação de erro
+                if (error.message.includes('obrigatórios')) {
+                    showNotification('error', 'Dados inválidos', error.message);
+                } else if (error.message.includes('não confere')) {
+                    showNotification('error', 'Quantidade incorreta', error.message);
+                } else if (error.message.includes('inválido na linha')) {
+                    showNotification('error', 'Formato inválido', error.message);
+                } else if (error.message.includes('Não foram encontrados dados')) {
+                    showNotification('error', 'Dados não encontrados', error.message);
+                } else {
+                    showNotification('error', 'Erro de conexão', 'Erro de conexão com o servidor. Verifique sua conexão e tente novamente.');
+                }
+            });
+        });
+
+        // Processar exclusão
+        document.getElementById('btn-confirmar-exclusao').addEventListener('click', function() {
+            const unidade = document.getElementById('select-unidade-exclusao').value;
+            const mes = document.getElementById('mes-exclusao').value;
+            const ano = document.getElementById('ano-exclusao').value;
+            
+            // Validação da unidade
+            if (!unidade) {
+                showNotification('warning', 'Unidade não selecionada', 'Por favor, selecione a unidade para excluir os dados.');
+                return;
+            }
+            
+            // Validação do mês e ano
+            if (!mes || !ano) {
+                showNotification('warning', 'Campos obrigatórios', 'Por favor, selecione o mês e ano para exclusão.');
+                return;
+            }
+            
+            // Preparar dados para enviar à API
+            const dadosExclusao = {
+                lote_id: loteId,
+                mes: parseInt(mes),
+                ano: parseInt(ano),
+                unidade: unidade
+            };
+            
+            // Mostrar modal de confirmação personalizado
+            mostrarConfirmacaoExclusao(unidade, mes, ano, dadosExclusao);
         });
 
         // Inicializar seletor de mês/ano da importação
@@ -1448,6 +2151,292 @@
             }
         }
         
+        // Inicializar seletor de mês/ano da entrada manual
+        function initMesAnoManual() {
+            const mesSelect = document.getElementById('mes-manual');
+            const anoInput = document.getElementById('ano-manual');
+            const mesAnoDisplay = document.getElementById('mes-ano-display-manual');
+            const mesAnoText = document.getElementById('mes-ano-text-manual');
+            
+            // Definir mês anterior como padrão
+            const now = new Date();
+            let mesAnterior = now.getMonth(); // getMonth() retorna 0-11
+            let anoAnterior = now.getFullYear();
+            
+            if (mesAnterior === 0) {
+                mesAnterior = 12;
+                anoAnterior--;
+            }
+            
+            mesSelect.value = mesAnterior.toString();
+            anoInput.value = anoAnterior.toString();
+            atualizarDisplayMesAnoManual();
+            gerarTabelaManual(); // Gerar tabela inicial
+            
+            // Eventos para atualizar display quando valores mudarem
+            mesSelect.addEventListener('change', function() {
+                atualizarDisplayMesAnoManual();
+                gerarTabelaManual();
+            });
+            anoInput.addEventListener('input', function() {
+                atualizarDisplayMesAnoManual();
+                gerarTabelaManual();
+            });
+            
+            // Clique no display para focar no primeiro input
+            mesAnoDisplay.addEventListener('click', function() {
+                mesSelect.focus();
+            });
+            
+            function atualizarDisplayMesAnoManual() {
+                const meses = [
+                    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+                ];
+                
+                const mesIndex = parseInt(mesSelect.value) - 1;
+                const mesNome = meses[mesIndex] || 'Mês';
+                const ano = anoInput.value || 'Ano';
+                
+                mesAnoText.textContent = `${mesNome}/${ano}`;
+            }
+        }
+
+        // Inicializar seletor de mês/ano do SIISP
+        function initMesAnoSiisp() {
+            const mesSelect = document.getElementById('mes-siisp');
+            const anoInput = document.getElementById('ano-siisp');
+            const mesAnoDisplay = document.getElementById('mes-ano-display-siisp');
+            const mesAnoText = document.getElementById('mes-ano-text-siisp');
+            
+            // Definir mês anterior como padrão
+            const now = new Date();
+            let mesAnterior = now.getMonth(); // getMonth() retorna 0-11
+            let anoAnterior = now.getFullYear();
+            
+            if (mesAnterior === 0) {
+                mesAnterior = 12;
+                anoAnterior--;
+            }
+            
+            mesSelect.value = mesAnterior.toString();
+            anoInput.value = anoAnterior.toString();
+            atualizarDisplayMesAnoSiisp();
+            
+            // Eventos para atualizar display quando valores mudarem
+            mesSelect.addEventListener('change', atualizarDisplayMesAnoSiisp);
+            anoInput.addEventListener('input', atualizarDisplayMesAnoSiisp);
+            
+            // Clique no display para focar no primeiro input
+            mesAnoDisplay.addEventListener('click', function() {
+                mesSelect.focus();
+            });
+            
+            function atualizarDisplayMesAnoSiisp() {
+                const meses = [
+                    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+                ];
+                
+                const mesIndex = parseInt(mesSelect.value) - 1;
+                const mesNome = meses[mesIndex] || 'Mês';
+                const ano = anoInput.value || 'Ano';
+                
+                mesAnoText.textContent = `${mesNome}/${ano}`;
+            }
+        }
+
+        // Função para gerar tabela manual baseada no mês/ano selecionado
+        function gerarTabelaManual() {
+            const mesSelect = document.getElementById('mes-manual');
+            const anoInput = document.getElementById('ano-manual');
+            const tbody = document.getElementById('tbody-entrada-manual');
+            
+            if (!mesSelect || !anoInput || !tbody) return;
+            
+            const mes = parseInt(mesSelect.value);
+            const ano = parseInt(anoInput.value);
+            
+            // Calcular número de dias no mês
+            const diasNoMes = new Date(ano, mes, 0).getDate();
+            
+            // Limpar tabela
+            tbody.innerHTML = '';
+            
+            // Gerar linhas para cada dia do mês
+            for (let dia = 1; dia <= diasNoMes; dia++) {
+                const tr = document.createElement('tr');
+                
+                // Formatar data como DD/MM/AAAA
+                const dataFormatada = `${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}/${ano}`;
+                
+                tr.innerHTML = `
+                    <td class="data-column">${dataFormatada}</td>
+                    <td><input type="number" min="0" placeholder="0" data-col="cafe-int" data-dia="${dia}"></td>
+                    <td><input type="number" min="0" placeholder="0" data-col="cafe-func" data-dia="${dia}"></td>
+                    <td><input type="number" min="0" placeholder="0" data-col="almoco-int" data-dia="${dia}"></td>
+                    <td><input type="number" min="0" placeholder="0" data-col="almoco-func" data-dia="${dia}"></td>
+                    <td><input type="number" min="0" placeholder="0" data-col="lanche-int" data-dia="${dia}"></td>
+                    <td><input type="number" min="0" placeholder="0" data-col="lanche-func" data-dia="${dia}"></td>
+                    <td><input type="number" min="0" placeholder="0" data-col="jantar-int" data-dia="${dia}"></td>
+                    <td><input type="number" min="0" placeholder="0" data-col="jantar-func" data-dia="${dia}"></td>
+                `;
+                
+                tbody.appendChild(tr);
+            }
+            
+            // Adicionar evento de navegação por teclado
+            adicionarNavegacaoTeclado();
+        }
+
+        // Função para adicionar navegação por teclado na tabela (estilo Excel)
+        function adicionarNavegacaoTeclado() {
+            const inputs = document.querySelectorAll('#tabela-entrada-manual input');
+            
+            inputs.forEach((input, index) => {
+                input.addEventListener('keydown', function(e) {
+                    let targetIndex = index;
+                    
+                    switch(e.key) {
+                        case 'Tab':
+                            // Tab já funciona naturalmente
+                            break;
+                        case 'Enter':
+                        case 'ArrowDown':
+                            e.preventDefault();
+                            targetIndex = index + 8; // Próxima linha (8 colunas de dados)
+                            break;
+                        case 'ArrowUp':
+                            e.preventDefault();
+                            targetIndex = index - 8; // Linha anterior
+                            break;
+                        case 'ArrowRight':
+                            if (input.selectionStart === input.value.length) {
+                                e.preventDefault();
+                                targetIndex = index + 1;
+                            }
+                            break;
+                        case 'ArrowLeft':
+                            if (input.selectionStart === 0) {
+                                e.preventDefault();
+                                targetIndex = index - 1;
+                            }
+                            break;
+                    }
+                    
+                    // Focar no input de destino se existir
+                    if (inputs[targetIndex] && targetIndex !== index) {
+                        inputs[targetIndex].focus();
+                        inputs[targetIndex].select();
+                    }
+                });
+
+                // Adicionar funcionalidade de paste especial (estilo Excel)
+                input.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    
+                    // Obter dados do clipboard
+                    const pasteData = e.clipboardData.getData('text');
+                    
+                    if (!pasteData.trim()) return;
+                    
+                    // Detectar se são dados tabulares (múltiplas linhas/colunas)
+                    if (isTabularData(pasteData)) {
+                        colarDadosTabulares(pasteData, input, index);
+                    } else {
+                        // Se for um valor simples, colar normalmente
+                        input.value = pasteData.trim();
+                    }
+                });
+            });
+        }
+
+        // Função para detectar se os dados são tabulares
+        function isTabularData(data) {
+            const lines = data.trim().split('\n');
+            if (lines.length <= 1) return false;
+            
+            // Verificar se há tabs ou múltiplos espaços (indicando colunas)
+            const hasTabsOrSpaces = lines.some(line => 
+                line.includes('\t') || line.match(/\s{2,}/) || line.split(/\s+/).length > 1
+            );
+            
+            return hasTabsOrSpaces || lines.length > 1;
+        }
+
+        // Função para colar dados tabulares nas células
+        function colarDadosTabulares(data, startInput, startIndex) {
+            const lines = data.trim().split('\n');
+            const inputs = document.querySelectorAll('#tabela-entrada-manual input');
+            const inputsPerRow = 8; // 8 colunas de dados (sem contar a coluna de data)
+            const table = document.getElementById('tabela-entrada-manual');
+            const rows = table.querySelectorAll('tbody tr');
+            
+            lines.forEach((line, rowOffset) => {
+                // Detectar separador (TAB tem prioridade sobre espaços)
+                let values;
+                if (line.includes('\t')) {
+                    values = line.split('\t');
+                } else {
+                    // Para espaços, dividir por múltiplos espaços ou espaços simples
+                    values = line.split(/\s+/).filter(v => v.trim() !== '');
+                }
+                
+                // Calcular linha de destino baseada na posição inicial
+                const targetRowIndex = Math.floor(startIndex / inputsPerRow) + rowOffset;
+                if (targetRowIndex >= rows.length) return; // Não ultrapassar o número de linhas
+                
+                const targetRow = rows[targetRowIndex];
+                
+                values.forEach((value, colOffset) => {
+                    if (colOffset === 0) {
+                        // Primeira coluna: preencher a célula de data (não é input, é texto)
+                        const dataCell = targetRow.querySelector('.data-column');
+                        if (dataCell && value.trim() !== '') {
+                            dataCell.textContent = value.trim();
+                            // Adicionar efeito visual na célula de data
+                            dataCell.style.backgroundColor = '#d4edda';
+                            dataCell.style.transition = 'background-color 1s ease-out';
+                            setTimeout(() => {
+                                dataCell.style.backgroundColor = '';
+                            }, 1000);
+                        }
+                    } else {
+                        // Demais colunas: preencher inputs de dados
+                        const inputIndexInRow = colOffset - 1; // Ajustar índice (primeira coluna é data)
+                        if (inputIndexInRow < inputsPerRow) {
+                            const targetInputs = targetRow.querySelectorAll('input');
+                            const targetInput = targetInputs[inputIndexInRow];
+                            
+                            if (targetInput) {
+                                // Limpar valor e inserir novo (apenas números para colunas de dados)
+                                const numericValue = value.replace(/[^\d]/g, '');
+                                if (numericValue) {
+                                    targetInput.value = numericValue;
+                                    
+                                    // Adicionar efeito visual para mostrar que foi colado
+                                    targetInput.style.backgroundColor = '#d4edda';
+                                    setTimeout(() => {
+                                        targetInput.style.backgroundColor = '';
+                                    }, 1000);
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Mostrar notificação de sucesso
+            const totalCells = lines.reduce((acc, line) => {
+                const values = line.includes('\t') ? line.split('\t') : line.split(/\s+/).filter(v => v.trim() !== '');
+                return acc + values.length; // Contar todas as células incluindo data
+            }, 0);
+            
+            if (totalCells > 0) {
+                showNotification('success', 'Dados colados com sucesso!', `${totalCells} valores foram inseridos na tabela (incluindo datas).`);
+            }
+        }
+        
         // Processar importação
         document.getElementById('btn-processar-import').addEventListener('click', function() {
             const unidade = document.getElementById('select-unidade-import').value;
@@ -1468,12 +2457,17 @@
             console.log('🔍 Debug - Primeiros 100 chars:', textoPdf.substring(0, 100));
             
             if (!unidade) {
-                alert('Por favor, selecione a unidade.');
+                showNotification('warning', 'Campo obrigatório', 'Por favor, selecione a unidade.');
                 return;
             }
             
             if (!mes || !ano) {
-                alert('Por favor, defina o mês e ano de referência.');
+                showNotification('warning', 'Campos obrigatórios', 'Por favor, defina o mês e ano de referência.');
+                return;
+            }
+            
+            if (!textoPdf || textoPdf.trim() === '') {
+                showNotification('warning', 'Campo obrigatório', 'Por favor, insira o texto extraído do PDF ou Excel.');
                 return;
             }
             
@@ -1519,13 +2513,14 @@
                     const refeicoes = data.validacao.refeicoes;
                     const siisp = data.validacao.siisp;
                     
-                    alert(`✅ Dados salvos com sucesso!\n\n` +
-                          `📅 Período: ${mesNome}/${ano}\n` +
-                          `🏢 Unidade: ${unidade}\n` +
-                          `📊 Refeições: ${refeicoes.registros_processados} registros processados\n` +
-                          `📋 Dias no mês: ${refeicoes.dias_esperados}\n` +
-                          `🔢 SIISP: ${siisp.mensagem}\n\n` +
-                          `✅ ${data.validacao.mensagem_geral}`);
+                    const detalhesCompletos = `Período: ${mesNome}/${ano} | ` +
+                        `Unidade: ${unidade} | ` +
+                        `Refeições: ${refeicoes.registros_processados} registros | ` +
+                        `Dias: ${refeicoes.dias_esperados} | ` +
+                        `SIISP: ${siisp.mensagem} | ` +
+                        `${data.validacao.mensagem_geral}`;
+                    
+                    showNotification('success', 'Dados salvos com sucesso!', detalhesCompletos);
                     
                     document.getElementById('secao-importacao').style.display = 'none';
                     
@@ -1540,7 +2535,7 @@
                     
                     console.log('✅ Dados salvos:', data.registro);
                 } else {
-                    alert('❌ Erro ao salvar dados: ' + (data.error || 'Erro desconhecido'));
+                    showNotification('error', 'Erro ao salvar dados', data.error || 'Erro desconhecido ao processar os dados.');
                     console.error('❌ Erro da API:', data);
                 }
             })
@@ -1553,20 +2548,19 @@
                     
                     if (errorData.validacao && !errorData.validacao.valido) {
                         // Erro de validação - mostrar popup detalhado
-                        alert(`🚨 DADOS REJEITADOS - INCONSISTÊNCIA DETECTADA\n\n` +
-                              `❌ ${errorData.validacao.detalhes}\n\n` +
-                              `📊 Detalhes:\n` +
-                              `• Registros encontrados: ${errorData.validacao.registros_processados}\n` +
-                              `• Dias esperados no mês: ${errorData.validacao.dias_esperados}\n\n` +
-                              `💡 Por favor, revise os dados e tente novamente.\n` +
-                              `Os dados devem conter exatamente ${errorData.validacao.dias_esperados} linhas.`);
+                        const detalhesValidacao = `${errorData.validacao.detalhes}. ` +
+                            `Registros encontrados: ${errorData.validacao.registros_processados}, ` +
+                            `Dias esperados: ${errorData.validacao.dias_esperados}. ` +
+                            `Os dados devem conter exatamente ${errorData.validacao.dias_esperados} linhas.`;
+                        
+                        showNotification('error', 'Dados rejeitados - Inconsistência detectada', detalhesValidacao);
                     } else {
                         // Outro tipo de erro
-                        alert(`❌ Erro: ${errorData.error || 'Erro desconhecido do servidor'}`);
+                        showNotification('error', 'Erro do servidor', errorData.error || 'Erro desconhecido do servidor.');
                     }
                 } catch (parseError) {
                     // Erro de conexão ou outro tipo
-                    alert('❌ Erro de conexão com o servidor!\n\nVerifique sua conexão e tente novamente.');
+                    showNotification('error', 'Erro de conexão', 'Erro de conexão com o servidor. Verifique sua conexão e tente novamente.');
                 }
                 
                 console.error('❌ Erro de rede:', error);
@@ -1576,23 +2570,204 @@
         // Salvar entrada manual
         document.getElementById('btn-salvar-manual').addEventListener('click', function() {
             const unidade = document.getElementById('select-unidade-manual').value;
-            const data = document.getElementById('data-manual').value;
+            const mes = document.getElementById('mes-manual').value;
+            const ano = document.getElementById('ano-manual').value;
             
-            if (!unidade || !data) {
-                alert('Por favor, selecione a unidade e a data.');
+            // Validação da unidade
+            if (!unidade) {
+                showNotification('warning', 'Campo obrigatório', 'Por favor, selecione a unidade.');
                 return;
             }
             
-            alert('Dados salvos com sucesso!\nNovo registro foi adicionado à tabela.');
-            document.getElementById('secao-manual').style.display = 'none';
+            // Validação do mês e ano
+            if (!mes || !ano) {
+                showNotification('warning', 'Campos obrigatórios', 'Por favor, selecione o mês e ano.');
+                return;
+            }
+
+            // Coletar dados da tabela
+            const dadosTabela = coletarDadosTabela();
             
-            // Limpar formulário
-            document.querySelectorAll('#secao-manual input[type="number"]').forEach(input => {
-                input.value = '';
+            // Verificar se há pelo menos um valor preenchido
+            const temDados = dadosTabela.some(dia => 
+                dia.cafe_interno > 0 || dia.cafe_funcionario > 0 || dia.almoco_interno > 0 || dia.almoco_funcionario > 0 ||
+                dia.lanche_interno > 0 || dia.lanche_funcionario > 0 || dia.jantar_interno > 0 || dia.jantar_funcionario > 0
+            );
+            
+            if (!temDados) {
+                showNotification('warning', 'Tabela vazia', 'Por favor, preencha pelo menos um valor na tabela.');
+                return;
+            }
+            
+            console.log('Dados coletados da tabela:', dadosTabela);
+            
+            // Preparar dados para enviar à API
+            const dadosParaApi = {
+                lote_id: loteId,
+                mes: parseInt(mes),
+                ano: parseInt(ano),
+                unidade: unidade,
+                dados_tabela: dadosTabela
+            };
+            
+            console.log('Enviando dados para API de entrada manual:', dadosParaApi);
+            
+            // Chamar API para salvar dados
+            fetch('/api/entrada-manual', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dadosParaApi)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Erro no servidor');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Mostrar notificação de sucesso
+                    const stats = data.estatisticas || {};
+                    const mensagem = `${stats.registros_processados || dadosTabela.length} registros salvos para ${unidade} em ${mes}/${ano}. Total de refeições: ${stats.total_refeicoes || 0}.`;
+                    
+                    showNotification('success', 'Dados salvos com sucesso!', mensagem);
+                    
+                    // Fechar seção e limpar formulário
+                    document.getElementById('secao-manual').style.display = 'none';
+                    document.getElementById('select-unidade-manual').value = '';
+                    gerarTabelaManual(); // Regenerar tabela vazia
+                    
+                    // Atualizar dados na tela (se aplicável)
+                    console.log('✅ Entrada manual salva:', data.registro);
+                    
+                    // Recarregar a página para mostrar os novos dados
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                    
+                } else {
+                    // Erro retornado pela API
+                    showNotification('error', 'Erro ao salvar', data.error || 'Erro desconhecido na API.');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Erro ao salvar entrada manual:', error);
+                
+                // Mostrar notificação de erro
+                if (error.message.includes('Lote ID') || error.message.includes('obrigatórios')) {
+                    showNotification('error', 'Dados inválidos', error.message);
+                } else if (error.message.includes('não confere')) {
+                    showNotification('error', 'Inconsistência de dados', error.message);
+                } else if (error.message.includes('inválidos encontrados')) {
+                    showNotification('error', 'Valores inválidos', error.message);
+                } else {
+                    showNotification('error', 'Erro de conexão', 'Erro de conexão com o servidor. Verifique sua conexão e tente novamente.');
+                }
             });
-            
-            carregarTabelaRefeicoes();
         });
+
+        // Função para coletar dados da tabela manual
+        function coletarDadosTabela() {
+            const inputs = document.querySelectorAll('#tabela-entrada-manual input');
+            const dados = [];
+            const diasNoMes = new Date(parseInt(document.getElementById('ano-manual').value), parseInt(document.getElementById('mes-manual').value), 0).getDate();
+            
+            for (let dia = 1; dia <= diasNoMes; dia++) {
+                const cafeInterno = parseInt(document.querySelector(`input[data-col="cafe-int"][data-dia="${dia}"]`).value) || 0;
+                const cafeFuncionario = parseInt(document.querySelector(`input[data-col="cafe-func"][data-dia="${dia}"]`).value) || 0;
+                const almocoInterno = parseInt(document.querySelector(`input[data-col="almoco-int"][data-dia="${dia}"]`).value) || 0;
+                const almocoFuncionario = parseInt(document.querySelector(`input[data-col="almoco-func"][data-dia="${dia}"]`).value) || 0;
+                const lancheInterno = parseInt(document.querySelector(`input[data-col="lanche-int"][data-dia="${dia}"]`).value) || 0;
+                const lancheFuncionario = parseInt(document.querySelector(`input[data-col="lanche-func"][data-dia="${dia}"]`).value) || 0;
+                const jantarInterno = parseInt(document.querySelector(`input[data-col="jantar-int"][data-dia="${dia}"]`).value) || 0;
+                const jantarFuncionario = parseInt(document.querySelector(`input[data-col="jantar-func"][data-dia="${dia}"]`).value) || 0;
+                
+                dados.push({
+                    dia: dia,
+                    cafe_interno: cafeInterno,
+                    cafe_funcionario: cafeFuncionario,
+                    almoco_interno: almocoInterno,
+                    almoco_funcionario: almocoFuncionario,
+                    lanche_interno: lancheInterno,
+                    lanche_funcionario: lancheFuncionario,
+                    jantar_interno: jantarInterno,
+                    jantar_funcionario: jantarFuncionario
+                });
+            }
+            
+            return dados;
+        }
+
+        // Função para mostrar confirmação de exclusão
+        function mostrarConfirmacaoExclusao(unidade, mes, ano, dadosExclusao) {
+            const modal = document.getElementById('modal-confirmacao-exclusao');
+            const mensagem = document.getElementById('mensagem-confirmacao');
+            
+            // Definir mensagem personalizada
+            mensagem.textContent = `Tem certeza que deseja excluir TODOS os dados de ${unidade} para ${mes}/${ano}?`;
+            
+            // Mostrar modal
+            modal.style.display = 'block';
+            
+            // Definir ação do botão de confirmação
+            document.getElementById('btn-confirmar-confirmacao').onclick = function() {
+                modal.style.display = 'none';
+                executarExclusao(dadosExclusao, unidade, mes, ano);
+            };
+        }
+        
+        // Função para executar a exclusão (código movido do evento original)
+        function executarExclusao(dadosExclusao, unidade, mes, ano) {
+            console.log('Excluindo dados:', dadosExclusao);
+            
+            // Chamar API para excluir dados
+            fetch('/api/excluir-dados', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dadosExclusao)
+            })
+            .then(response => {
+                // Sempre tentar fazer parse do JSON, mesmo para erros
+                return response.json().then(data => {
+                    return { data: data, status: response.status, ok: response.ok };
+                });
+            })
+            .then(result => {
+                console.log('🔍 Debug - Resposta da API de exclusão:', result);
+                const { data, status, ok } = result;
+                
+                if (ok && data.success) {
+                    showNotification('success', 'Registro excluído', `Os dados de ${unidade} para ${mes}/${ano} foram excluídos com sucesso.`);
+                    
+                    // Fechar popup de exclusão
+                    document.getElementById('secao-exclusao').style.display = 'none';
+                    
+                    // Limpar formulário
+                    document.getElementById('select-unidade-exclusao').value = '';
+                    document.getElementById('mes-exclusao').value = '';
+                    document.getElementById('ano-exclusao').value = '2025';
+                    
+                    // Recarregar dados da tabela
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else if (status === 404 || (data.error && (data.error.includes('não encontrado') || data.error.includes('Registro não encontrado')))) {
+                    showNotification('warning', 'Registro não existente', `Não foram encontrados dados de ${unidade} para ${mes}/${ano}.`);
+                } else {
+                    showNotification('error', 'Erro na exclusão', data.error || 'Erro desconhecido ao excluir os dados.');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Erro ao excluir dados:', error);
+                showNotification('error', 'Erro de conexão', 'Erro de conexão com o servidor. Verifique sua conexão e tente novamente.');
+            });
+        }
 
         // Modal da legenda
         document.getElementById('btn-legenda').addEventListener('click', function() {
@@ -1603,8 +2778,19 @@
             document.getElementById('modal-legenda').style.display = 'none';
         });
 
-        // Fechar modal clicando fora
+        // Modal de confirmação de exclusão
+        document.getElementById('btn-cancelar-confirmacao').addEventListener('click', function() {
+            document.getElementById('modal-confirmacao-exclusao').style.display = 'none';
+        });
+
+        // Fechar modais clicando fora
         document.getElementById('modal-legenda').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('modal-confirmacao-exclusao').addEventListener('click', function(e) {
             if (e.target === this) {
                 this.style.display = 'none';
             }
@@ -1614,7 +2800,7 @@
 
         // Exportar tabela
         document.getElementById('btn-exportar-tabela').addEventListener('click', function() {
-            alert('Funcionalidade de exportação será implementada em versões futuras.\n\nFormatos disponíveis: Excel, PDF, CSV');
+            showNotification('warning', 'Funcionalidade em desenvolvimento', 'A exportação será implementada em versões futuras. Formatos disponíveis: Excel, PDF, CSV');
         });
         
 
@@ -1623,9 +2809,12 @@
         document.getElementById('logoutLink').addEventListener('click', function(e) {
             e.preventDefault();
             if (confirm('Tem certeza que deseja sair do sistema?')) {
+                showNotification('success', 'Logout realizado', 'Até logo!', false);
                 localStorage.removeItem('sgmrp_usuario');
                 localStorage.removeItem('sgmrp_remember');
-                window.location.href = 'login.html';
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
             }
         });
 
@@ -1945,12 +3134,12 @@
         document.addEventListener('click', function(e) {
             if (e.target.closest('a[href="#relatorios"]')) {
                 e.preventDefault();
-                alert('Módulo de Relatórios será implementado na próxima versão do SGMRP.');
+                showNotification('warning', 'Módulo em desenvolvimento', 'O módulo de Relatórios será implementado na próxima versão do SGMRP.');
             }
             
             if (e.target.closest('a[href="#configuracoes"]')) {
                 e.preventDefault();
-                alert('Módulo de Configurações será implementado na próxima versão do SGMRP.');
+                showNotification('warning', 'Módulo em desenvolvimento', 'O módulo de Configurações será implementado na próxima versão do SGMRP.');
             }
         });
     </script>

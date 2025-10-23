@@ -390,8 +390,9 @@
     </footer>
 
     <script>
-        // Dados dos mapas vindos do Flask
+        // Dados dos mapas e lotes vindos do Flask
         const mapasDados = {{ mapas_dados | tojson }};
+        const lotesGlobal = {{ lotes | tojson }};
         
         // Verificar se usuário está logado (simulação)
         window.addEventListener('load', function() {
@@ -477,9 +478,22 @@
         
         // Função para calcular estatísticas dos mapas filtrados
         function calcularEstatisticas(mapas) {
+            // Calcular número total de unidades dos lotes ativos (independente dos mapas)
+            const loteIdSelecionado = parseInt(document.getElementById('filtro-lote').value);
+            let totalUnidadesLotes = 0;
+            
+            if (loteIdSelecionado) {
+                // Se um lote específico está selecionado, mostrar apenas suas unidades
+                const loteEspecifico = lotesGlobal.find(l => l.id === loteIdSelecionado);
+                totalUnidadesLotes = loteEspecifico ? loteEspecifico.unidades.length : 0;
+            } else {
+                // Se nenhum lote específico, mostrar total de todas as unidades de todos os lotes
+                totalUnidadesLotes = lotesGlobal.reduce((total, lote) => total + lote.unidades.length, 0);
+            }
+            
             if (!mapas || mapas.length === 0) {
                 return {
-                    unidades: 0,
+                    unidades: totalUnidadesLotes,
                     refeicoes: 0,
                     discrepancias: 0,
                     conformidade: '0.0'
@@ -529,11 +543,51 @@
                     
                     valorTotal += valorDia;
                     
-                    // Calcular desvios financeiros (excedentes acima do esperado)
+                    // Calcular desvios financeiros usando colunas _siisp quando disponíveis
                     const siisp = (mapa.n_siisp && mapa.n_siisp.length > i) ? mapa.n_siisp[i] : 0;
                     
-                    if (siisp > 0) {
-                        // Verificar excedentes por tipo de refeição
+                    // Usar colunas _siisp se disponíveis (já calculadas), senão calcular na hora
+                    const usarColunasSiisp = mapa.cafe_interno_siisp && mapa.cafe_interno_siisp.length > i;
+                    
+                    if (usarColunasSiisp) {
+                        // Usar valores já calculados das colunas _siisp para detectar discrepâncias
+                        // INCLUIR TODOS OS EXCEDENTES no desvio (mesmo os pequenos)
+                        const excedenteCafe = mapa.cafe_interno_siisp[i] > 0 ? mapa.cafe_interno_siisp[i] : 0;
+                        const excedenteAlmoco = mapa.almoco_interno_siisp[i] > 0 ? mapa.almoco_interno_siisp[i] : 0;
+                        const excedenteLanche = mapa.lanche_interno_siisp[i] > 0 ? mapa.lanche_interno_siisp[i] : 0;
+                        const excedenteJantar = mapa.jantar_interno_siisp[i] > 0 ? mapa.jantar_interno_siisp[i] : 0;
+                        
+                        valorDesvio += 
+                            (excedenteCafe * precos.cafe.interno) +
+                            (excedenteAlmoco * precos.almoco.interno) +
+                            (excedenteLanche * precos.lanche.interno) +
+                            (excedenteJantar * precos.jantar.interno);
+                        
+                        // Contar discrepâncias críticas usando colunas _siisp (apenas > 5)
+                        if (mapa.cafe_interno_siisp[i] > 5) registrosComDiscrepancia++;
+                        if (mapa.almoco_interno_siisp[i] > 5) registrosComDiscrepancia++;
+                        if (mapa.lanche_interno_siisp[i] > 5) registrosComDiscrepancia++;
+                        if (mapa.jantar_interno_siisp[i] > 5) registrosComDiscrepancia++;
+                        
+                        // Verificar funcionários SIISP usando colunas calculadas
+                        if (mapa.cafe_funcionario_siisp && mapa.cafe_funcionario_siisp[i] > 0) {
+                            registrosComDiscrepancia++;
+                            valorDesvio += mapa.cafe_funcionario_siisp[i] * precos.cafe.funcionario;
+                        }
+                        if (mapa.almoco_funcionario_siisp && mapa.almoco_funcionario_siisp[i] > 0) {
+                            registrosComDiscrepancia++;
+                            valorDesvio += mapa.almoco_funcionario_siisp[i] * precos.almoco.funcionario;
+                        }
+                        if (mapa.lanche_funcionario_siisp && mapa.lanche_funcionario_siisp[i] > 0) {
+                            registrosComDiscrepancia++;
+                            valorDesvio += mapa.lanche_funcionario_siisp[i] * precos.lanche.funcionario;
+                        }
+                        if (mapa.jantar_funcionario_siisp && mapa.jantar_funcionario_siisp[i] > 0) {
+                            registrosComDiscrepancia++;
+                            valorDesvio += mapa.jantar_funcionario_siisp[i] * precos.jantar.funcionario;
+                        }
+                    } else if (siisp > 0) {
+                        // Fallback: calcular na hora se não há colunas _siisp
                         const excedenteCafe = Math.max(0, mapa.cafe_interno[i] - siisp);
                         const excedenteAlmoco = Math.max(0, mapa.almoco_interno[i] - siisp);
                         const excedenteLanche = Math.max(0, mapa.lanche_interno[i] - siisp);
@@ -545,39 +599,12 @@
                             (excedenteLanche * precos.lanche.interno) +
                             (excedenteJantar * precos.jantar.interno);
                         
-                        // Contar discrepâncias críticas individualmente (mesma lógica do lote-detalhes.html)
-                        // Cada tipo de refeição é contado separadamente se diferença > 5
-                        const tiposRefeicaoDetalhados = [
-                            {valor: mapa.cafe_interno[i], siisp: siisp, tipo: 'cafe'},
-                            {valor: mapa.almoco_interno[i], siisp: siisp, tipo: 'almoco'},
-                            {valor: mapa.lanche_interno[i], siisp: siisp, tipo: 'lanche'},
-                            {valor: mapa.jantar_interno[i], siisp: siisp, tipo: 'jantar'}
-                        ];
-                        
-                        tiposRefeicaoDetalhados.forEach(tipo => {
-                            const diferenca = tipo.valor - tipo.siisp;
-                            if (diferenca > 5) {
-                                registrosComDiscrepancia++; // Contar célula vermelha (discrepância crítica)
-                            }
-                        });
+                        // Contar discrepâncias críticas
+                        if (excedenteCafe > 5) registrosComDiscrepancia++;
+                        if (excedenteAlmoco > 5) registrosComDiscrepancia++;
+                        if (excedenteLanche > 5) registrosComDiscrepancia++;
+                        if (excedenteJantar > 5) registrosComDiscrepancia++;
                     }
-                    
-                    // Verificar funcionários SIISP (mesma lógica do lote-detalhes.html)
-                    const funcionariosSiispDetalhados = [
-                        {valorSiisp: mapa.cafe_funcionario_siisp && mapa.cafe_funcionario_siisp[i], tipo: 'cafe'},
-                        {valorSiisp: mapa.almoco_funcionario_siisp && mapa.almoco_funcionario_siisp[i], tipo: 'almoco'},
-                        {valorSiisp: mapa.lanche_funcionario_siisp && mapa.lanche_funcionario_siisp[i], tipo: 'lanche'},
-                        {valorSiisp: mapa.jantar_funcionario_siisp && mapa.jantar_funcionario_siisp[i], tipo: 'jantar'}
-                    ];
-                    
-                    funcionariosSiispDetalhados.forEach(func => {
-                        if (func.valorSiisp !== null && func.valorSiisp !== undefined) {
-                            // Para funcionários: valores > 0 são críticos (vermelhos)
-                            if (func.valorSiisp > 0) {
-                                registrosComDiscrepancia++; // Células vermelhas (críticas)
-                            }
-                        }
-                    });
                 }
             });
             
@@ -587,7 +614,7 @@
                 '0.0';
             
             return {
-                unidades: unidadesUnicas.size,
+                unidades: totalUnidadesLotes, // Usar total de unidades dos lotes, não das unidades únicas nos mapas
                 refeicoes: totalRefeicoes,
                 discrepancias: registrosComDiscrepancia,
                 conformidade: conformidade
@@ -596,12 +623,16 @@
         
         // Função para calcular estatísticas individuais de cada lote
         function calcularEstatisticasLote(loteId, mapasFiltrados) {
+            // Obter número total de unidades do lote (independente dos mapas)
+            const lote = lotesGlobal.find(l => l.id === loteId);
+            const totalUnidadesLote = lote ? lote.unidades.length : 0;
+            
             // Filtrar mapas apenas para o lote específico
             const mapasDoLote = mapasFiltrados.filter(mapa => mapa.lote_id === loteId);
             
             if (!mapasDoLote || mapasDoLote.length === 0) {
                 return {
-                    unidades: 0,
+                    unidades: totalUnidadesLote, // Mostrar sempre o número total de unidades do lote
                     refeicoes: 0,
                     conformidade: '0.0',
                     discrepancias: 0
@@ -651,11 +682,51 @@
                     
                     valorTotal += valorDia;
                     
-                    // Calcular desvios financeiros (excedentes acima do esperado)
+                    // Calcular desvios financeiros usando colunas _siisp quando disponíveis
                     const siisp = (mapa.n_siisp && mapa.n_siisp.length > i) ? mapa.n_siisp[i] : 0;
                     
-                    if (siisp > 0) {
-                        // Verificar excedentes por tipo de refeição
+                    // Usar colunas _siisp se disponíveis (já calculadas), senão calcular na hora
+                    const usarColunasSiisp = mapa.cafe_interno_siisp && mapa.cafe_interno_siisp.length > i;
+                    
+                    if (usarColunasSiisp) {
+                        // Usar valores já calculados das colunas _siisp para detectar discrepâncias
+                        // INCLUIR TODOS OS EXCEDENTES no desvio (mesmo os pequenos)
+                        const excedenteCafe = mapa.cafe_interno_siisp[i] > 0 ? mapa.cafe_interno_siisp[i] : 0;
+                        const excedenteAlmoco = mapa.almoco_interno_siisp[i] > 0 ? mapa.almoco_interno_siisp[i] : 0;
+                        const excedenteLanche = mapa.lanche_interno_siisp[i] > 0 ? mapa.lanche_interno_siisp[i] : 0;
+                        const excedenteJantar = mapa.jantar_interno_siisp[i] > 0 ? mapa.jantar_interno_siisp[i] : 0;
+                        
+                        valorDesvio += 
+                            (excedenteCafe * precos.cafe.interno) +
+                            (excedenteAlmoco * precos.almoco.interno) +
+                            (excedenteLanche * precos.lanche.interno) +
+                            (excedenteJantar * precos.jantar.interno);
+                        
+                        // Contar discrepâncias críticas usando colunas _siisp (apenas > 5)
+                        if (mapa.cafe_interno_siisp[i] > 5) registrosComProblema++;
+                        if (mapa.almoco_interno_siisp[i] > 5) registrosComProblema++;
+                        if (mapa.lanche_interno_siisp[i] > 5) registrosComProblema++;
+                        if (mapa.jantar_interno_siisp[i] > 5) registrosComProblema++;
+                        
+                        // Verificar funcionários SIISP usando colunas calculadas
+                        if (mapa.cafe_funcionario_siisp && mapa.cafe_funcionario_siisp[i] > 0) {
+                            registrosComProblema++;
+                            valorDesvio += mapa.cafe_funcionario_siisp[i] * precos.cafe.funcionario;
+                        }
+                        if (mapa.almoco_funcionario_siisp && mapa.almoco_funcionario_siisp[i] > 0) {
+                            registrosComProblema++;
+                            valorDesvio += mapa.almoco_funcionario_siisp[i] * precos.almoco.funcionario;
+                        }
+                        if (mapa.lanche_funcionario_siisp && mapa.lanche_funcionario_siisp[i] > 0) {
+                            registrosComProblema++;
+                            valorDesvio += mapa.lanche_funcionario_siisp[i] * precos.lanche.funcionario;
+                        }
+                        if (mapa.jantar_funcionario_siisp && mapa.jantar_funcionario_siisp[i] > 0) {
+                            registrosComProblema++;
+                            valorDesvio += mapa.jantar_funcionario_siisp[i] * precos.jantar.funcionario;
+                        }
+                    } else if (siisp > 0) {
+                        // Fallback: calcular na hora se não há colunas _siisp
                         const excedenteCafe = Math.max(0, mapa.cafe_interno[i] - siisp);
                         const excedenteAlmoco = Math.max(0, mapa.almoco_interno[i] - siisp);
                         const excedenteLanche = Math.max(0, mapa.lanche_interno[i] - siisp);
@@ -667,39 +738,12 @@
                             (excedenteLanche * precos.lanche.interno) +
                             (excedenteJantar * precos.jantar.interno);
                         
-                        // Contar discrepâncias críticas individualmente (mesma lógica do lote-detalhes.html)
-                        // Cada tipo de refeição é contado separadamente se diferença > 5
-                        const tiposRefeicaoDetalhados = [
-                            {valor: mapa.cafe_interno[i], siisp: siisp, tipo: 'cafe'},
-                            {valor: mapa.almoco_interno[i], siisp: siisp, tipo: 'almoco'},
-                            {valor: mapa.lanche_interno[i], siisp: siisp, tipo: 'lanche'},
-                            {valor: mapa.jantar_interno[i], siisp: siisp, tipo: 'jantar'}
-                        ];
-                        
-                        tiposRefeicaoDetalhados.forEach(tipo => {
-                            const diferenca = tipo.valor - tipo.siisp;
-                            if (diferenca > 5) {
-                                registrosComProblema++; // Contar célula vermelha (discrepância crítica)
-                            }
-                        });
+                        // Contar discrepâncias críticas
+                        if (excedenteCafe > 5) registrosComProblema++;
+                        if (excedenteAlmoco > 5) registrosComProblema++;
+                        if (excedenteLanche > 5) registrosComProblema++;
+                        if (excedenteJantar > 5) registrosComProblema++;
                     }
-                    
-                    // Verificar funcionários SIISP (mesma lógica do lote-detalhes.html)
-                    const funcionariosSiispDetalhados = [
-                        {valorSiisp: mapa.cafe_funcionario_siisp && mapa.cafe_funcionario_siisp[i], tipo: 'cafe'},
-                        {valorSiisp: mapa.almoco_funcionario_siisp && mapa.almoco_funcionario_siisp[i], tipo: 'almoco'},
-                        {valorSiisp: mapa.lanche_funcionario_siisp && mapa.lanche_funcionario_siisp[i], tipo: 'lanche'},
-                        {valorSiisp: mapa.jantar_funcionario_siisp && mapa.jantar_funcionario_siisp[i], tipo: 'jantar'}
-                    ];
-                    
-                    funcionariosSiispDetalhados.forEach(func => {
-                        if (func.valorSiisp !== null && func.valorSiisp !== undefined) {
-                            // Para funcionários: valores > 0 são críticos (vermelhos)
-                            if (func.valorSiisp > 0) {
-                                registrosComProblema++; // Células vermelhas (críticas)
-                            }
-                        }
-                    });
                 }
             });
             
@@ -712,9 +756,9 @@
             const discrepancias = registrosComProblema;
             
             return {
-                unidades: unidadesUnicas.size,
+                unidades: totalUnidadesLote, // Usar sempre o número total de unidades do lote
                 refeicoes: totalRefeicoes,
-                conformidade: parseFloat(conformidade),
+                conformidade: conformidade,
                 discrepancias: discrepancias
             };
         }
@@ -761,12 +805,16 @@
                 const conformidadePercentElement = card.querySelector('.conformidade-percent');
                 const conformidadeIconElement = card.querySelector('.conformidade-icon');
                 if (conformidadePercentElement) {
-                    conformidadePercentElement.textContent = estatisticas.conformidade + '%';
+                    // Garantir que sempre mostre com uma casa decimal (ex: 0.0%, 95.5%)
+                    const conformidadeFormatada = typeof estatisticas.conformidade === 'string' ? 
+                        estatisticas.conformidade : estatisticas.conformidade.toFixed(1);
+                    conformidadePercentElement.textContent = conformidadeFormatada + '%';
                 }
                 if (conformidadeIconElement) {
-                    if (estatisticas.conformidade >= 95) {
+                    const conformidadeNum = parseFloat(estatisticas.conformidade);
+                    if (conformidadeNum >= 95) {
                         conformidadeIconElement.textContent = '✅';
-                    } else if (estatisticas.conformidade >= 90) {
+                    } else if (conformidadeNum >= 90) {
                         conformidadeIconElement.textContent = '⚠️';
                     } else {
                         conformidadeIconElement.textContent = '🚨';

@@ -2,28 +2,28 @@
   "lotes": [
     {
       "id": 1,
-      "nome": "Lote 1",
-      "contrato": "CT-2024/001",
-      "data_inicio_contrato": "15/01/2024",
-      "empresa": "Empresa ABC Alimentação Ltda",
-      "unidades": [1, 2, 3, 4, 5],
+      "nome": "Lote I",
+      "contrato": "028/2021",
+      "data_inicio_contrato": "30/03/2025",
+      "empresa": "Ágile",
+      "unidades": [1, 2, 3, 4, 5, 6, 7, 8, 9],
       "ativo": true,
       "precos": {
         "cafe": {
-          "interno": 3.50,
-          "funcionario": 3.75
+          "interno": 2.81,
+          "funcionario": 2.44
         },
         "almoco": {
-          "interno": 8.90,
-          "funcionario": 9.15
+          "interno": 8.24,
+          "funcionario": 8.05
         },
         "lanche": {
-          "interno": 4.20,
-          "funcionario": 4.45
+          "interno": 3.79,
+          "funcionario": 3.53
         },
         "jantar": {
-          "interno": 8.50,
-          "funcionario": 8.75
+          "interno": 8.24,
+          "funcionario": 7.93
         }
       }
     },
@@ -33,7 +33,7 @@
       "contrato": "CT-2024/002",
       "data_inicio_contrato": "01/02/2024",
       "empresa": "XYZ Refeições e Nutrição S.A",
-      "unidades": [6, 7, 8, 9],
+      "unidades": [],
       "ativo": true,
       "precos": {
         "cafe": {
@@ -60,7 +60,7 @@
       "contrato": "CT-2024/003",
       "data_inicio_contrato": "10/03/2024",
       "empresa": "DEF Nutrição e Catering",
-      "unidades": [10, 11, 12],
+      "unidades": [],
       "ativo": true,
       "precos": {
         "cafe": {
@@ -87,7 +87,7 @@
       "contrato": "CT-2023/018",
       "data_inicio_contrato": "22/11/2023",
       "empresa": "GHI Catering e Serviços",
-      "unidades": [13, 14, 15],
+      "unidades": [],
       "ativo": true,
       "precos": {
         "cafe": {
@@ -114,7 +114,7 @@
       "contrato": "CT-2024/005",
       "data_inicio_contrato": "05/04/2024",
       "empresa": "JKL Alimentação Hospitalar",
-      "unidades": [16, 17, 18, 19],
+      "unidades": [],
       "ativo": true,
       "precos": {
         "cafe": {
@@ -141,7 +141,7 @@
       "contrato": "CT-2024/006",
       "data_inicio_contrato": "18/05/2024",
       "empresa": "MNO Serviços Nutricionais",
-      "unidades": [20, 21, 22, 23, 24],
+      "unidades": [],
       "ativo": true,
       "precos": {
         "cafe": {
@@ -168,7 +168,7 @@
       "contrato": "CT-2024/007",
       "data_inicio_contrato": "30/06/2024",
       "empresa": "PQR Alimentação Coletiva",
-      "unidades": [25, 26, 27],
+      "unidades": [],
       "ativo": true,
       "precos": {
         "cafe": {
@@ -195,7 +195,7 @@
       "contrato": "CT-2024/008",
       "data_inicio_contrato": "12/07/2024",
       "empresa": "STU Nutrição Especializada",
-      "unidades": [28, 29, 30, 31, 32],
+      "unidades": [],
       "ativo": true,
       "precos": {
         "cafe": {
@@ -222,24 +222,24 @@
       "contrato": "CT-2024/009",
       "data_inicio_contrato": "25/08/2024",
       "empresa": "VWX Catering Corporativo",
-      "unidades": [33, 34, 35, 36],
+      "unidades": [],
       "ativo": true,
       "precos": {
         "cafe": {
-          "interno": 3.70,
-          "funcionario": 3.95
+          "interno": 2.81,
+          "funcionario": 2.44
         },
         "almoco": {
-          "interno": 10.80,
-          "funcionario": 11.05
+          "interno": 8.24,
+          "funcionario": 8.05
         },
         "lanche": {
-          "interno": 4.50,
-          "funcionario": 4.75
+          "interno": 3.79,
+          "funcionario": 3.53
         },
         "jantar": {
-          "interno": 10.20,
-          "funcionario": 10.45
+          "interno": 8.24,
+          "funcionario": 7.93
         }
       }
     }
