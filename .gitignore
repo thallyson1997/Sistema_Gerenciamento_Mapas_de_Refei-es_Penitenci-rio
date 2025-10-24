@@ -8,6 +8,9 @@ dados/mapas_real.json
 dados/mapas_producao.json
 dados/backup_*.json
 
+# Ignorar todos os arquivos e subpastas dentro de dados/
+dados/
+
 # Logs que podem conter informações sensíveis
 *.log
 logs/
