@@ -242,6 +242,10 @@
     </header>
 
     <main>
+            <!-- Botão flutuante para troca de abas/tabelas -->
+            <button id="btn-troca-tabela" style="position: fixed; bottom: 32px; right: 32px; z-index: 1200; background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 56px; height: 56px; box-shadow: 0 4px 16px rgba(0,0,0,0.18); font-size: 2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;" title="Alternar tabela">
+                <span id="icon-troca-tabela">⇄</span>
+            </button>
         <div class="container">
             <!-- Breadcrumb -->
             <nav aria-label="Navegação" style="margin-bottom: 2rem;">
@@ -1820,6 +1824,68 @@
         function initTabs() {
             const tabButtons = document.querySelectorAll('.tab-button');
             const tabContents = document.querySelectorAll('.tab-content');
+
+                tabButtons.forEach(button => {/* ...existing code... */});
+
+                // Ativar a primeira aba por padrão
+                if (tabButtons.length > 0) {/* ...existing code... */}
+
+                // Botão flutuante de troca de tabela
+                const btnTrocaTabela = document.getElementById('btn-troca-tabela');
+                if (btnTrocaTabela) {
+                    btnTrocaTabela.addEventListener('click', function() {
+                        const tab1 = document.getElementById('tab-dados-refeicoes');
+                        const tab2 = document.getElementById('tab-comparacao-siisp');
+                        const tabButtons = document.querySelectorAll('.tab-button');
+                        let tabelaContainer1 = tab1 ? tab1.querySelector('.table-container, .tabela-container') : null;
+                        let tabelaContainer2 = tab2 ? tab2.querySelector('.table-container, .tabela-container') : null;
+                        let scrollPos = 0;
+                        // Alterna para a outra aba
+                        if (tab1 && tab1.style.display !== 'none' && tabelaContainer1) {
+                            scrollPos = tabelaContainer1.scrollTop;
+                            tab1.style.display = 'none';
+                            tab2.style.display = 'block';
+                            if (tabelaContainer2) tabelaContainer2.scrollTop = scrollPos;
+                            // Atualizar botões de aba
+                            tabButtons.forEach(btn => {
+                                if (btn.dataset.tab === 'dados-refeicoes') {
+                                    btn.classList.remove('active');
+                                    btn.style.borderBottomColor = 'transparent';
+                                    btn.style.color = 'var(--gray-600)';
+                                    btn.style.backgroundColor = 'transparent';
+                                    btn.style.marginBottom = '';
+                                } else if (btn.dataset.tab === 'comparacao-siisp') {
+                                    btn.classList.add('active');
+                                    btn.style.borderBottomColor = 'var(--primary-color)';
+                                    btn.style.color = 'var(--primary-color)';
+                                    btn.style.backgroundColor = 'white';
+                                    btn.style.marginBottom = '-2px';
+                                }
+                            });
+                        } else if (tab2 && tab2.style.display !== 'none' && tabelaContainer2) {
+                            scrollPos = tabelaContainer2.scrollTop;
+                            tab2.style.display = 'none';
+                            tab1.style.display = 'block';
+                            if (tabelaContainer1) tabelaContainer1.scrollTop = scrollPos;
+                            // Atualizar botões de aba
+                            tabButtons.forEach(btn => {
+                                if (btn.dataset.tab === 'comparacao-siisp') {
+                                    btn.classList.remove('active');
+                                    btn.style.borderBottomColor = 'transparent';
+                                    btn.style.color = 'var(--gray-600)';
+                                    btn.style.backgroundColor = 'transparent';
+                                    btn.style.marginBottom = '';
+                                } else if (btn.dataset.tab === 'dados-refeicoes') {
+                                    btn.classList.add('active');
+                                    btn.style.borderBottomColor = 'var(--primary-color)';
+                                    btn.style.color = 'var(--primary-color)';
+                                    btn.style.backgroundColor = 'white';
+                                    btn.style.marginBottom = '-2px';
+                                }
+                            });
+                        }
+                    });
+                }
 
             tabButtons.forEach(button => {
                 button.addEventListener('click', function() {

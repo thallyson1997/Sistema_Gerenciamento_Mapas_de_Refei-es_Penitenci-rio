@@ -505,13 +505,25 @@
             let totalRegistros = 0;
             let registrosComDiscrepancia = 0;
             
-            // Preços simulados (mesmos do lote-detalhes.html)
-            const precos = {
-                cafe: { interno: 4.50, funcionario: 5.00 },
-                almoco: { interno: 12.00, funcionario: 13.50 },
-                lanche: { interno: 6.00, funcionario: 6.50 },
-                jantar: { interno: 10.00, funcionario: 11.00 }
-            };
+            // Usar preços reais do lote se possível
+            let precos = null;
+            if (mapas && mapas.length > 0) {
+                // Tenta pegar o lote do primeiro mapa
+                const loteId = mapas[0].lote_id;
+                const loteObj = lotesGlobal.find(l => l.id === loteId);
+                if (loteObj && loteObj.precos) {
+                    precos = loteObj.precos;
+                }
+            }
+            // Fallback para preços simulados se não houver preços reais
+            if (!precos) {
+                precos = {
+                    cafe: { interno: 4.50, funcionario: 5.00 },
+                    almoco: { interno: 12.00, funcionario: 13.50 },
+                    lanche: { interno: 6.00, funcionario: 6.50 },
+                    jantar: { interno: 10.00, funcionario: 11.00 }
+                };
+            }
             
             let valorTotal = 0;
             let valorDesvio = 0;
@@ -644,13 +656,21 @@
             let totalRegistros = 0;
             let registrosComProblema = 0;
             
-            // Preços simulados (mesmos do lote-detalhes.html)
-            const precos = {
-                cafe: { interno: 4.50, funcionario: 5.00 },
-                almoco: { interno: 12.00, funcionario: 13.50 },
-                lanche: { interno: 6.00, funcionario: 6.50 },
-                jantar: { interno: 10.00, funcionario: 11.00 }
-            };
+            // Usar preços reais do lote se possível
+            let precos = null;
+            const loteObj = lotesGlobal.find(l => l.id === loteId);
+            if (loteObj && loteObj.precos) {
+                precos = loteObj.precos;
+            }
+            // Fallback para preços simulados se não houver preços reais
+            if (!precos) {
+                precos = {
+                    cafe: { interno: 4.50, funcionario: 5.00 },
+                    almoco: { interno: 12.00, funcionario: 13.50 },
+                    lanche: { interno: 6.00, funcionario: 6.50 },
+                    jantar: { interno: 10.00, funcionario: 11.00 }
+                };
+            }
             
             let valorTotal = 0;
             let valorDesvio = 0;
