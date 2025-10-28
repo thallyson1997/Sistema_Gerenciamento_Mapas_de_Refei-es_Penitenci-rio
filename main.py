@@ -1,3 +1,10 @@
+# ===== IMPORTS NECESSÁRIOS =====
+from flask import Flask, request, send_file, render_template, flash, redirect, url_for, session, jsonify
+import io
+import os
+import json
+import calendar
+from datetime import datetime
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -8,21 +15,283 @@ Autor: SEAP
 Data: Outubro 2025
 """
 
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
-from datetime import datetime, timedelta
-import calendar
-import os
-import json
+
 
 # Configuração da aplicação Flask
 app = Flask(__name__)
 app.secret_key = 'sgmrp_seap_2025_secret_key_desenvolvimento'  # Em produção, usar variável de ambiente
 app.config['DEBUG'] = True
 
-# Configurações de paths
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DADOS_DIR = os.path.join(BASE_DIR, 'dados')
+# ===== ROTA DE EXPORTAÇÃO DE TABELA EXCEL =====
+@app.route('/exportar-tabela')
+def exportar_tabela():
+    # Receber filtros da query string
+    lote_id = request.args.get('lote_id', type=int)
+    data_inicio = request.args.get('data_inicio')
+    data_fim = request.args.get('data_fim')
+    unidades = request.args.get('unidades')
+    unidades_list = unidades.split(',') if unidades else []
 
+    # Carregar mapas do lote
+    mapas = carregar_dados_json('mapas.json').get('mapas', [])
+    lotes = carregar_lotes()
+    lote = next((l for l in lotes if l['id'] == lote_id), None)
+    precos = lote.get('precos', {}) if lote else {}
+
+    # Filtrar mapas conforme filtros
+    def filtro_mapa(m):
+        if m['lote_id'] != lote_id:
+            return False
+        if unidades_list and m.get('nome_unidade') not in unidades_list:
+            return False
+        if data_inicio and data_fim:
+            # Verifica se há datas dentro do intervalo
+            datas = m.get('data', [])
+            if not datas:
+                return False
+            # Assume datas no formato DD/MM/YYYY
+            def data_br_to_iso(d):
+                d = d.split('/')
+                return f"{d[2]}-{d[1].zfill(2)}-{d[0].zfill(2)}"
+            datas_iso = [data_br_to_iso(d) for d in datas]
+            if not any(data_inicio <= d <= data_fim for d in datas_iso):
+                return False
+        return True
+    mapas_filtrados = [m for m in mapas if filtro_mapa(m)]
+
+    # Gerar Excel
+    from openpyxl import load_workbook
+    # Carregar modelo.xlsx
+    modelo_path = os.path.join(DADOS_DIR, 'modelo.xlsx')
+    wb = load_workbook(modelo_path)
+    ws1 = wb.active
+
+    # Preencher preços do lote nas células M6 até T6
+    # Ordem: Café Interno, Café Func., Almoço Interno, Almoço Func., Lanche Interno, Lanche Func., Jantar Interno, Jantar Func.
+    precos_ordem = [
+        ('cafe', 'interno'),
+        ('cafe', 'funcionario'),
+        ('almoco', 'interno'),
+        ('almoco', 'funcionario'),
+        ('lanche', 'interno'),
+        ('lanche', 'funcionario'),
+        ('jantar', 'interno'),
+        ('jantar', 'funcionario')
+    ]
+    col_inicio = 13  # M = 13
+    from copy import copy
+    for idx, (ref, tipo) in enumerate(precos_ordem):
+        col = col_inicio + idx
+        valor_preco = precos.get(ref, {}).get(tipo, None)
+        cell_preco = ws1.cell(row=6, column=col, value=valor_preco)
+        # Copiar formatação da célula original
+        cell_modelo = ws1.cell(row=6, column=col)
+        cell_preco.font = copy(cell_modelo.font)
+        cell_preco.border = copy(cell_modelo.border)
+        cell_preco.alignment = copy(cell_modelo.alignment)
+        cell_preco.number_format = 'General'
+        cell_preco.protection = copy(cell_modelo.protection)
+
+    # Buscar cabeçalho 'LOCAÇÃO' nas primeiras 20 linhas
+    header = None
+    idx_locacao = None
+    header_row = None
+    for r in range(1, 21):
+        row_values = [cell.value for cell in ws1[r]]
+        if row_values and 'LOCAÇÃO' in row_values:
+            header = row_values
+            idx_locacao = row_values.index('LOCAÇÃO')
+            header_row = r
+            break
+
+    if header is None:
+        # Não encontrou cabeçalho, aborta preenchimento
+        return ("Cabeçalho LOCAÇÃO não encontrado no modelo.", 400)
+    # Se não houver dados filtrados, retorna mensagem
+    tem_dados = False
+
+    # Preencher linhas a partir da linha 12 (após cabeçalho mesclado B9:B11)
+    linha = 12
+    lote_nome = f"LOTE {lote_id}"
+    # Captura o estilo da primeira célula das colunas LOCAÇÃO e UNIDADE
+    from copy import copy
+    locacao_col = idx_locacao + 1
+    primeira_locacao = ws1.cell(row=header_row, column=locacao_col)
+    locacao_style = {
+        'font': copy(primeira_locacao.font),
+        'border': copy(primeira_locacao.border),
+        'alignment': copy(primeira_locacao.alignment),
+        'number_format': primeira_locacao.number_format,
+        'protection': copy(primeira_locacao.protection)
+    }
+
+    # Detectar índice da coluna UNIDADE
+    idx_unidade = None
+    for i, col_name in enumerate(header):
+        if col_name and str(col_name).strip().upper() == 'UNIDADE':
+            idx_unidade = i
+            break
+    unidade_style = None
+    if idx_unidade is not None:
+        unidade_col = idx_unidade + 1
+        primeira_unidade = ws1.cell(row=header_row, column=unidade_col)
+        unidade_style = {
+            'font': copy(primeira_unidade.font),
+            'border': copy(primeira_unidade.border),
+            'alignment': copy(primeira_unidade.alignment),
+            'number_format': primeira_unidade.number_format,
+            'protection': copy(primeira_unidade.protection)
+        }
+
+    # Função para converter data para ISO (YYYY-MM-DD)
+    def data_br_to_iso(d):
+        d = d.split('/')
+        return f"{d[2]}-{d[1].zfill(2)}-{d[0].zfill(2)}"
+
+
+    # Preencher LOCAÇÃO, UNIDADE e SIISP (coluna C) a partir da linha 12
+    linha = 12
+    tem_dados = False
+    # Copiar formatação da célula A12
+    a12 = ws1.cell(row=12, column=1)
+    style_a12 = {
+        'font': copy(a12.font),
+        'border': copy(a12.border),
+        'alignment': copy(a12.alignment),
+        'number_format': a12.number_format,
+        'protection': copy(a12.protection)
+    }
+
+    for mapa in mapas_filtrados:
+        unidade_nome = mapa.get('nome_unidade', '')
+        lote_nome = f"LOTE {lote_id}"
+        n_siisp = mapa.get('n_siisp', [])
+        datas = mapa.get('data', [])
+        # Aplica filtro de unidade
+        if unidades_list and unidade_nome not in unidades_list:
+            continue
+        for i, valor in enumerate(n_siisp):
+            # Aplica filtro de data
+            if i < len(datas):
+                data_iso = data_br_to_iso(datas[i])
+                if data_inicio and data_fim:
+                    if not (data_inicio <= data_iso <= data_fim):
+                        continue
+            # LOCAÇÃO (coluna idx_locacao+1), UNIDADE (coluna idx_unidade+1), SIISP (coluna 3)
+            if idx_locacao is not None:
+                cell_locacao = ws1.cell(row=linha, column=idx_locacao+1, value=lote_nome)
+                cell_locacao.font = style_a12['font']
+                cell_locacao.border = style_a12['border']
+                cell_locacao.alignment = style_a12['alignment']
+                cell_locacao.number_format = style_a12['number_format']
+                cell_locacao.protection = style_a12['protection']
+            if idx_unidade is not None:
+                cell_unidade = ws1.cell(row=linha, column=idx_unidade+1, value=unidade_nome)
+                cell_unidade.font = style_a12['font']
+                cell_unidade.border = style_a12['border']
+                cell_unidade.alignment = style_a12['alignment']
+                cell_unidade.number_format = style_a12['number_format']
+                cell_unidade.protection = style_a12['protection']
+            cell_siisp = ws1.cell(row=linha, column=3, value=valor)
+            cell_siisp.font = style_a12['font']
+            cell_siisp.border = style_a12['border']
+            cell_siisp.alignment = style_a12['alignment']
+            cell_siisp.number_format = 'General'
+            cell_siisp.protection = style_a12['protection']
+
+            # Preencher coluna D (Data) com formatação de A12, salvando como data
+            data_val = datas[i] if i < len(datas) else ''
+            cell_data = ws1.cell(row=linha, column=4, value=data_val)
+            cell_data.font = style_a12['font']
+            cell_data.border = style_a12['border']
+            cell_data.alignment = style_a12['alignment']
+            cell_data.number_format = 'DD/MM/YYYY'  # Formato de data brasileiro
+            cell_data.protection = style_a12['protection']
+
+            # Preencher colunas E-L com dados das refeições, todos como números
+            colunas_refeicoes = [
+                ('cafe_interno', 5),
+                ('cafe_funcionario', 6),
+                ('almoco_interno', 7),
+                ('almoco_funcionario', 8),
+                ('lanche_interno', 9),
+                ('lanche_funcionario', 10),
+                ('jantar_interno', 11),
+                ('jantar_funcionario', 12)
+            ]
+            for campo, col in colunas_refeicoes:
+                valor_refeicao = mapa.get(campo, [])[i] if i < len(mapa.get(campo, [])) else None
+                cell_refeicao = ws1.cell(row=linha, column=col, value=valor_refeicao)
+                cell_refeicao.font = style_a12['font']
+                cell_refeicao.border = style_a12['border']
+                cell_refeicao.alignment = style_a12['alignment']
+                cell_refeicao.number_format = 'General'
+                cell_refeicao.protection = style_a12['protection']
+
+            linha += 1
+            tem_dados = True
+
+    if not tem_dados:
+        return ("Nenhum dado SIISP encontrado para os filtros selecionados.", 404)
+
+    # Copiar fórmulas de M12:T12 para as linhas de dados preenchidas
+    linhas_preenchidas = linha - 12  # linha é incrementada após cada preenchimento
+    for offset in range(1, linhas_preenchidas):
+        target_row = 12 + offset
+        for col in range(13, 21):  # M=13, T=20
+            formula_or_value = ws1.cell(row=12, column=col).value
+            if ws1.cell(row=12, column=col).data_type == 'f':
+                # Se for fórmula, ajustar referência de linha
+                import re
+                def ajusta_formula(formula, linha_origem, linha_destino):
+                    return re.sub(r'(\D)'+str(linha_origem)+r'(\D|$)', lambda m: m.group(1)+str(linha_destino)+m.group(2), formula)
+                formula_ajustada = ajusta_formula(formula_or_value, 12, target_row)
+                ws1.cell(row=target_row, column=col, value=formula_ajustada)
+                ws1.cell(row=target_row, column=col).data_type = 'f'
+            else:
+                ws1.cell(row=target_row, column=col, value=formula_or_value)
+            # Copiar formatação
+            cell_modelo = ws1.cell(row=12, column=col)
+            cell_dest = ws1.cell(row=target_row, column=col)
+            from copy import copy
+            cell_dest.font = copy(cell_modelo.font)
+            cell_dest.border = copy(cell_modelo.border)
+            cell_dest.alignment = copy(cell_modelo.alignment)
+            cell_dest.number_format = cell_modelo.number_format
+            cell_dest.protection = copy(cell_modelo.protection)
+
+    # Copiar regras de formatação condicional de M12:T12 para as linhas de dados preenchidas
+    for col in range(13, 21):  # M=13, T=20
+        cell_coord = ws1.cell(row=12, column=col).coordinate
+        # Coletar regras relevantes sem modificar durante iteração
+        regras_para_copiar = []
+        for cf_rule in ws1.conditional_formatting:
+            if cell_coord in cf_rule.cells:
+                for rule in cf_rule.rules:
+                    regras_para_copiar.append(rule)
+        # Agora replica as regras para as células de destino
+        for rule in regras_para_copiar:
+            for target_row in range(13, linha):
+                target_coord = ws1.cell(row=target_row, column=col).coordinate
+                ws1.conditional_formatting.add(target_coord, rule)
+
+    # Salvar em memória e retornar arquivo
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    # Nome do arquivo
+    nome_arquivo = f"tabela_lote_{lote_id}"
+    if data_inicio and data_fim:
+        nome_arquivo += f"_{data_inicio}_a_{data_fim}"
+    nome_arquivo += ".xlsx"
+
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name=nome_arquivo
+    )
 # Funções auxiliares para manipular dados JSON
 def carregar_dados_json(arquivo):
     """Carrega dados de um arquivo JSON"""
@@ -1600,6 +1869,9 @@ def erro_interno(error):
 # ===== INICIALIZAÇÃO DA APLICAÇÃO =====
 
 if __name__ == '__main__':
+    # Definir BASE_DIR e DADOS_DIR antes dos prints
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    DADOS_DIR = os.path.join(BASE_DIR, 'dados')
     print("🚀 Iniciando SGMRP - Sistema de Gerenciamento de Mapas de Refeições Penitenciário")
     print(f"📁 Diretório base: {BASE_DIR}")
     print(f"📄 Templates: {os.path.join(BASE_DIR, 'templates')}")

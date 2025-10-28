@@ -242,10 +242,16 @@
     </header>
 
     <main>
+
             <!-- Botão flutuante para troca de abas/tabelas -->
-            <button id="btn-troca-tabela" style="position: fixed; bottom: 32px; right: 32px; z-index: 1200; background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 56px; height: 56px; box-shadow: 0 4px 16px rgba(0,0,0,0.18); font-size: 2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;" title="Alternar tabela">
-                <span id="icon-troca-tabela">⇄</span>
-            </button>
+            <div style="position: fixed; bottom: 32px; right: 32px; z-index: 1200; display: flex; gap: 16px;">
+                <button id="btn-troca-tabela" style="background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 56px; height: 56px; box-shadow: 0 4px 16px rgba(0,0,0,0.18); font-size: 2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;" title="Alternar tabela">
+                    <span id="icon-troca-tabela">⇄</span>
+                </button>
+                <button id="btn-baixar-tabela" style="background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 56px; height: 56px; box-shadow: 0 4px 16px rgba(0,0,0,0.18); font-size: 2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;" title="Baixar tabela">
+                    <span id="icon-baixar-tabela">↓</span>
+                </button>
+            </div>
         <div class="container">
             <!-- Breadcrumb -->
             <nav aria-label="Navegação" style="margin-bottom: 2rem;">
@@ -1194,12 +1200,57 @@
             }
         }
 
-        // Dados reais dos mapas do lote - carregados do Flask
-        const mapasLote = {{ mapas_lote | tojson }};
-        // Dados dos preços do lote
-        const precosLote = {{ lote.precos | tojson }};
-        // ID do lote atual
-        const loteId = {{ lote.id }};
+
+
+    // Dados reais dos mapas do lote - carregados do Flask
+    const mapasLote = JSON.parse(`{{ mapas_lote | tojson | safe }}`);
+    // Dados dos preços do lote
+    const precosLote = JSON.parse(`{{ lote.precos | tojson | safe }}`);
+    // ID do lote atual
+    const loteId = "{{ lote.id }}";
+
+    // Evento do botão de baixar tabela
+    document.getElementById('btn-baixar-tabela').addEventListener('click', function() {
+        // Obter filtros ativos
+        const dataInicio = filtrosAtivos.dataInicio;
+        const dataFim = filtrosAtivos.dataFim;
+        const unidades = filtrosAtivos.unidadesSelecionadas;
+
+        // Montar nome do arquivo
+        let nomeArquivo = 'tabela_lote_' + loteId;
+        if (dataInicio && dataFim) {
+            nomeArquivo += `_${dataInicio}_a_${dataFim}`;
+        }
+        nomeArquivo += '.xlsx';
+
+        // Montar URL da exportação
+        const params = new URLSearchParams();
+        if (dataInicio) params.append('data_inicio', dataInicio);
+        if (dataFim) params.append('data_fim', dataFim);
+        if (unidades && unidades.length > 0) params.append('unidades', unidades.join(','));
+        params.append('lote_id', loteId);
+
+        // Chamar rota Flask para exportar Excel
+        fetch(`/exportar-tabela?${params.toString()}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Falha ao gerar arquivo');
+                return response.blob();
+            })
+            .then(blob => {
+                // Criar link para download
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = nomeArquivo;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(() => {
+                showNotification('error', 'Erro ao baixar tabela', 'Não foi possível gerar o arquivo Excel.');
+            });
+    });
         
         // Variáveis globais para controle dos filtros
         let filtrosAtivos = {

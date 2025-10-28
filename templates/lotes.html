@@ -106,7 +106,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                             <div>
                                 <span style="font-size: 0.875rem; color: var(--gray-600);">
-                                    Exibindo <strong id="resultados-count">4</strong> de <strong>4</strong> lotes
+                                    Exibindo <strong id="resultados-count">{{ lotes|length }}</strong> de <strong>{{ lotes|length }}</strong> lotes
                                 </span>
                             </div>
                             <div style="display: flex; gap: 0.5rem; align-items: center;">
@@ -125,14 +125,14 @@
 
             <!-- Lista de Lotes -->
             <section id="lista-lotes">
-                <!-- Lote 1 -->
-                <div class="card fade-in lote-item" data-lote="1" data-status="ativo" data-empresa="abc" data-conformidade="96.8">
+                {% for lote in lotes %}
+                <div class="card fade-in lote-item" data-lote="{{ loop.index }}" data-status="ativo" data-empresa="{{ lote.empresa|lower }}" data-conformidade="96.8">
                     <div class="card-body" style="padding: 2rem;">
                         <div style="display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: start;">
                             <!-- Informações principais -->
                             <div>
                                 <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                                    <h3 style="margin: 0; color: var(--primary-color);">Lote 1</h3>
+                                    <h3 style="margin: 0; color: var(--primary-color);">Lote {{ loop.index }}</h3>
                                     <div class="badge" style="background-color: var(--success-color); color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500;">
                                         ATIVO
                                     </div>
@@ -143,17 +143,17 @@
 
                                 <div style="margin-bottom: 1.5rem;">
                                     <p style="margin: 0; color: var(--gray-600);">
-                                        <strong>Empresa Responsável:</strong> ABC Alimentação Ltda.
+                                        <strong>Empresa Responsável:</strong> {{ lote.empresa }}
                                     </p>
                                     <p style="margin: 0; color: var(--gray-600);">
-                                        <strong>Presídios:</strong> 5 unidades ativas
+                                        <strong>Unidades:</strong> {{ lote.unidades|length }} unidades ativas
                                     </p>
                                     <p style="margin: 0; color: var(--gray-600);">
                                         <strong>Última Atualização:</strong> 18/10/2025 às 15:30
                                     </p>
                                 </div>
 
-                                <!-- Estatísticas do Lote -->
+                                <!-- Estatísticas do Lote (simuladas) -->
                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
                                     <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
                                         <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary-color);">28,450</div>
@@ -176,205 +176,20 @@
 
                             <!-- Ações -->
                             <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: stretch; min-width: 150px;">
-                                <a href="lote-detalhes.html?lote=1" class="btn btn-primary btn-sm">
+                                <a href="lote-detalhes.html?lote={{ loop.index }}" class="btn btn-primary btn-sm">
                                     📊 Ver Detalhes
                                 </a>
-                                <button class="btn btn-secondary btn-sm" onclick="importarDados(1)">
+                                <button class="btn btn-secondary btn-sm" onclick="importarDados({{ loop.index }})">
                                     📤 Importar Dados
                                 </button>
-                                <button class="btn btn-secondary btn-sm" onclick="gerarRelatorio(1)">
+                                <button class="btn btn-secondary btn-sm" onclick="gerarRelatorio({{ loop.index }})">
                                     📋 Relatório
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Lote 2 -->
-                <div class="card fade-in lote-item" data-lote="2" data-status="ativo" data-empresa="xyz" data-conformidade="91.5">
-                    <div class="card-body" style="padding: 2rem;">
-                        <div style="display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: start;">
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                                    <h3 style="margin: 0; color: var(--primary-color);">Lote 2</h3>
-                                    <div class="badge" style="background-color: var(--success-color); color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500;">
-                                        ATIVO
-                                    </div>
-                                    <div style="background-color: #fff3cd; color: #856404; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500;">
-                                        91.5% Conformidade
-                                    </div>
-                                </div>
-
-                                <div style="margin-bottom: 1.5rem;">
-                                    <p style="margin: 0; color: var(--gray-600);">
-                                        <strong>Empresa Responsável:</strong> XYZ Refeições S.A.
-                                    </p>
-                                    <p style="margin: 0; color: var(--gray-600);">
-                                        <strong>Presídios:</strong> 4 unidades ativas
-                                    </p>
-                                    <p style="margin: 0; color: var(--gray-600);">
-                                        <strong>Última Atualização:</strong> 19/10/2025 às 09:15
-                                    </p>
-                                </div>
-
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
-                                    <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary-color);">22,180</div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Refeições/Mês</div>
-                                    </div>
-                                    <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--success-color);">1,980</div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Detentos</div>
-                                    </div>
-                                    <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--danger-color);">4</div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Alertas Ativos</div>
-                                    </div>
-                                    <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary-color);">R$ 69,5K</div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Custo Estimado</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: stretch; min-width: 150px;">
-                                <a href="lote-detalhes.html?lote=2" class="btn btn-primary btn-sm">
-                                    📊 Ver Detalhes
-                                </a>
-                                <button class="btn btn-secondary btn-sm" onclick="importarDados(2)">
-                                    📤 Importar Dados
-                                </button>
-                                <button class="btn btn-secondary btn-sm" onclick="gerarRelatorio(2)">
-                                    📋 Relatório
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lote 3 -->
-                <div class="card fade-in lote-item" data-lote="3" data-status="ativo" data-empresa="def" data-conformidade="98.2">
-                    <div class="card-body" style="padding: 2rem;">
-                        <div style="display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: start;">
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                                    <h3 style="margin: 0; color: var(--primary-color);">Lote 3</h3>
-                                    <div class="badge" style="background-color: var(--success-color); color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500;">
-                                        ATIVO
-                                    </div>
-                                    <div style="background-color: var(--light-blue); color: var(--primary-color); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500;">
-                                        98.2% Conformidade
-                                    </div>
-                                </div>
-
-                                <div style="margin-bottom: 1.5rem;">
-                                    <p style="margin: 0; color: var(--gray-600);">
-                                        <strong>Empresa Responsável:</strong> DEF Nutrição e Alimentação
-                                    </p>
-                                    <p style="margin: 0; color: var(--gray-600);">
-                                        <strong>Presídios:</strong> 3 unidades ativas
-                                    </p>
-                                    <p style="margin: 0; color: var(--gray-600);">
-                                        <strong>Última Atualização:</strong> 19/10/2025 às 11:45
-                                    </p>
-                                </div>
-
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
-                                    <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary-color);">18,920</div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Refeições/Mês</div>
-                                    </div>
-                                    <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--success-color);">1,685</div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Detentos</div>
-                                    </div>
-                                    <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--success-color);">0</div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Alertas Ativos</div>
-                                    </div>
-                                    <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary-color);">R$ 59,3K</div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Custo Estimado</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: stretch; min-width: 150px;">
-                                <a href="lote-detalhes.html?lote=3" class="btn btn-primary btn-sm">
-                                    📊 Ver Detalhes
-                                </a>
-                                <button class="btn btn-secondary btn-sm" onclick="importarDados(3)">
-                                    📤 Importar Dados
-                                </button>
-                                <button class="btn btn-secondary btn-sm" onclick="gerarRelatorio(3)">
-                                    📋 Relatório
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lote 4 -->
-                <div class="card fade-in lote-item" data-lote="4" data-status="ativo" data-empresa="ghi" data-conformidade="89.7">
-                    <div class="card-body" style="padding: 2rem;">
-                        <div style="display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: start;">
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                                    <h3 style="margin: 0; color: var(--primary-color);">Lote 4</h3>
-                                    <div class="badge" style="background-color: var(--success-color); color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500;">
-                                        ATIVO
-                                    </div>
-                                    <div style="background-color: #f8d7da; color: #721c24; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500;">
-                                        89.7% Conformidade
-                                    </div>
-                                </div>
-
-                                <div style="margin-bottom: 1.5rem;">
-                                    <p style="margin: 0; color: var(--gray-600);">
-                                        <strong>Empresa Responsável:</strong> GHI Catering Especializado
-                                    </p>
-                                    <p style="margin: 0; color: var(--gray-600);">
-                                        <strong>Presídios:</strong> 3 unidades ativas
-                                    </p>
-                                    <p style="margin: 0; color: var(--gray-600);">
-                                        <strong>Última Atualização:</strong> 17/10/2025 às 16:20
-                                    </p>
-                                </div>
-
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
-                                    <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary-color);">16,800</div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Refeições/Mês</div>
-                                    </div>
-                                    <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--success-color);">1,498</div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Detentos</div>
-                                    </div>
-                                    <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--danger-color);">3</div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Alertas Ativos</div>
-                                    </div>
-                                    <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary-color);">R$ 52,6K</div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Custo Estimado</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: stretch; min-width: 150px;">
-                                <a href="lote-detalhes.html?lote=4" class="btn btn-primary btn-sm">
-                                    📊 Ver Detalhes
-                                </a>
-                                <button class="btn btn-secondary btn-sm" onclick="importarDados(4)">
-                                    📤 Importar Dados
-                                </button>
-                                <button class="btn btn-secondary btn-sm" onclick="gerarRelatorio(4)">
-                                    📋 Relatório
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {% endfor %}
             </section>
         </div>
     </main>
