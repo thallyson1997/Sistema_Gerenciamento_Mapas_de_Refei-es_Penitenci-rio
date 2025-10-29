@@ -1052,12 +1052,146 @@ def lotes():
     
     # Carregar lotes do arquivo JSON
     lotes = carregar_lotes()
-    
+    mapas = carregar_mapas()
+
+    def calcular_conformidade_lote(lote):
+        lote_id = lote.get('id')
+        mapas_lote = [m for m in mapas if m.get('lote_id') == lote_id]
+        precos = lote.get('precos', {})
+        valor_total = 0
+        valor_desvio = 0
+        for mapa in mapas_lote:
+            # Soma valores esperados multiplicados pelo preço
+            campos_precos = [
+                ('cafe_interno', precos.get('cafe', {}).get('interno', 0)),
+                ('cafe_funcionario', precos.get('cafe', {}).get('funcionario', 0)),
+                ('almoco_interno', precos.get('almoco', {}).get('interno', 0)),
+                ('almoco_funcionario', precos.get('almoco', {}).get('funcionario', 0)),
+                ('lanche_interno', precos.get('lanche', {}).get('interno', 0)),
+                ('lanche_funcionario', precos.get('lanche', {}).get('funcionario', 0)),
+                ('jantar_interno', precos.get('jantar', {}).get('interno', 0)),
+                ('jantar_funcionario', precos.get('jantar', {}).get('funcionario', 0)),
+            ]
+            for campo, preco in campos_precos:
+                valores = mapa.get(campo, [])
+                valor_total += sum(valores) * preco if valores else 0
+            # Soma desvios SIISP multiplicados pelo preço (considera todos tipos)
+            n_siisp = mapa.get('n_siisp', [])
+            # Para desvio, soma todos os n_siisp multiplicados pelo preço médio das refeições
+            # (No detalhe, soma por tipo, mas aqui só tem n_siisp total, então usa média dos preços)
+            if n_siisp:
+                # Se possível, soma por tipo igual ao esperado
+                # Aqui, para cada campo, se houver campo_siisp, soma os excedentes multiplicados pelo preço
+                for idx, campo in enumerate(['cafe_interno', 'cafe_funcionario', 'almoco_interno', 'almoco_funcionario', 'lanche_interno', 'lanche_funcionario', 'jantar_interno', 'jantar_funcionario']):
+                    campo_siisp = f"{campo}_siisp"
+                    siisp_vals = mapa.get(campo_siisp, [])
+                    preco = 0
+                    if 'cafe' in campo:
+                        preco = precos.get('cafe', {}).get('interno' if 'interno' in campo else 'funcionario', 0)
+                    elif 'almoco' in campo:
+                        preco = precos.get('almoco', {}).get('interno' if 'interno' in campo else 'funcionario', 0)
+                    elif 'lanche' in campo:
+                        preco = precos.get('lanche', {}).get('interno' if 'interno' in campo else 'funcionario', 0)
+                    elif 'jantar' in campo:
+                        preco = precos.get('jantar', {}).get('interno' if 'interno' in campo else 'funcionario', 0)
+                    if siisp_vals:
+                        # Só soma excedentes positivos
+                        valor_desvio += sum([v for v in siisp_vals if v > 0]) * preco
+            # Se não houver campos_siisp, soma n_siisp total multiplicado pelo preço médio
+            elif n_siisp:
+                precos_lista = [p for _, p in campos_precos if p > 0]
+                preco_medio = sum(precos_lista) / len(precos_lista) if precos_lista else 1
+                valor_desvio += sum(n_siisp) * preco_medio
+        if valor_total > 0:
+            conformidade = ((valor_total - valor_desvio) / valor_total) * 100
+            return round(max(0, conformidade), 1)
+        return None
+
+    # Atualiza cada lote com conformidade calculada
+    for lote in lotes:
+        # Inicialização de variáveis para todos os cálculos
+        lote_id = lote.get('id')
+        mapas_lote = [m for m in mapas if m.get('lote_id') == lote_id]
+        meses_distintos = set()
+        precos = lote.get('precos', {})
+
+        # Cálculo de desvio/mês
+        valor_desvio_total = 0
+        for mapa in mapas_lote:
+            for campo, preco in [
+                ('cafe_interno_siisp', precos.get('cafe', {}).get('interno', 0)),
+                ('cafe_funcionario_siisp', precos.get('cafe', {}).get('funcionario', 0)),
+                ('almoco_interno_siisp', precos.get('almoco', {}).get('interno', 0)),
+                ('almoco_funcionario_siisp', precos.get('almoco', {}).get('funcionario', 0)),
+                ('lanche_interno_siisp', precos.get('lanche', {}).get('interno', 0)),
+                ('lanche_funcionario_siisp', precos.get('lanche', {}).get('funcionario', 0)),
+                ('jantar_interno_siisp', precos.get('jantar', {}).get('interno', 0)),
+                ('jantar_funcionario_siisp', precos.get('jantar', {}).get('funcionario', 0)),
+            ]:
+                valores = mapa.get(campo, [])
+                valor_desvio_total += sum([v for v in valores if v > 0]) * preco if valores else 0
+            # Adiciona mês/ano do mapa
+            mes = mapa.get('mes')
+            ano = mapa.get('ano')
+            if mes and ano:
+                meses_distintos.add(f"{mes:02d}/{ano}")
+        # Cálculo de meses cadastrados
+        lote['meses_cadastrados'] = len(meses_distintos)
+        if meses_distintos:
+            lote['desvio_mes'] = round(valor_desvio_total / len(meses_distintos), 2)
+        else:
+            lote['desvio_mes'] = 0
+
+        conf = calcular_conformidade_lote(lote)
+        lote['conformidade'] = conf if conf is not None else 'N/A'
+
+        # Cálculo de refeições/mês
+        total_refeicoes = 0
+        for mapa in mapas_lote:
+            for campo in [
+                'cafe_interno', 'cafe_funcionario',
+                'almoco_interno', 'almoco_funcionario',
+                'lanche_interno', 'lanche_funcionario',
+                'jantar_interno', 'jantar_funcionario'
+            ]:
+                valores = mapa.get(campo, [])
+                total_refeicoes += sum(valores) if valores else 0
+            # Adiciona mês/ano do mapa
+            mes = mapa.get('mes')
+            ano = mapa.get('ano')
+            if mes and ano:
+                meses_distintos.add(f"{mes:02d}/{ano}")
+        # Calcula refeições/mês
+        if meses_distintos:
+            lote['refeicoes_mes'] = int(total_refeicoes / len(meses_distintos))
+        else:
+            lote['refeicoes_mes'] = 0
+
+        # Cálculo de custo/mês
+        precos = lote.get('precos', {})
+        valor_total = 0
+        for mapa in mapas_lote:
+            for campo, preco in [
+                ('cafe_interno', precos.get('cafe', {}).get('interno', 0)),
+                ('cafe_funcionario', precos.get('cafe', {}).get('funcionario', 0)),
+                ('almoco_interno', precos.get('almoco', {}).get('interno', 0)),
+                ('almoco_funcionario', precos.get('almoco', {}).get('funcionario', 0)),
+                ('lanche_interno', precos.get('lanche', {}).get('interno', 0)),
+                ('lanche_funcionario', precos.get('lanche', {}).get('funcionario', 0)),
+                ('jantar_interno', precos.get('jantar', {}).get('interno', 0)),
+                ('jantar_funcionario', precos.get('jantar', {}).get('funcionario', 0)),
+            ]:
+                valores = mapa.get(campo, [])
+                valor_total += sum(valores) * preco if valores else 0
+        if meses_distintos:
+            lote['custo_mes'] = round(valor_total / len(meses_distintos), 2)
+        else:
+            lote['custo_mes'] = 0
+
     context = {
         'lotes': lotes,
         'unidades': DADOS_SIMULADOS['unidades']
     }
-    
     return render_template('lotes.html', **context)
 
 @app.route('/lote/<int:lote_id>')

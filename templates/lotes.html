@@ -46,9 +46,7 @@
                         </p>
                     </div>
                     <div style="display: flex; gap: 0.75rem;">
-                        <button class="btn btn-secondary" id="exportarDados">
-                            📊 Exportar Dados
-                        </button>
+                        <!-- Botão Exportar Dados removido -->
                         <button class="btn btn-primary" id="novoLote">
                             ➕ Novo Lote
                         </button>
@@ -126,7 +124,7 @@
             <!-- Lista de Lotes -->
             <section id="lista-lotes">
                 {% for lote in lotes %}
-                <div class="card fade-in lote-item" data-lote="{{ loop.index }}" data-status="ativo" data-empresa="{{ lote.empresa|lower }}" data-conformidade="96.8">
+                <div class="card fade-in lote-item" data-lote="{{ loop.index }}" data-status="ativo" data-empresa="{{ lote.empresa|lower }}" data-conformidade="{{ lote.conformidade }}">
                     <div class="card-body" style="padding: 2rem;">
                         <div style="display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: start;">
                             <!-- Informações principais -->
@@ -137,7 +135,7 @@
                                         ATIVO
                                     </div>
                                     <div style="background-color: var(--light-blue); color: var(--primary-color); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500;">
-                                        96.8% Conformidade
+                                        {{ lote.conformidade }}% Conformidade
                                     </div>
                                 </div>
 
@@ -156,20 +154,20 @@
                                 <!-- Estatísticas do Lote (simuladas) -->
                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
                                     <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary-color);">28,450</div>
+                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary-color);">{{ lote.refeicoes_mes }}</div>
                                         <div style="font-size: 0.75rem; color: var(--gray-600);">Refeições/Mês</div>
                                     </div>
                                     <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--success-color);">2,547</div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Detentos</div>
+                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--success-color);">R$ {{ '%.2f'|format(lote.custo_mes) }}</div>
+                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Custo/Mês</div>
                                     </div>
                                     <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--warning-color);">2</div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Alertas Ativos</div>
+                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--warning-color);">R$ {{ '%.2f'|format(lote.desvio_mes) }}</div>
+                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Desvio/Mês</div>
                                     </div>
                                     <div style="text-align: center; padding: 1rem; background-color: var(--gray-50); border-radius: var(--border-radius);">
-                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary-color);">R$ 89,2K</div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Custo Estimado</div>
+                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary-color);">{{ lote.meses_cadastrados }}</div>
+                                        <div style="font-size: 0.75rem; color: var(--gray-600);">Meses Cadastrados</div>
                                     </div>
                                 </div>
                             </div>
@@ -177,13 +175,13 @@
                             <!-- Ações -->
                             <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: stretch; min-width: 150px;">
                                 <a href="lote-detalhes.html?lote={{ loop.index }}" class="btn btn-primary btn-sm">
-                                    📊 Ver Detalhes
+                                    🔍 Ver Detalhes
                                 </a>
                                 <button class="btn btn-secondary btn-sm" onclick="importarDados({{ loop.index }})">
                                     📤 Importar Dados
                                 </button>
                                 <button class="btn btn-secondary btn-sm" onclick="gerarRelatorio({{ loop.index }})">
-                                    📋 Relatório
+                                   📊 Relatório
                                 </button>
                             </div>
                         </div>
