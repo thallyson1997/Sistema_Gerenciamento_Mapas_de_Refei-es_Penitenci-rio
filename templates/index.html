@@ -27,22 +27,22 @@
 
     <main>
         <!-- Hero Section -->
-        <section class="hero" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 4rem 0; margin-bottom: 3rem;">
+            <section class="hero hero-bg">
             <div class="container">
                 <div style="max-width: 800px; margin: 0 auto; text-align: center;">
-                    <h1 class="fade-in" style="font-size: 3rem; margin-bottom: 1rem; color: white;">
+                        <h1 class="fade-in hero-title">
                         Sistema de Gerenciamento de<br>
                         Mapas de Refeições Penitenciário
                     </h1>
-                    <p class="fade-in" style="font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.9;">
+                        <p class="fade-in hero-subtitle">
                         Modernize o controle alimentar no sistema prisional com nossa solução web integrada,
                         substituindo planilhas Excel fragmentadas por uma plataforma centralizada e eficiente.
                     </p>
-                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                        <a href="{{ url_for('login') }}" class="btn btn-lg" style="background-color: white; color: var(--primary-color); font-weight: 600;">
+                        <div class="hero-btn-group">
+                            <a href="{{ url_for('login') }}" class="btn btn-lg btn-hero-login">
                             Acessar Sistema
                         </a>
-                        <a href="{{ url_for('cadastro') }}" class="btn btn-lg btn-secondary" style="border: 2px solid white; color: white;">
+                            <a href="{{ url_for('cadastro') }}" class="btn btn-lg btn-secondary btn-hero-cadastro">
                             Cadastrar-se
                         </a>
                     </div>

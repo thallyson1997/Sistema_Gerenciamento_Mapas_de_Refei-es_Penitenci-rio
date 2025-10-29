@@ -56,29 +56,23 @@
 
             <!-- Filtros Avançados -->
             <section class="filters fade-in">
-                <h3 style="margin-bottom: 1rem;">Filtros e Pesquisa</h3>
+                <h3 style="margin-bottom: 1rem;">Filtros</h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
-                    <div>
-                        <label for="filtro-busca-lote" class="form-label">Buscar Lote/Presídio</label>
-                        <input type="text" id="filtro-busca-lote" class="form-input" placeholder="Digite o nome...">
-                    </div>
                     <div>
                         <label for="filtro-status" class="form-label">Status</label>
                         <select id="filtro-status" class="form-select">
                             <option value="">Todos os status</option>
                             <option value="ativo">Ativo</option>
                             <option value="inativo">Inativo</option>
-                            <option value="manutencao">Manutenção</option>
                         </select>
                     </div>
                     <div>
                         <label for="filtro-empresa" class="form-label">Empresa</label>
                         <select id="filtro-empresa" class="form-select">
                             <option value="">Todas as empresas</option>
-                            <option value="abc">ABC Alimentação</option>
-                            <option value="xyz">XYZ Refeições</option>
-                            <option value="def">DEF Nutrição</option>
-                            <option value="ghi">GHI Catering</option>
+                            {% for empresa in empresas %}
+                                <option value="{{ empresa|lower }}">{{ empresa }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div>
@@ -124,16 +118,22 @@
             <!-- Lista de Lotes -->
             <section id="lista-lotes">
                 {% for lote in lotes %}
-                <div class="card fade-in lote-item" data-lote="{{ loop.index }}" data-status="ativo" data-empresa="{{ lote.empresa|lower }}" data-conformidade="{{ lote.conformidade }}">
+                <div class="card fade-in lote-item" data-lote="{{ loop.index }}" data-status="{{ 'ativo' if lote.ativo else 'inativo' }}" data-empresa="{{ lote.empresa|lower }}" data-conformidade="{{ lote.conformidade }}">
                     <div class="card-body" style="padding: 2rem;">
                         <div style="display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: start;">
                             <!-- Informações principais -->
                             <div>
                                 <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
                                     <h3 style="margin: 0; color: var(--primary-color);">Lote {{ loop.index }}</h3>
+                                    {% if lote.ativo %}
                                     <div class="badge" style="background-color: var(--success-color); color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500;">
                                         ATIVO
                                     </div>
+                                    {% else %}
+                                    <div class="badge" style="background-color: var(--danger-color); color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500;">
+                                        INATIVO
+                                    </div>
+                                    {% endif %}
                                     <div style="background-color: var(--light-blue); color: var(--primary-color); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500;">
                                         {{ lote.conformidade }}% Conformidade
                                     </div>
@@ -174,15 +174,15 @@
 
                             <!-- Ações -->
                             <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: stretch; min-width: 150px;">
-                                <a href="lote-detalhes.html?lote={{ loop.index }}" class="btn btn-primary btn-sm">
+                                    <a href="{{ url_for('lote_detalhes', lote_id=lote.id) }}" class="btn btn-primary btn-sm">
                                     🔍 Ver Detalhes
                                 </a>
                                 <button class="btn btn-secondary btn-sm" onclick="importarDados({{ loop.index }})">
-                                    📤 Importar Dados
-                                </button>
-                                <button class="btn btn-secondary btn-sm" onclick="gerarRelatorio({{ loop.index }})">
-                                   📊 Relatório
-                                </button>
+                                                📤 Importar Dados
+                                          </button>
+                                          <button class="btn btn-secondary btn-sm" onclick="alert('Funcionalidade de relatório para Lote {{ loop.index }} será implementada em versões futuras.')">
+                                              📊 Relatório
+                                          </button>
                             </div>
                         </div>
                     </div>
@@ -201,45 +201,108 @@
     </footer>
 
     <script>
-        // Verificar autenticação
-        window.addEventListener('load', function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar autenticação
             const usuarioSalvo = localStorage.getItem('sgmrp_usuario');
             if (!usuarioSalvo) {
                 alert('Sessão expirada. Redirecionando para login.');
                 window.location.href = 'login.html';
                 return;
             }
-        });
 
-        // Logout
-        document.getElementById('logoutLink').addEventListener('click', function(e) {
-            e.preventDefault();
-            if (confirm('Tem certeza que deseja sair do sistema?')) {
-                localStorage.removeItem('sgmrp_usuario');
-                localStorage.removeItem('sgmrp_remember');
-                window.location.href = 'login.html';
+            // Logout
+            var logoutBtn = document.getElementById('logoutLink');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (confirm('Tem certeza que deseja sair do sistema?')) {
+                        localStorage.removeItem('sgmrp_usuario');
+                        localStorage.removeItem('sgmrp_remember');
+                        window.location.href = 'login.html';
+                    }
+                });
             }
-        });
 
-        // Busca em tempo real
-        document.getElementById('filtro-busca-lote').addEventListener('input', function() {
-            applyFilters();
-        });
+            // Busca em tempo real
+            var buscaInput = document.getElementById('filtro-busca-lote');
+            if (buscaInput) {
+                buscaInput.addEventListener('input', function() {
+                    applyFilters();
+                });
+            }
 
-        // Ordenação
-        document.getElementById('ordenacao').addEventListener('change', function() {
-            sortLotes(this.value);
-        });
+            // Ordenação
+            var ordenacaoSelect = document.getElementById('ordenacao');
+            if (ordenacaoSelect) {
+                ordenacaoSelect.addEventListener('change', function() {
+                    sortLotes(this.value);
+                });
+            }
 
-        // Aplicar filtros
-        document.getElementById('aplicarFiltros').addEventListener('click', applyFilters);
-        document.getElementById('limparFiltros').addEventListener('click', clearFilters);
+            // Aplicar filtros
+            var aplicarFiltrosBtn = document.getElementById('aplicarFiltros');
+            if (aplicarFiltrosBtn) {
+                aplicarFiltrosBtn.addEventListener('click', applyFilters);
+            }
+            var limparFiltrosBtn = document.getElementById('limparFiltros');
+            if (limparFiltrosBtn) {
+                limparFiltrosBtn.addEventListener('click', clearFilters);
+            }
+
+            // Botão Novo Lote
+            var novoLoteBtn = document.getElementById('novoLote');
+            if (novoLoteBtn) {
+                novoLoteBtn.addEventListener('click', function() {
+                    alert('Funcionalidade de criação de novo lote será implementada em versões futuras.');
+                });
+            }
+
+            // Botão Exportar Dados (se existir)
+            var exportarDadosBtn = document.getElementById('exportarDados');
+            if (exportarDadosBtn) {
+                exportarDadosBtn.addEventListener('click', function() {
+                    alert('Funcionalidade de exportação será implementada em versões futuras.\n\nFormatos disponíveis: Excel, PDF, CSV');
+                });
+            }
+
+            // Animações
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            document.querySelectorAll('.fade-in').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+
+            // Placeholder para links de relatórios e configurações
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('a[href="#relatorios"]')) {
+                    e.preventDefault();
+                    alert('Módulo de Relatórios será implementado na próxima versão do SGMRP.');
+                }
+                if (e.target.closest('a[href="#configuracoes"]')) {
+                    e.preventDefault();
+                    alert('Módulo de Configurações será implementado na próxima versão do SGMRP.');
+                }
+            });
+        });
 
         function applyFilters() {
-            const busca = document.getElementById('filtro-busca-lote').value.toLowerCase();
-            const status = document.getElementById('filtro-status').value;
-            const empresa = document.getElementById('filtro-empresa').value;
-            const conformidade = document.getElementById('filtro-conformidade').value;
+            const busca = document.getElementById('filtro-busca-lote')?.value.toLowerCase() || '';
+            const status = document.getElementById('filtro-status')?.value || '';
+            const empresa = document.getElementById('filtro-empresa')?.value || '';
+            const conformidade = document.getElementById('filtro-conformidade')?.value || '';
 
             const lotes = document.querySelectorAll('.lote-item');
             let visibleCount = 0;
@@ -287,14 +350,17 @@
                 }
             });
 
-            document.getElementById('resultados-count').textContent = visibleCount;
+            var resultadosCount = document.getElementById('resultados-count');
+            if (resultadosCount) {
+                resultadosCount.textContent = visibleCount;
+            }
         }
 
         function clearFilters() {
-            document.getElementById('filtro-busca-lote').value = '';
-            document.getElementById('filtro-status').value = '';
-            document.getElementById('filtro-empresa').value = '';
-            document.getElementById('filtro-conformidade').value = '';
+            if (document.getElementById('filtro-busca-lote')) document.getElementById('filtro-busca-lote').value = '';
+            if (document.getElementById('filtro-status')) document.getElementById('filtro-status').value = '';
+            if (document.getElementById('filtro-empresa')) document.getElementById('filtro-empresa').value = '';
+            if (document.getElementById('filtro-conformidade')) document.getElementById('filtro-conformidade').value = '';
             applyFilters();
         }
 
@@ -308,86 +374,32 @@
                         const nomeA = a.querySelector('h3').textContent;
                         const nomeB = b.querySelector('h3').textContent;
                         return nomeA.localeCompare(nomeB);
-                    
                     case 'conformidade':
                         const confA = parseFloat(a.dataset.conformidade);
                         const confB = parseFloat(b.dataset.conformidade);
                         return confB - confA; // Decrescente
-                    
                     case 'refeicoes':
-                        // Extrair número de refeições do HTML
-                        const refA = parseInt(a.querySelector('[data-refeicoes]')?.dataset.refeicoes || 
-                                           a.textContent.match(/(\d+,\d+)/)?.[1]?.replace(',', '') || '0');
-                        const refB = parseInt(b.querySelector('[data-refeicoes]')?.dataset.refeicoes || 
-                                           b.textContent.match(/(\d+,\d+)/)?.[1]?.replace(',', '') || '0');
+                        const refA = parseInt(a.querySelector('[data-refeicoes]')?.dataset.refeicoes || a.textContent.match(/(\d+,\d+)/)?.[1]?.replace(',', '') || '0');
+                        const refB = parseInt(b.querySelector('[data-refeicoes]')?.dataset.refeicoes || b.textContent.match(/(\d+,\d+)/)?.[1]?.replace(',', '') || '0');
                         return refB - refA; // Decrescente
-                    
                     case 'atualizacao':
-                        // Simulação - em app real usaria timestamp
                         return Math.random() - 0.5;
-                    
                     default:
                         return 0;
                 }
             });
 
-            // Remover todos os elementos e readicionar ordenados
             lotes.forEach(lote => container.removeChild(lote));
             lotes.forEach(lote => container.appendChild(lote));
         }
 
-        // Funções dos botões de ação
         function importarDados(loteId) {
-            window.location.href = `lote-detalhes.html?lote=${loteId}&acao=importar`;
+            alert(`Funcionalidade de importação de dados para Lote ${loteId} será implementada em versões futuras.`);
         }
 
         function gerarRelatorio(loteId) {
             alert(`Funcionalidade de relatório para Lote ${loteId} será implementada em versões futuras.`);
         }
-
-        // Botões do header
-        document.getElementById('novoLote').addEventListener('click', function() {
-            alert('Funcionalidade de criação de novo lote será implementada em versões futuras.');
-        });
-
-        document.getElementById('exportarDados').addEventListener('click', function() {
-            alert('Funcionalidade de exportação será implementada em versões futuras.\n\nFormatos disponíveis: Excel, PDF, CSV');
-        });
-
-        // Animações
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.fade-in').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(el);
-        });
-
-        // Placeholder para links de relatórios e configurações
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('a[href="#relatorios"]')) {
-                e.preventDefault();
-                alert('Módulo de Relatórios será implementado na próxima versão do SGMRP.');
-            }
-            
-            if (e.target.closest('a[href="#configuracoes"]')) {
-                e.preventDefault();
-                alert('Módulo de Configurações será implementado na próxima versão do SGMRP.');
-            }
-        });
     </script>
 </body>
 </html>

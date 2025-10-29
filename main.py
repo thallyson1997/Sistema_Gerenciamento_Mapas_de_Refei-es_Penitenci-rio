@@ -14,6 +14,9 @@ Arquivo principal da aplicação Flask
 Autor: SEAP
 Data: Outubro 2025
 """
+import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DADOS_DIR = os.path.join(BASE_DIR, 'dados')
 
 
 
@@ -64,7 +67,30 @@ def exportar_tabela():
     # Carregar modelo.xlsx
     modelo_path = os.path.join(DADOS_DIR, 'modelo.xlsx')
     wb = load_workbook(modelo_path)
-    ws1 = wb.active
+    # Seleciona a planilha COMPARATIVO
+    if 'COMPARATIVO' in wb.sheetnames:
+        ws1 = wb['COMPARATIVO']
+    else:
+        ws1 = wb.active
+        ws1.title = 'COMPARATIVO'
+
+    # Copiar conteúdo da planilha RESUMO do modelo.xlsx para a saída
+    if 'RESUMO' in wb.sheetnames:
+        ws_resumo_saida = wb['RESUMO']
+        # Carregar novamente o modelo.xlsx só para garantir que não foi alterado
+        modelo_wb = load_workbook(modelo_path)
+        if 'RESUMO' in modelo_wb.sheetnames:
+            ws_resumo_modelo = modelo_wb['RESUMO']
+            # Copiar valores e estilos básicos
+            for row in ws_resumo_modelo.iter_rows():
+                for cell in row:
+                    dest_cell = ws_resumo_saida.cell(row=cell.row, column=cell.column, value=cell.value)
+                    from copy import copy
+                    dest_cell.font = copy(cell.font)
+                    dest_cell.border = copy(cell.border)
+                    dest_cell.alignment = copy(cell.alignment)
+                    dest_cell.number_format = cell.number_format
+                    dest_cell.protection = copy(cell.protection)
 
     # Preencher preços do lote nas células M6 até T6
     # Ordem: Café Interno, Café Func., Almoço Interno, Almoço Func., Lanche Interno, Lanche Func., Jantar Interno, Jantar Func.
@@ -804,84 +830,6 @@ def atualizar_acesso_usuario(user_id, acesso):
     return None
 
 # Dados simulados temporários (até criarmos os JSONs)
-DADOS_SIMULADOS = {
-    'usuarios': [
-        {
-            'id': 1,
-            'email': 'admin@seap.gov.br',
-            'senha': 'admin123',
-            'nome': 'Administrador Sistema',
-            'perfil': 'admin'
-        }
-    ],
-    'unidades': [
-        {'id': 1, 'nome': 'Penitenciária Central', 'codigo': 'PC001'},
-        {'id': 2, 'nome': 'Penitenciária Industrial', 'codigo': 'PI002'},
-        {'id': 3, 'nome': 'Instituto Penal Feminino', 'codigo': 'IPF003'},
-    ],
-    'lotes': [
-        {
-            'id': 1,
-            'numero': 'LT-2025-001',
-            'nome': 'Lote 1',
-            'contrato': 'CT-2024-001',
-            'data_inicio_contrato': '15/01/2024',
-            'empresa': 'Empresa ABC Alimentação',
-            'presidios': 5,
-            'status': 'em_andamento',
-            'data_inicio': '2025-01-01',
-            'data_fim': '2025-01-31',
-            'refeicoes': 28450,
-            'conformidade': 96.8,
-            'alertas': 2
-        },
-        {
-            'id': 2,
-            'numero': 'LT-2025-002',
-            'nome': 'Lote 2',
-            'contrato': 'CT-2024-002',
-            'data_inicio_contrato': '01/02/2024',
-            'empresa': 'Empresa XYZ Refeições',
-            'presidios': 4,
-            'status': 'em_andamento',
-            'data_inicio': '2025-02-01',
-            'data_fim': '2025-02-28',
-            'refeicoes': 22180,
-            'conformidade': 91.5,
-            'alertas': 4
-        },
-        {
-            'id': 3,
-            'numero': 'LT-2025-003',
-            'nome': 'Lote 3',
-            'contrato': 'CT-2024-003',
-            'data_inicio_contrato': '10/03/2024',
-            'empresa': 'Empresa DEF Nutrição',
-            'presidios': 3,
-            'status': 'em_andamento',
-            'data_inicio': '2025-03-01',
-            'data_fim': '2025-03-31',
-            'refeicoes': 18920,
-            'conformidade': 98.2,
-            'alertas': 0
-        },
-        {
-            'id': 4,
-            'numero': 'LT-2025-004',
-            'nome': 'Lote 4',
-            'contrato': 'CT-2023-018',
-            'data_inicio_contrato': '22/11/2023',
-            'empresa': 'Empresa GHI Catering',
-            'presidios': 3,
-            'status': 'em_andamento',
-            'data_inicio': '2025-04-01',
-            'data_fim': '2025-04-30',
-            'refeicoes': 16800,
-            'conformidade': 89.7,
-            'alertas': 3
-        }
-    ]
-}
 
 # ===== ROTAS DA APLICAÇÃO =====
 
@@ -1188,9 +1136,11 @@ def lotes():
         else:
             lote['custo_mes'] = 0
 
+    empresas = sorted(set(lote.get('empresa', '').strip() for lote in lotes if lote.get('empresa')))
     context = {
         'lotes': lotes,
-        'unidades': DADOS_SIMULADOS['unidades']
+        'unidades': carregar_unidades(),
+        'empresas': empresas
     }
     return render_template('lotes.html', **context)
 

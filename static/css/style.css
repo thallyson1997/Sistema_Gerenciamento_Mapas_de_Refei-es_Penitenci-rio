@@ -1,3 +1,47 @@
+/* Hero Section Refactor */
+.hero-bg {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 4rem 0;
+    margin-bottom: 3rem;
+}
+
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.hero-title {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: white;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+.hero-btn-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-hero-login {
+    background-color: white;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.btn-hero-cadastro {
+    border: 2px solid white;
+    color: white;
+    background-color: var(--primary-color);
+}
 /* =============================================
    SGMRP - Sistema de Gerenciamento de Mapas de Refeições Penitenciário
    Estilos principais - CSS responsivo
