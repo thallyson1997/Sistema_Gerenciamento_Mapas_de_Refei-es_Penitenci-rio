@@ -24,7 +24,11 @@ from functions.utils import (
     adicionar_usuario,
     buscar_usuario_por_email_ou_usuario,
     validar_dados_unicos,
-    atualizar_acesso_usuario
+    atualizar_acesso_usuario,
+    filtro_mapa,
+    int_to_roman,
+    data_br_to_iso,
+    calcular_conformidade_lote
 )
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
@@ -63,25 +67,7 @@ def exportar_tabela():
     precos = lote.get('precos', {}) if lote else {}
 
     # Filtrar mapas conforme filtros
-    def filtro_mapa(m):
-        if m['lote_id'] != lote_id:
-            return False
-        if unidades_list and m.get('nome_unidade') not in unidades_list:
-            return False
-        if data_inicio and data_fim:
-            # Verifica se há datas dentro do intervalo
-            datas = m.get('data', [])
-            if not datas:
-                return False
-            # Assume datas no formato DD/MM/YYYY
-            def data_br_to_iso(d):
-                d = d.split('/')
-                return f"{d[2]}-{d[1].zfill(2)}-{d[0].zfill(2)}"
-            datas_iso = [data_br_to_iso(d) for d in datas]
-            if not any(data_inicio <= d <= data_fim for d in datas_iso):
-                return False
-        return True
-    mapas_filtrados = [m for m in mapas if filtro_mapa(m)]
+    mapas_filtrados = [m for m in mapas if filtro_mapa(m, lote_id, unidades_list, data_inicio, data_fim)]
 
     # Gerar Excel
     from openpyxl import load_workbook
@@ -97,9 +83,304 @@ def exportar_tabela():
 
     # Copiar conteúdo da planilha RESUMO do modelo.xlsx para a saída
     if 'RESUMO' in wb.sheetnames:
+        # Preenche B8 com o número do contrato do lote
+        contrato_numero = lote.get('contrato', '') if lote else ''
         ws_resumo_saida = wb['RESUMO']
-        # Adiciona o texto "Olá, Mundo!" na célula A1 da planilha RESUMO
-        ws_resumo_saida['A1'] = "Olá, Mundo!"
+        ws_resumo_saida['B8'] = f"CONTRATO : {contrato_numero}"
+        ws_resumo_saida = wb['RESUMO']
+        # Preenche B7 com o texto dinâmico solicitado
+        empresa_nome = lote.get('empresa', '') if lote else ''
+        mes = None
+        ano = None
+        if mapas_filtrados:
+            mes = mapas_filtrados[0].get('mes')
+            ano = mapas_filtrados[0].get('ano')
+        # Mês em português
+        meses_pt = [
+            '', 'JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO',
+            'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'
+        ]
+        mes_nome = meses_pt[mes] if mes and 1 <= mes <= 12 else ''
+        # Lote em romano
+        lote_romano = int_to_roman(lote_id) if lote_id else ''
+        texto_resumo = f"RESUMO FINAL LOTE {lote_romano} - EMPRESA {empresa_nome} - {mes_nome} {ano}".upper()
+        ws_resumo_saida['B7'] = texto_resumo
+
+        # Desmesclar todas as células mescladas que envolvem linha 13 ou abaixo nas colunas B a K (2 a 11)
+        for merged_range in list(ws_resumo_saida.merged_cells.ranges):
+            min_col = merged_range.min_col
+            max_col = merged_range.max_col
+            min_row = merged_range.min_row
+            max_row = merged_range.max_row
+            # Se QUALQUER parte do range está em linha 13 ou abaixo E coluna B a K
+            if max_row >= 13 and min_col >= 2 and max_col <= 11:
+                ws_resumo_saida.unmerge_cells(str(merged_range))
+        # Inserir linhas e preencher valores conforme quantidade de unidades filtradas
+        quantidade_unidades = len(unidades_list) if unidades_list else len(obter_unidades_do_lote(lote_id))
+        valores = list(range(1, quantidade_unidades + 1))
+        from copy import copy
+        estilo_b11 = ws_resumo_saida['B11']
+        if unidades_list:
+            nomes_unidades = unidades_list
+        else:
+            unidades_lote = obter_unidades_do_lote(lote_id)
+            # Se for lista de dicts, extrai nome; se for lista de strings, usa direto
+            if unidades_lote and isinstance(unidades_lote[0], dict):
+                nomes_unidades = [u.get('nome', '') for u in unidades_lote]
+            else:
+                nomes_unidades = unidades_lote
+        if quantidade_unidades == 1:
+            # B11: número, C11: nome da unidade
+            # Preencher B11:K11 com valores e estilo de B9
+            cell_b = ws_resumo_saida['B11']
+            cell_b.value = 1
+            cell_b.font = copy(estilo_b11.font)
+            cell_b.border = copy(estilo_b11.border)
+            cell_b.alignment = copy(estilo_b11.alignment)
+            cell_b.number_format = estilo_b11.number_format
+            cell_b.protection = copy(estilo_b11.protection)
+
+            # C11: nome da unidade
+            cell_c = ws_resumo_saida['C11']
+            cell_c.value = nomes_unidades[0] if nomes_unidades else ''
+            cell_c.font = copy(estilo_b11.font)
+            cell_c.border = copy(estilo_b11.border)
+            cell_c.alignment = copy(estilo_b11.alignment)
+            cell_c.number_format = estilo_b11.number_format
+            cell_c.protection = copy(estilo_b11.protection)
+
+            # D11: quantidade de café dos internos e E-K: refeições
+            colunas_refeicoes = [
+                ('cafe_interno', 'D'),
+                ('cafe_funcionario', 'E'),
+                ('almoco_interno', 'F'),
+                ('almoco_funcionario', 'G'),
+                ('lanche_interno', 'H'),
+                ('lanche_funcionario', 'I'),
+                ('jantar_interno', 'J'),
+                ('jantar_funcionario', 'K')
+            ]
+            for campo, col in colunas_refeicoes:
+                valor_ref = 0
+                if mapas_filtrados:
+                    nome_unidade = nomes_unidades[0] if nomes_unidades else ''
+                    mapa_ref = next((m for m in mapas_filtrados if m.get('nome_unidade') == nome_unidade), None)
+                    if mapa_ref:
+                        valor_ref = sum(mapa_ref.get(campo, []) or [])
+                cell = ws_resumo_saida[f'{col}11']
+                cell.value = valor_ref
+                cell.font = copy(estilo_b11.font)
+                cell.border = copy(estilo_b11.border)
+                cell.alignment = copy(estilo_b11.alignment)
+                cell.number_format = estilo_b11.number_format
+                cell.protection = copy(estilo_b11.protection)
+
+            # Remesclar células de B13 até B16
+            linha_inicio_merge = 13
+            ws_resumo_saida.merge_cells(start_row=linha_inicio_merge, start_column=2, end_row=linha_inicio_merge+3, end_column=2)
+
+            # Preencher preços do lote na linha correta (D13-K13 para 1 unidade)
+            precos_ordem_resumo = [
+                ('cafe', 'interno'),
+                ('cafe', 'funcionario'),
+                ('almoco', 'interno'),
+                ('almoco', 'funcionario'),
+                ('lanche', 'interno'),
+                ('lanche', 'funcionario'),
+                ('jantar', 'interno'),
+                ('jantar', 'funcionario')
+            ]
+            linha_precos = 13  # Para 1 unidade
+            for col_offset, (ref, tipo) in enumerate(precos_ordem_resumo):
+                col_precos = 4 + col_offset  # D=4, E=5, ..., K=11
+                valor_preco = precos.get(ref, {}).get(tipo, None)
+                cell = ws_resumo_saida.cell(row=linha_precos, column=col_precos, value=valor_preco)
+                cell_modelo = ws_resumo_saida.cell(row=13, column=4)
+                from copy import copy
+                cell.font = copy(cell_modelo.font)
+                cell.border = copy(cell_modelo.border)
+                cell.alignment = copy(cell_modelo.alignment)
+                cell.number_format = cell_modelo.number_format
+                cell.protection = copy(cell_modelo.protection)
+
+            # Preencher soma total de cada tipo de refeição nas colunas D-K na linha 14
+            colunas_refeicoes = [
+                ('cafe_interno', 4),
+                ('cafe_funcionario', 5),
+                ('almoco_interno', 6),
+                ('almoco_funcionario', 7),
+                ('lanche_interno', 8),
+                ('lanche_funcionario', 9),
+                ('jantar_interno', 10),
+                ('jantar_funcionario', 11)
+            ]
+            for campo, col_idx in colunas_refeicoes:
+                soma_total = 0
+                for nome_unidade in nomes_unidades:
+                    mapa_ref = next((m for m in mapas_filtrados if m.get('nome_unidade') == nome_unidade), None)
+                    if mapa_ref:
+                        soma_total += sum(mapa_ref.get(campo, []) or [])
+                cell_soma = ws_resumo_saida.cell(row=14, column=col_idx, value=soma_total)
+                cell_modelo = ws_resumo_saida.cell(row=14, column=col_idx)
+                from copy import copy
+                cell_soma.font = copy(cell_modelo.font)
+                cell_soma.border = copy(cell_modelo.border)
+                cell_soma.alignment = copy(cell_modelo.alignment)
+                cell_soma.number_format = cell_modelo.number_format
+                cell_soma.protection = copy(cell_modelo.protection)
+
+            # Preencher D15:K15 com o produto das células de D13:K13 (preços) e D14:K14 (somas)
+            for col_idx in range(4, 12):  # D=4, ..., K=11
+                preco = ws_resumo_saida.cell(row=13, column=col_idx).value
+                soma = ws_resumo_saida.cell(row=14, column=col_idx).value
+                produto = (preco if preco else 0) * (soma if soma else 0)
+                cell_produto = ws_resumo_saida.cell(row=15, column=col_idx, value=produto)
+                cell_modelo = ws_resumo_saida.cell(row=15, column=4)
+                cell_produto.font = copy(cell_modelo.font)
+                cell_produto.border = copy(cell_modelo.border)
+                cell_produto.alignment = copy(cell_modelo.alignment)
+                cell_produto.number_format = cell_modelo.number_format
+                cell_produto.protection = copy(cell_modelo.protection)
+
+            # Mesclar D16:K16 e preencher D16 com a soma de D15:K15
+            ws_resumo_saida.merge_cells('D16:K16')
+            soma_produtos = sum(ws_resumo_saida.cell(row=15, column=col_idx).value or 0 for col_idx in range(4, 12))
+            cell_soma_merged = ws_resumo_saida['D16']
+            cell_modelo = ws_resumo_saida.cell(row=16, column=4)
+            cell_soma_merged.value = soma_produtos
+            cell_soma_merged.font = copy(cell_modelo.font)
+            cell_soma_merged.border = copy(cell_modelo.border)
+            cell_soma_merged.alignment = copy(cell_modelo.alignment)
+            cell_soma_merged.number_format = cell_modelo.number_format
+            cell_soma_merged.protection = copy(cell_modelo.protection)
+        else:
+            ws_resumo_saida.insert_rows(11, amount=len(valores)-1)
+            for idx, valor in enumerate(valores):
+                # B: número
+                cell_b = ws_resumo_saida[f'B{11 + idx}']
+                cell_b.value = valor
+                cell_b.font = copy(estilo_b11.font)
+                cell_b.border = copy(estilo_b11.border)
+                cell_b.alignment = copy(estilo_b11.alignment)
+                cell_b.number_format = estilo_b11.number_format
+                cell_b.protection = copy(estilo_b11.protection)
+
+                # C: nome da unidade
+                cell_c = ws_resumo_saida[f'C{11 + idx}']
+                cell_c.value = nomes_unidades[idx] if idx < len(nomes_unidades) else ''
+                cell_c.font = copy(estilo_b11.font)
+                cell_c.border = copy(estilo_b11.border)
+                cell_c.alignment = copy(estilo_b11.alignment)
+                cell_c.number_format = estilo_b11.number_format
+                cell_c.protection = copy(estilo_b11.protection)
+
+                # D: quantidade de café dos internos e E-K: refeições
+                colunas_refeicoes = [
+                    ('cafe_interno', 'D'),
+                    ('cafe_funcionario', 'E'),
+                    ('almoco_interno', 'F'),
+                    ('almoco_funcionario', 'G'),
+                    ('lanche_interno', 'H'),
+                    ('lanche_funcionario', 'I'),
+                    ('jantar_interno', 'J'),
+                    ('jantar_funcionario', 'K')
+                ]
+                for campo, col in colunas_refeicoes:
+                    valor_ref = 0
+                    if mapas_filtrados:
+                        nome_unidade = nomes_unidades[idx] if idx < len(nomes_unidades) else ''
+                        mapa_ref = next((m for m in mapas_filtrados if m.get('nome_unidade') == nome_unidade), None)
+                        if mapa_ref:
+                            valor_ref = sum(mapa_ref.get(campo, []) or [])
+                    cell = ws_resumo_saida[f'{col}{11 + idx}']
+                    cell.value = valor_ref
+                    cell.font = copy(estilo_b11.font)
+                    cell.border = copy(estilo_b11.border)
+                    cell.alignment = copy(estilo_b11.alignment)
+                    cell.number_format = estilo_b11.number_format
+                    cell.protection = copy(estilo_b11.protection)
+
+            # Remesclar células de B16 até B19 (B16 = B13 + len(valores) - 1)
+            linha_inicio_merge = 13 + len(valores) - 1
+            ws_resumo_saida.merge_cells(start_row=linha_inicio_merge, start_column=2, end_row=linha_inicio_merge+3, end_column=2)
+
+            # Preencher preços do lote na linha correta (D14-K14 para 2 unidades, D15-K15 para 3, ...)
+            precos_ordem_resumo = [
+                ('cafe', 'interno'),
+                ('cafe', 'funcionario'),
+                ('almoco', 'interno'),
+                ('almoco', 'funcionario'),
+                ('lanche', 'interno'),
+                ('lanche', 'funcionario'),
+                ('jantar', 'interno'),
+                ('jantar', 'funcionario')
+            ]
+            linha_precos = 13 + (quantidade_unidades - 1)
+            for col_offset, (ref, tipo) in enumerate(precos_ordem_resumo):
+                col_precos = 4 + col_offset  # D=4, E=5, ..., K=11
+                valor_preco = precos.get(ref, {}).get(tipo, None)
+                cell = ws_resumo_saida.cell(row=linha_precos, column=col_precos, value=valor_preco)
+                cell_modelo = ws_resumo_saida.cell(row=13 + (quantidade_unidades - 1), column=4)
+                from copy import copy
+                cell.font = copy(cell_modelo.font)
+                cell.border = copy(cell_modelo.border)
+                cell.alignment = copy(cell_modelo.alignment)
+                cell.number_format = cell_modelo.number_format
+                cell.protection = copy(cell_modelo.protection)
+
+            # Preencher soma total de cada tipo de refeição nas colunas D-K na linha correta
+            linha_soma = 13 + quantidade_unidades  # D14 para 1 unidade, D15 para 2, ...
+            colunas_refeicoes = [
+                ('cafe_interno', 4),
+                ('cafe_funcionario', 5),
+                ('almoco_interno', 6),
+                ('almoco_funcionario', 7),
+                ('lanche_interno', 8),
+                ('lanche_funcionario', 9),
+                ('jantar_interno', 10),
+                ('jantar_funcionario', 11)
+            ]
+            for campo, col_idx in colunas_refeicoes:
+                soma_total = 0
+                for nome_unidade in nomes_unidades:
+                    mapa_ref = next((m for m in mapas_filtrados if m.get('nome_unidade') == nome_unidade), None)
+                    if mapa_ref:
+                        soma_total += sum(mapa_ref.get(campo, []) or [])
+                cell_soma = ws_resumo_saida.cell(row=linha_soma, column=col_idx, value=soma_total)
+                cell_modelo = ws_resumo_saida.cell(row=14 + quantidade_unidades - 1, column=col_idx)
+                from copy import copy
+                cell_soma.font = copy(cell_modelo.font)
+                cell_soma.border = copy(cell_modelo.border)
+                cell_soma.alignment = copy(cell_modelo.alignment)
+                cell_soma.number_format = cell_modelo.number_format
+                cell_soma.protection = copy(cell_modelo.protection)
+            
+            # Preencher Dn:Kn com o produto das células de Dn-1:Kn-1 (preços) e D14n-2:K14n-2 (somas)
+            for col_idx in range(4, 12):  # D=4, ..., K=11
+                preco = ws_resumo_saida.cell(row=13+quantidade_unidades-1, column=col_idx).value
+                soma = ws_resumo_saida.cell(row=14+quantidade_unidades-1, column=col_idx).value
+                produto = (preco if preco else 0) * (soma if soma else 0)
+                cell_produto = ws_resumo_saida.cell(row=15+quantidade_unidades-1, column=col_idx, value=produto)
+                cell_modelo = ws_resumo_saida.cell(row=15 + quantidade_unidades - 1, column=col_idx)
+                cell_produto.font = copy(cell_modelo.font)
+                cell_produto.border = copy(cell_modelo.border)
+                cell_produto.alignment = copy(cell_modelo.alignment)
+                cell_produto.number_format = cell_modelo.number_format
+                cell_produto.protection = copy(cell_modelo.protection)
+            
+            # Mesclar Dn:Kn e preencher Dn com a soma de Dn-1:Kn-1
+            cell_init = f'D{16 + quantidade_unidades - 1}'
+            cell_end = f'K{16 + quantidade_unidades - 1}'
+            ws_resumo_saida.merge_cells(f'{cell_init}:{cell_end}')
+            soma_produtos = sum(ws_resumo_saida.cell(row=15 + quantidade_unidades - 1, column=col_idx).value or 0 for col_idx in range(4, 12))
+            cell_soma_merged = ws_resumo_saida[cell_init]
+            cell_modelo = ws_resumo_saida.cell(row=16 + quantidade_unidades - 1, column=4)
+            cell_soma_merged.value = soma_produtos
+            cell_soma_merged.font = copy(cell_modelo.font)
+            cell_soma_merged.border = copy(cell_modelo.border)
+            cell_soma_merged.alignment = copy(cell_modelo.alignment)
+            cell_soma_merged.number_format = cell_modelo.number_format
+            cell_soma_merged.protection = copy(cell_modelo.protection)
 
     # Preencher preços do lote nas células M6 até T6
     # Ordem: Café Interno, Café Func., Almoço Interno, Almoço Func., Lanche Interno, Lanche Func., Jantar Interno, Jantar Func.
@@ -177,12 +458,6 @@ def exportar_tabela():
             'number_format': primeira_unidade.number_format,
             'protection': copy(primeira_unidade.protection)
         }
-
-    # Função para converter data para ISO (YYYY-MM-DD)
-    def data_br_to_iso(d):
-        d = d.split('/')
-        return f"{d[2]}-{d[1].zfill(2)}-{d[0].zfill(2)}"
-
 
     # Preencher LOCAÇÃO, UNIDADE e SIISP (coluna C) a partir da linha 12
     linha = 12
@@ -501,58 +776,6 @@ def lotes():
     lotes = carregar_lotes()
     mapas = carregar_mapas()
 
-    def calcular_conformidade_lote(lote):
-        lote_id = lote.get('id')
-        mapas_lote = [m for m in mapas if m.get('lote_id') == lote_id]
-        precos = lote.get('precos', {})
-        valor_total = 0
-        valor_desvio = 0
-        for mapa in mapas_lote:
-            # Soma valores esperados multiplicados pelo preço
-            campos_precos = [
-                ('cafe_interno', precos.get('cafe', {}).get('interno', 0)),
-                ('cafe_funcionario', precos.get('cafe', {}).get('funcionario', 0)),
-                ('almoco_interno', precos.get('almoco', {}).get('interno', 0)),
-                ('almoco_funcionario', precos.get('almoco', {}).get('funcionario', 0)),
-                ('lanche_interno', precos.get('lanche', {}).get('interno', 0)),
-                ('lanche_funcionario', precos.get('lanche', {}).get('funcionario', 0)),
-                ('jantar_interno', precos.get('jantar', {}).get('interno', 0)),
-                ('jantar_funcionario', precos.get('jantar', {}).get('funcionario', 0)),
-            ]
-            for campo, preco in campos_precos:
-                valores = mapa.get(campo, [])
-                valor_total += sum(valores) * preco if valores else 0
-            # Soma desvios SIISP multiplicados pelo preço (considera todos tipos)
-            n_siisp = mapa.get('n_siisp', [])
-            # Para desvio, soma todos os n_siisp multiplicados pelo preço médio das refeições
-            # (No detalhe, soma por tipo, mas aqui só tem n_siisp total, então usa média dos preços)
-            if n_siisp:
-                # Se possível, soma por tipo igual ao esperado
-                # Aqui, para cada campo, se houver campo_siisp, soma os excedentes multiplicados pelo preço
-                for idx, campo in enumerate(['cafe_interno', 'cafe_funcionario', 'almoco_interno', 'almoco_funcionario', 'lanche_interno', 'lanche_funcionario', 'jantar_interno', 'jantar_funcionario']):
-                    campo_siisp = f"{campo}_siisp"
-                    siisp_vals = mapa.get(campo_siisp, [])
-                    preco = 0
-                    if 'cafe' in campo:
-                        preco = precos.get('cafe', {}).get('interno' if 'interno' in campo else 'funcionario', 0)
-                    elif 'almoco' in campo:
-                        preco = precos.get('almoco', {}).get('interno' if 'interno' in campo else 'funcionario', 0)
-                    elif 'lanche' in campo:
-                        preco = precos.get('lanche', {}).get('interno' if 'interno' in campo else 'funcionario', 0)
-                    elif 'jantar' in campo:
-                        preco = precos.get('jantar', {}).get('interno' if 'interno' in campo else 'funcionario', 0)
-                    if siisp_vals:
-                        # Só soma excedentes positivos
-                        valor_desvio += sum([v for v in siisp_vals if v > 0]) * preco
-            # Se não houver campos_siisp, soma n_siisp total multiplicado pelo preço médio
-            elif n_siisp:
-                precos_lista = [p for _, p in campos_precos if p > 0]
-                preco_medio = sum(precos_lista) / len(precos_lista) if precos_lista else 1
-                valor_desvio += sum(n_siisp) * preco_medio
-        if valor_total > 0:
-            conformidade = ((valor_total - valor_desvio) / valor_total) * 100
-            return round(max(0, conformidade), 1)
-        return None
 
     # Atualiza cada lote com conformidade calculada
     for lote in lotes:
@@ -1334,11 +1557,6 @@ def api_lotes():
     """API para listar lotes (JSON)"""
     lotes = carregar_lotes()
     return jsonify(lotes)
-
-@app.route('/api/unidades')
-def api_unidades():
-    """API para listar unidades (JSON)"""
-    return jsonify(DADOS_SIMULADOS['unidades'])
 
 @app.route('/api/usuarios')
 def api_usuarios():

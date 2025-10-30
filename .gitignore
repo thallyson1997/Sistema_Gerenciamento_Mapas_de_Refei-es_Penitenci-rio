@@ -228,3 +228,10 @@ Temporary Items
 .directory
 .Trash-*
 .nfs*
+
+# ==========================================
+# NÃO IGNORAR NADA ABAIXO DESTA LINHA
+# ==========================================
+!dados/modelo.xlsx
+!dados/dados.txt
+!dados/dados_siisp_exemplo.txt

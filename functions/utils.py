@@ -1,3 +1,94 @@
+# Função para calcular conformidade do lote (migrada de main.py)
+def calcular_conformidade_lote(lote, mapas=None):
+	"""
+	Calcula a conformidade do lote considerando os mapas e preços.
+	Se mapas não for fornecido, carrega todos os mapas do sistema.
+	"""
+	if mapas is None:
+		mapas = carregar_mapas()
+	lote_id = lote.get('id')
+	mapas_lote = [m for m in mapas if m.get('lote_id') == lote_id]
+	precos = lote.get('precos', {})
+	valor_total = 0
+	valor_desvio = 0
+	for mapa in mapas_lote:
+		# Soma valores esperados multiplicados pelo preço
+		campos_precos = [
+			('cafe_interno', precos.get('cafe', {}).get('interno', 0)),
+			('cafe_funcionario', precos.get('cafe', {}).get('funcionario', 0)),
+			('almoco_interno', precos.get('almoco', {}).get('interno', 0)),
+			('almoco_funcionario', precos.get('almoco', {}).get('funcionario', 0)),
+			('lanche_interno', precos.get('lanche', {}).get('interno', 0)),
+			('lanche_funcionario', precos.get('lanche', {}).get('funcionario', 0)),
+			('jantar_interno', precos.get('jantar', {}).get('interno', 0)),
+			('jantar_funcionario', precos.get('jantar', {}).get('funcionario', 0)),
+		]
+		for campo, preco in campos_precos:
+			valores = mapa.get(campo, [])
+			valor_total += sum(valores) * preco if valores else 0
+		# Soma desvios SIISP multiplicados pelo preço (considera todos tipos)
+		n_siisp = mapa.get('n_siisp', [])
+		# Para desvio, soma todos os n_siisp multiplicados pelo preço médio das refeições
+		# (No detalhe, soma por tipo, mas aqui só tem n_siisp total, então usa média dos preços)
+		if n_siisp:
+			# Se possível, soma por tipo igual ao esperado
+			# Aqui, para cada campo, se houver campo_siisp, soma os excedentes multiplicados pelo preço
+			for idx, campo in enumerate(['cafe_interno', 'cafe_funcionario', 'almoco_interno', 'almoco_funcionario', 'lanche_interno', 'lanche_funcionario', 'jantar_interno', 'jantar_funcionario']):
+				campo_siisp = f"{campo}_siisp"
+				siisp_vals = mapa.get(campo_siisp, [])
+				preco = 0
+				if 'cafe' in campo:
+					preco = precos.get('cafe', {}).get('interno' if 'interno' in campo else 'funcionario', 0)
+				elif 'almoco' in campo:
+					preco = precos.get('almoco', {}).get('interno' if 'interno' in campo else 'funcionario', 0)
+				elif 'lanche' in campo:
+					preco = precos.get('lanche', {}).get('interno' if 'interno' in campo else 'funcionario', 0)
+				elif 'jantar' in campo:
+					preco = precos.get('jantar', {}).get('interno' if 'interno' in campo else 'funcionario', 0)
+				if siisp_vals:
+					# Só soma excedentes positivos
+					valor_desvio += sum([v for v in siisp_vals if v > 0]) * preco
+		# Se não houver campos_siisp, soma n_siisp total multiplicado pelo preço médio
+		elif n_siisp:
+			precos_lista = [p for _, p in campos_precos if p > 0]
+			preco_medio = sum(precos_lista) / len(precos_lista) if precos_lista else 1
+			valor_desvio += sum(n_siisp) * preco_medio
+	if valor_total > 0:
+		conformidade = ((valor_total - valor_desvio) / valor_total) * 100
+		return round(max(0, conformidade), 1)
+	return None
+def data_br_to_iso(d):
+	d = d.split('/')
+	return f"{d[2]}-{d[1].zfill(2)}-{d[0].zfill(2)}"
+def int_to_roman(num):
+	val = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
+	syms = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I']
+	roman_num = ''
+	i = 0
+	while num > 0:
+		for _ in range(num // val[i]):
+			roman_num += syms[i]
+			num -= val[i]
+		i += 1
+	return roman_num
+def filtro_mapa(m, lote_id, unidades_list, data_inicio, data_fim):
+	if m['lote_id'] != lote_id:
+		return False
+	if unidades_list and m.get('nome_unidade') not in unidades_list:
+		return False
+	if data_inicio and data_fim:
+		# Verifica se há datas dentro do intervalo
+		datas = m.get('data', [])
+		if not datas:
+			return False
+		# Assume datas no formato DD/MM/YYYY
+		def data_br_to_iso(d):
+			d = d.split('/')
+			return f"{d[2]}-{d[1].zfill(2)}-{d[0].zfill(2)}"
+		datas_iso = [data_br_to_iso(d) for d in datas]
+		if not any(data_inicio <= d <= data_fim for d in datas_iso):
+			return False
+	return True
 # Funções auxiliares movidas de main.py
 import os
 import json
