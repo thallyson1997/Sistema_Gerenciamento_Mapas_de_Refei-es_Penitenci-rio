@@ -43,8 +43,6 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DADOS_DIR = os.path.join(BASE_DIR, 'dados')
 
-
-
 # Configuração da aplicação Flask
 app = Flask(__name__)
 app.secret_key = 'sgmrp_seap_2025_secret_key_desenvolvimento'  # Em produção, usar variável de ambiente
@@ -723,6 +721,7 @@ def cadastro():
             if novo_usuario:
                 flash(f'Cadastro realizado com sucesso! Aguarde liberação de acesso.', 'success')
                 print(f"✅ Novo usuário cadastrado:")
+                print(f"   ID: {str(novo_usuario.get('id', ''))}")
                 print(f"   Nome: {novo_usuario['nome']}")
                 print(f"   Email: {novo_usuario['email']}")
                 print(f"   Usuário: {novo_usuario['usuario']}")
@@ -1684,9 +1683,7 @@ if __name__ == '__main__':
     migrar_dados_existentes()
     
     print("🔗 Acesse: http://localhost:5000")
-    print("👤 Admin: admin@seap.gov.br (ou 'admin') | Senha: admin123")
-    print("📋 Usuários: /admin/usuarios (apenas admin)")
-    print("📝 Cadastros salvos em: dados/usuarios.json")
+    print("📝 Cadastros de usuários salvos no Firestore (coleção 'usuarios')")
     print("-" * 60)
     
     # Executar aplicação

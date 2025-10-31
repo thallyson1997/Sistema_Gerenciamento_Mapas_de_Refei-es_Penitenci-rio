@@ -8,6 +8,7 @@ dados/usuarios.json
 dados/unidades.json
 dados/lotes.json
 dados/backup_*.json
+dados/serviceAccountKey.json
 
 # Logs que podem conter informações sensíveis
 *.log

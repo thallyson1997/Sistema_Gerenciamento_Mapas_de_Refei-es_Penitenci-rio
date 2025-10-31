@@ -94,6 +94,7 @@ import os
 import json
 import calendar
 from datetime import datetime
+from .firestore_utils import carregar_firestore, salvar_firestore
 
 def carregar_dados_json(arquivo):
 	DADOS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'dados')
@@ -119,12 +120,25 @@ def salvar_dados_json(arquivo, dados):
 		return False
 
 def carregar_usuarios():
-	dados = carregar_dados_json('usuarios.json')
-	return dados.get('usuarios', [])
+	"""
+	Carrega todos os usuários da coleção 'usuarios' do Firestore.
+	"""
+	return carregar_firestore('usuarios')
 
 def salvar_usuarios(usuarios):
-	dados = {'usuarios': usuarios}
-	return salvar_dados_json('usuarios.json', dados)
+	"""
+	Salva lista de usuários na coleção 'usuarios' do Firestore.
+	Remove todos os documentos existentes e insere os novos.
+	"""
+	# Para garantir que não haja duplicidade, pode-se apagar todos e inserir novamente (alternativamente, atualizar individualmente)
+	# Aqui, para simplificar, remove todos e insere todos (pode ser otimizado depois)
+	from .firestore_utils import db
+	colecao_ref = db.collection('usuarios')
+	# Apaga todos os documentos existentes
+	for doc in colecao_ref.stream():
+		colecao_ref.document(doc.id).delete()
+	# Insere todos os usuários
+	return salvar_firestore('usuarios', usuarios)
 
 def carregar_lotes():
 	dados = carregar_dados_json('lotes.json')
@@ -372,8 +386,13 @@ def obter_mapas_do_lote(lote_id, mes=None, ano=None):
 	return mapas_lote
 
 def adicionar_usuario(dados_usuario):
+	"""
+	Adiciona um novo usuário na coleção 'usuarios' do Firestore.
+	"""
 	usuarios = carregar_usuarios()
-	proximo_id = max([u.get('id', 0) for u in usuarios], default=0) + 1
+	# Garante que só ids inteiros sejam usados para calcular o próximo id
+	ids_validos = [u.get('id', 0) for u in usuarios if isinstance(u.get('id', 0), int)]
+	proximo_id = (max(ids_validos) if ids_validos else 0) + 1
 	novo_usuario = {
 		'id': proximo_id,
 		'nome': dados_usuario.get('nome', '').strip(),
@@ -390,12 +409,17 @@ def adicionar_usuario(dados_usuario):
 		'data_cadastro': datetime.now().isoformat() + 'Z',
 		'acesso': False
 	}
-	usuarios.append(novo_usuario)
-	if salvar_usuarios(usuarios):
+	# Salva diretamente no Firestore
+	ids = salvar_firestore('usuarios', novo_usuario)
+	if ids:
+		novo_usuario['firestore_id'] = ids[0]
 		return novo_usuario
 	return None
 
 def buscar_usuario_por_email_ou_usuario(identificador):
+	"""
+	Busca usuário por email ou nome de usuário na coleção 'usuarios' do Firestore.
+	"""
 	usuarios = carregar_usuarios()
 	identificador = identificador.lower().strip()
 	return next((u for u in usuarios if 
@@ -403,6 +427,9 @@ def buscar_usuario_por_email_ou_usuario(identificador):
 				u.get('usuario', '').lower() == identificador), None)
 
 def validar_dados_unicos(dados_usuario, usuario_id=None):
+	"""
+	Valida dados únicos do usuário na coleção 'usuarios' do Firestore.
+	"""
 	usuarios = carregar_usuarios()
 	erros = []
 	if usuario_id:
@@ -425,10 +452,19 @@ def validar_dados_unicos(dados_usuario, usuario_id=None):
 	return erros
 
 def atualizar_acesso_usuario(user_id, acesso):
-	usuarios = carregar_usuarios()
-	for usuario in usuarios:
-		if usuario['id'] == user_id:
-			usuario['acesso'] = acesso
-			if salvar_usuarios(usuarios):
-				return usuario
+	"""
+	Atualiza o campo 'acesso' de um usuário na coleção 'usuarios' do Firestore.
+	"""
+	from .firestore_utils import db
+	colecao_ref = db.collection('usuarios')
+	# Busca o documento pelo campo 'id'
+	query = colecao_ref.where('id', '==', user_id).limit(1).stream()
+	doc = next(query, None)
+	if doc:
+		doc_ref = colecao_ref.document(doc.id)
+		doc_ref.update({'acesso': acesso})
+		usuario = doc.to_dict()
+		usuario['acesso'] = acesso
+		usuario['firestore_id'] = doc.id
+		return usuario
 	return None
