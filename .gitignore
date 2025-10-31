@@ -4,12 +4,10 @@
 
 # Arquivos de dados reais (contém informações sensíveis)
 dados/mapas.json
-dados/mapas_real.json
-dados/mapas_producao.json
+dados/usuarios.json
+dados/unidades.json
+dados/lotes.json
 dados/backup_*.json
-
-# Ignorar todos os arquivos e subpastas dentro de dados/
-dados/
 
 # Logs que podem conter informações sensíveis
 *.log
