@@ -197,6 +197,20 @@ body.dark-mode table {
     border-color: #4a5568;
 }
 
+/* Indicadores coloridos da tabela de comparação SIISP no modo escuro */
+body.dark-mode .table .cell-ok {
+    background-color: #059669 !important; /* verde vibrante */
+    color: #fff !important;
+}
+body.dark-mode .table .cell-warning {
+    background-color: #2563eb !important; /* azul vibrante */
+    color: #fff !important;
+}
+body.dark-mode .table .cell-danger {
+    background-color: #dc2626 !important; /* vermelho vibrante */
+    color: #fff !important;
+}
+
 body.dark-mode table thead {
     background-color: #374151;
     color: #f7fafc;
@@ -1023,5 +1037,40 @@ body.dark-mode .radio-option input[type="radio"]:checked + label {
     border-color: var(--primary-color) !important;
     background: var(--primary-color) !important;
     color: #ffffff !important;
+}
+
+/* Seletor de mês/ano nos pop-ups */
+body.dark-mode .mes-ano-selector {
+    background-color: #1f2937 !important;
+    border-color: #4a5568 !important;
+}
+
+body.dark-mode .mes-ano-display {
+    background-color: #374151 !important;
+    border-color: var(--primary-color) !important;
+    color: #fff !important;
+}
+
+body.dark-mode .mes-ano-display:hover {
+    background-color: #4b5563 !important;
+}
+
+body.dark-mode .mes-ano-text {
+    color: #fff !important;
+}
+
+body.dark-mode .mes-ano-input {
+    background-color: #374151 !important;
+    border-color: #4a5568 !important;
+    color: #fff !important;
+}
+
+body.dark-mode .mes-ano-input:focus {
+    background-color: #374151 !important;
+    border-color: var(--primary-color) !important;
+}
+
+body.dark-mode .mes-ano-inputs label {
+    color: #e5e7eb !important;
 }
 

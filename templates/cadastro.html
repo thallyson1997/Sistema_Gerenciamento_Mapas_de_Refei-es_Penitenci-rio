@@ -9,6 +9,35 @@
     <link rel="stylesheet" href="/static/css/validation.css">
     <link rel="stylesheet" href="/static/css/dark-mode.css">
     <script src="/static/js/config-loader.js"></script>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            .form-label,
+            legend,
+            h1,
+            h4,
+            h5 {
+                color: white !important;
+            }
+        }
+
+        body.dark-mode .form-label,
+        body.dark-mode legend,
+        body.dark-mode h1,
+        body.dark-mode h4,
+        body.dark-mode h5 {
+            color: white !important;
+        }
+
+        .divisor-span-cadastro {
+            background-color: white;
+            color: var(--gray-500);
+        }
+
+        body.dark-mode .divisor-span-cadastro {
+            background-color: var(--bg-color);
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -330,9 +359,9 @@
                     </form>
 
                     <!-- Divisor -->
-                    <div style="text-align: center; margin: 2rem 0; position: relative;">
+                    <div style="text-align: center; margin: 2rem 0 2.5rem 0; position: relative;">
                         <hr style="border: none; border-top: 1px solid var(--gray-200);">
-                        <span style="background-color: white; color: var(--gray-500); padding: 0 1rem; position: absolute; top: -0.5rem; left: 50%; transform: translateX(-50%); font-size: 0.875rem;">
+                        <span class="divisor-span-cadastro" style="padding: 0 1rem; position: absolute; top: 0.25rem; left: 50%; transform: translateX(-50%); font-size: 0.875rem; white-space: nowrap;">
                             Já tem uma conta?
                         </span>
                     </div>
@@ -347,14 +376,16 @@
             </div>
 
             <!-- Informações sobre o processo -->
-            <div class="alert alert-info" style="margin-top: 2rem;">
-                <h4 style="margin-bottom: 0.5rem;">Processo de Aprovação</h4>
-                <p style="margin-bottom: 0.5rem; font-size: 0.875rem;">
-                    Sua solicitação de cadastro será analisada pelo administrador do sistema em até 48 horas úteis.
-                </p>
-                <p style="margin-bottom: 0; font-size: 0.875rem;">
-                    <strong>Você receberá um e-mail</strong> confirmando a aprovação ou solicitando informações adicionais.
-                </p>
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-body" style="padding: 1.5rem;">
+                    <h5 style="margin-bottom: 1rem;">Processo de Aprovação</h5>
+                    <p style="margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--gray-600);">
+                        Sua solicitação de cadastro será analisada pelo administrador do sistema em até 48 horas úteis.
+                    </p>
+                    <p style="margin-bottom: 0; font-size: 0.875rem; color: var(--gray-600);">
+                        <strong>Você receberá um e-mail</strong> confirmando a aprovação ou solicitando informações adicionais.
+                    </p>
+                </div>
             </div>
         </div>
     </main>

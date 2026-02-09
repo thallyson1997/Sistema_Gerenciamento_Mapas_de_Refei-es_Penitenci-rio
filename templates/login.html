@@ -49,6 +49,26 @@
         #flashMessage {
             animation: slideIn 0.3s ease-out;
         }
+
+        @media (prefers-color-scheme: dark) {
+            .form-label {
+                color: white;
+            }
+        }
+
+        body.dark-mode .form-label {
+            color: white;
+        }
+
+        .divisor-span {
+            background-color: white;
+            color: var(--gray-500);
+        }
+
+        body.dark-mode .divisor-span {
+            background-color: var(--bg-color);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -191,9 +211,9 @@
                     </form>
 
                     <!-- Divisor -->
-                    <div style="text-align: center; margin: 1.5rem 0; position: relative;">
+                    <div style="text-align: center; margin: 1.5rem 0 2.5rem 0; position: relative;">
                         <hr style="border: none; border-top: 1px solid var(--gray-200);">
-                        <span style="background-color: white; color: var(--gray-500); padding: 0 1rem; position: absolute; top: -0.5rem; left: 50%; transform: translateX(-50%); font-size: 0.875rem;">
+                        <span class="divisor-span" style="padding: 0 1rem; position: absolute; top: 0.25rem; left: 50%; transform: translateX(-50%); font-size: 0.875rem; white-space: nowrap;">
                             Não tem uma conta?
                         </span>
                     </div>
@@ -208,16 +228,18 @@
             </div>
 
             <!-- Informações de Acesso -->
-            <div class="alert alert-info" style="margin-top: 2rem;">
-                <h4 style="margin-bottom: 0.5rem;">Acesso Restrito</h4>
-                <p style="margin-bottom: 0.5rem; font-size: 0.875rem;">
-                    Este sistema é destinado exclusivamente para funcionários autorizados da SFA, 
-                    supervisores, gestores do sistema penitenciário e auditores credenciados.
-                </p>
-                <p style="margin-bottom: 0; font-size: 0.875rem;">
-                    <strong>Para obter acesso:</strong> Entre em contato com o administrador do sistema 
-                    ou responsável pela área de TI da sua unidade.
-                </p>
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-body" style="padding: 1.5rem;">
+                    <h5 style="margin-bottom: 1rem;">Acesso Restrito</h5>
+                    <p style="margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--gray-600);">
+                        Este sistema é destinado exclusivamente para funcionários autorizados da SFA, 
+                        supervisores, gestores do sistema penitenciário e auditores credenciados.
+                    </p>
+                    <p style="margin-bottom: 0; font-size: 0.875rem; color: var(--gray-600);">
+                        <strong>Para obter acesso:</strong> Entre em contato com o administrador do sistema 
+                        ou responsável pela área de TI da sua unidade.
+                    </p>
+                </div>
             </div>
 
             <!-- Informações Técnicas -->

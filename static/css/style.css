@@ -429,6 +429,22 @@ main {
     font-size: var(--font-size-xs);
 }
 
+/* Estilos para modo escuro dos indicadores coloridos */
+body.dark-mode .table .cell-ok {
+    background-color: #10b981;
+    color: white;
+}
+
+body.dark-mode .table .cell-warning {
+    background-color: #3b82f6;
+    color: white;
+}
+
+body.dark-mode .table .cell-danger {
+    background-color: #ef4444;
+    color: white;
+}
+
 /* === ALERTS === */
 .alert {
     padding: var(--spacing-4);
@@ -1036,7 +1052,7 @@ html.font-large {
 .unidades-body {
     padding: 1rem;
     box-sizing: border-box;
-    max-height: 300px;
+    max-height: 520px;
     overflow-y: auto;
 }
 
