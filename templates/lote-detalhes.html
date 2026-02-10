@@ -1365,6 +1365,9 @@
         precosPorLote[predecessorData.id.toString()] = predecessorData.precos;
     }
         
+        // Flag para rastrear se estamos em modo "adicionar mais SIISP"
+        let siispAdicionadoComSucesso = false;
+        
         // Variáveis globais para controle dos filtros
         let filtrosAtivos = {
             dataInicio: null,
@@ -2251,6 +2254,9 @@
             document.getElementById('secao-siisp').style.display = 'block';
             document.getElementById('secao-siisp').scrollIntoView({ behavior: 'smooth' });
             
+            // Resetar flag ao abrir pela primeira vez
+            siispAdicionadoComSucesso = false;
+            
             // Sincronizar com o filtro principal
             sincronizarSeletoresPopups();
             
@@ -2273,6 +2279,11 @@
 
         document.getElementById('btn-cancelar-siisp').addEventListener('click', function() {
             document.getElementById('secao-siisp').style.display = 'none';
+            
+            // Se estava em modo "adicionar mais" e desistiu, recarregar a página
+            if (siispAdicionadoComSucesso) {
+                window.location.reload();
+            }
         });
 
         // Processar adição de números SIISP
@@ -3059,6 +3070,9 @@
 
         // Modal de adicionar mais SIISP
         document.getElementById('btn-sim-adicionar-mais').addEventListener('click', function() {
+            // Marcar que já houve adição com sucesso
+            siispAdicionadoComSucesso = true;
+            
             // Fechar modal
             document.getElementById('modal-adicionar-mais-siisp').style.display = 'none';
             // Limpar apenas unidade e números SIISP, manter mês/ano

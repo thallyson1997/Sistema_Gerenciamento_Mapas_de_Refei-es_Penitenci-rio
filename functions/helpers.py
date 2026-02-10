@@ -1069,6 +1069,9 @@ def gerar_excel_exportacao(lote_id, unidades_list, data_inicio=None, data_fim=No
 						except:
 							pass
 				
+				# Nome da aba COMPARATIVO (com sufixo se houver múltiplos meses)
+				nome_aba_comparativo = f'COMPARATIVO{sufixo}'
+				
 				# Preencher a coluna ORDEM (coluna B), UNIDADE (coluna C) e CAFÉ INTERNO (coluna D) começando da linha 11
 				for i in range(quantidade_unidades):
 					linha_atual = 11 + i
@@ -1098,9 +1101,9 @@ def gerar_excel_exportacao(lote_id, unidades_list, data_inicio=None, data_fim=No
 						cell_unidade.protection = copy(estilo_c11.protection)
 						cell_unidade.alignment = copy(estilo_c11.alignment)
 					
-					# Coluna D: Total de café interno
-					total_cafe = totais_cafe_interno.get(nome_unidade_atual, 0)
-					cell_cafe = ws_resumo.cell(row=linha_atual, column=4, value=total_cafe)
+					# Coluna D: Total de café interno - FÓRMULA SUMIF
+					formula_cafe_interno = f'=SUMIF(\'{nome_aba_comparativo}\'!$B:$B,C{linha_atual},\'{nome_aba_comparativo}\'!$E:$E)'
+					cell_cafe = ws_resumo.cell(row=linha_atual, column=4, value=formula_cafe_interno)
 					
 					# Copiar o estilo de D11 para a célula atual
 					if estilo_d11.has_style:
@@ -1111,8 +1114,9 @@ def gerar_excel_exportacao(lote_id, unidades_list, data_inicio=None, data_fim=No
 						cell_cafe.protection = copy(estilo_d11.protection)
 						cell_cafe.alignment = copy(estilo_d11.alignment)
 					
-					# Coluna E: Total de café funcionário
-					cell_e = ws_resumo.cell(row=linha_atual, column=5, value=totais_cafe_funcionario.get(nome_unidade_atual, 0))
+					# Coluna E: Total de café funcionário - FÓRMULA SUMIF
+					formula_cafe_func = f'=SUMIF(\'{nome_aba_comparativo}\'!$B:$B,C{linha_atual},\'{nome_aba_comparativo}\'!$F:$F)'
+					cell_e = ws_resumo.cell(row=linha_atual, column=5, value=formula_cafe_func)
 					if estilo_e11.has_style:
 						cell_e.font = copy(estilo_e11.font)
 						cell_e.border = copy(estilo_e11.border)
@@ -1121,8 +1125,9 @@ def gerar_excel_exportacao(lote_id, unidades_list, data_inicio=None, data_fim=No
 						cell_e.protection = copy(estilo_e11.protection)
 						cell_e.alignment = copy(estilo_e11.alignment)
 					
-					# Coluna F: Total de almoço interno
-					cell_f = ws_resumo.cell(row=linha_atual, column=6, value=totais_almoco_interno.get(nome_unidade_atual, 0))
+					# Coluna F: Total de almoço interno - FÓRMULA SUMIF
+					formula_almoco_interno = f'=SUMIF(\'{nome_aba_comparativo}\'!$B:$B,C{linha_atual},\'{nome_aba_comparativo}\'!$G:$G)'
+					cell_f = ws_resumo.cell(row=linha_atual, column=6, value=formula_almoco_interno)
 					if estilo_f11.has_style:
 						cell_f.font = copy(estilo_f11.font)
 						cell_f.border = copy(estilo_f11.border)
@@ -1131,8 +1136,9 @@ def gerar_excel_exportacao(lote_id, unidades_list, data_inicio=None, data_fim=No
 						cell_f.protection = copy(estilo_f11.protection)
 						cell_f.alignment = copy(estilo_f11.alignment)
 					
-					# Coluna G: Total de almoço funcionário
-					cell_g = ws_resumo.cell(row=linha_atual, column=7, value=totais_almoco_funcionario.get(nome_unidade_atual, 0))
+					# Coluna G: Total de almoço funcionário - FÓRMULA SUMIF
+					formula_almoco_func = f'=SUMIF(\'{nome_aba_comparativo}\'!$B:$B,C{linha_atual},\'{nome_aba_comparativo}\'!$H:$H)'
+					cell_g = ws_resumo.cell(row=linha_atual, column=7, value=formula_almoco_func)
 					if estilo_g11.has_style:
 						cell_g.font = copy(estilo_g11.font)
 						cell_g.border = copy(estilo_g11.border)
@@ -1141,8 +1147,9 @@ def gerar_excel_exportacao(lote_id, unidades_list, data_inicio=None, data_fim=No
 						cell_g.protection = copy(estilo_g11.protection)
 						cell_g.alignment = copy(estilo_g11.alignment)
 					
-					# Coluna H: Total de lanche interno
-					cell_h = ws_resumo.cell(row=linha_atual, column=8, value=totais_lanche_interno.get(nome_unidade_atual, 0))
+					# Coluna H: Total de lanche interno - FÓRMULA SUMIF
+					formula_lanche_interno = f'=SUMIF(\'{nome_aba_comparativo}\'!$B:$B,C{linha_atual},\'{nome_aba_comparativo}\'!$I:$I)'
+					cell_h = ws_resumo.cell(row=linha_atual, column=8, value=formula_lanche_interno)
 					if estilo_h11.has_style:
 						cell_h.font = copy(estilo_h11.font)
 						cell_h.border = copy(estilo_h11.border)
@@ -1151,8 +1158,9 @@ def gerar_excel_exportacao(lote_id, unidades_list, data_inicio=None, data_fim=No
 						cell_h.protection = copy(estilo_h11.protection)
 						cell_h.alignment = copy(estilo_h11.alignment)
 					
-					# Coluna I: Total de lanche funcionário
-					cell_i = ws_resumo.cell(row=linha_atual, column=9, value=totais_lanche_funcionario.get(nome_unidade_atual, 0))
+					# Coluna I: Total de lanche funcionário - FÓRMULA SUMIF
+					formula_lanche_func = f'=SUMIF(\'{nome_aba_comparativo}\'!$B:$B,C{linha_atual},\'{nome_aba_comparativo}\'!$J:$J)'
+					cell_i = ws_resumo.cell(row=linha_atual, column=9, value=formula_lanche_func)
 					if estilo_i11.has_style:
 						cell_i.font = copy(estilo_i11.font)
 						cell_i.border = copy(estilo_i11.border)
@@ -1161,8 +1169,9 @@ def gerar_excel_exportacao(lote_id, unidades_list, data_inicio=None, data_fim=No
 						cell_i.protection = copy(estilo_i11.protection)
 						cell_i.alignment = copy(estilo_i11.alignment)
 					
-					# Coluna J: Total de jantar interno
-					cell_j = ws_resumo.cell(row=linha_atual, column=10, value=totais_jantar_interno.get(nome_unidade_atual, 0))
+					# Coluna J: Total de jantar interno - FÓRMULA SUMIF
+					formula_jantar_interno = f'=SUMIF(\'{nome_aba_comparativo}\'!$B:$B,C{linha_atual},\'{nome_aba_comparativo}\'!$K:$K)'
+					cell_j = ws_resumo.cell(row=linha_atual, column=10, value=formula_jantar_interno)
 					if estilo_j11.has_style:
 						cell_j.font = copy(estilo_j11.font)
 						cell_j.border = copy(estilo_j11.border)
@@ -1171,8 +1180,9 @@ def gerar_excel_exportacao(lote_id, unidades_list, data_inicio=None, data_fim=No
 						cell_j.protection = copy(estilo_j11.protection)
 						cell_j.alignment = copy(estilo_j11.alignment)
 					
-					# Coluna K: Total de jantar funcionário
-					cell_k = ws_resumo.cell(row=linha_atual, column=11, value=totais_jantar_funcionario.get(nome_unidade_atual, 0))
+					# Coluna K: Total de jantar funcionário - FÓRMULA SUMIF
+					formula_jantar_func = f'=SUMIF(\'{nome_aba_comparativo}\'!$B:$B,C{linha_atual},\'{nome_aba_comparativo}\'!$L:$L)'
+					cell_k = ws_resumo.cell(row=linha_atual, column=11, value=formula_jantar_func)
 					if estilo_k11.has_style:
 						cell_k.font = copy(estilo_k11.font)
 						cell_k.border = copy(estilo_k11.border)
@@ -1847,9 +1857,16 @@ def gerar_excel_exportacao_multiplos_lotes(data_inicio, data_fim):
 				ws_origem = wb_lote[sheet_name]
 				
 				if 'COMPARATIVO' in sheet_name:
-					# Armazenar COMPARATIVO com nome do lote
-					comparativos[f"COMPARATIVO {lote_nome}"] = ws_origem
-					print(f"  ✓ COMPARATIVO armazenado: COMPARATIVO {lote_nome}")
+					# Armazenar COMPARATIVO com nome do lote, preservando sufixo de mês se houver
+					# Exemplo: "COMPARATIVO - JANEIRO" vira "COMPARATIVO Lote A - JANEIRO"
+					if ' - ' in sheet_name:  # Tem sufixo de mês
+						sufixo_mes = sheet_name.split(' - ', 1)[1]
+						nome_comparativo = f"COMPARATIVO {lote_nome} - {sufixo_mes}"
+					else:
+						nome_comparativo = f"COMPARATIVO {lote_nome}"
+					
+					comparativos[nome_comparativo] = ws_origem
+					print(f"  ✓ COMPARATIVO armazenado: {nome_comparativo}")
 					
 				elif 'RESUMO' in sheet_name:
 					# Determinar categoria do RESUMO pelo nome da sheet
@@ -2039,8 +2056,58 @@ def _criar_resumo_agrupado(wb_destino, resumos_list, nome_sheet):
 			for col_idx, cell in enumerate(row, 1):
 				cell_value = cell.value
 				
+				# Calcular offset de linhas
+				offset = linha_atual - linha_origem
+				
+				# Se é uma fórmula SUMIF que referencia outra aba (COMPARATIVO), ajustar o nome da aba E as referências de linha
+				if isinstance(cell_value, str) and '=SUMIF(' in cell_value.upper():
+					import re
+					# Padrão: =SUMIF('COMPARATIVO'!... ou =SUMIF('COMPARATIVO - MÊS'!...
+					# Substituir para incluir o nome do lote: =SUMIF('COMPARATIVO {lote_nome}'!...
+					# Procurar qualquer referência a COMPARATIVO
+					if 'COMPARATIVO' in cell_value.upper():
+						# Tentar encontrar o padrão 'COMPARATIVO...'!
+						match = re.search(r"'(COMPARATIVO[^']*)'!", cell_value, re.IGNORECASE)
+						if match:
+							aba_original = match.group(1)
+							# Substituir pela aba do lote atual
+							# Se já tem um sufixo de mês (ex: "COMPARATIVO - JANEIRO"), manter
+							if ' - ' in aba_original:
+								# Extrair o sufixo do mês
+								sufixo_mes = aba_original.split(' - ', 1)[1]
+								nova_aba = f'COMPARATIVO {lote_nome} - {sufixo_mes}'
+							else:
+								nova_aba = f'COMPARATIVO {lote_nome}'
+							
+							cell_value = cell_value.replace(f"'{aba_original}'!", f"'{nova_aba}'!")
+					
+					# Ajustar referências de linha dentro da fórmula SUMIF (ex: C11 → C25)
+					# Procurar referências de células que não estão entre aspas (não são nomes de aba)
+					# e que não são absolutas (não têm $)
+					def ajustar_ref_sumif(match):
+						ref = match.group(0)
+						# Verificar se não está dentro de aspas (nome de aba)
+						pos = match.start()
+						# Contar aspas simples antes desta posição
+						aspas_antes = cell_value[:pos].count("'")
+						# Se número ímpar de aspas, estamos dentro de um nome de aba
+						if aspas_antes % 2 == 1:
+							return ref  # Não mexer
+						# Verificar se tem $ antes (referência absoluta)
+						if pos > 0 and cell_value[pos-1] == '$':
+							return ref  # Não mexer em referências absolutas
+						# Extrair coluna e linha
+						col = ''.join([c for c in ref if c.isalpha()])
+						lin = int(''.join([c for c in ref if c.isdigit()]))
+						nova_lin = lin + offset
+						return f"{col}{nova_lin}"
+					
+					# Substituir apenas referências relativas de célula (sem $)
+					# Padrão: letra(s) seguida(s) de número(s), mas não precedido por $
+					cell_value = re.sub(r'(?<!\$)(?<!\w)([A-Z]+\d+)(?!\w)', ajustar_ref_sumif, cell_value)
+				
 				# Se é uma fórmula com SUM/SOMA, ajustar as referências de linha
-				if isinstance(cell_value, str) and ('=SUM(' in cell_value.upper()):
+				elif isinstance(cell_value, str) and ('=SUM(' in cell_value.upper()):
 					# Encontrar o padrão =SUM(COLUNA{linha1}:COLUNA{linha2})
 					import re
 					match = re.search(r'=SUM\(([A-Z]+)(\d+):([A-Z]+)(\d+)\)', cell_value, re.IGNORECASE)
@@ -2058,7 +2125,7 @@ def _criar_resumo_agrupado(wb_destino, resumos_list, nome_sheet):
 						# Reconstruir a fórmula
 						cell_value = f'=SUM({col1}{lin1_novo}:{col2}{lin2_novo})'
 				
-				# Se é outra fórmula (não SUM), ajustar as referências simples como =D18*D19
+				# Se é outra fórmula (não SUM/SUMIF), ajustar as referências simples como =D18*D19
 				elif isinstance(cell_value, str) and cell_value.startswith('=') and 'SUM' not in cell_value.upper():
 					import re
 					
