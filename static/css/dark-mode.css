@@ -1,3 +1,14 @@
+/* --- MODAL DE LOGOUT DARK MODE --- */
+body.dark-mode .info-box-logout {
+    background-color: #1e293b !important;
+    border-left-color: #f59e0b !important;
+}
+
+body.dark-mode .info-box-logout p,
+body.dark-mode .info-box-logout strong {
+    color: #fbbf24 !important;
+}
+
 /* --- INDEX PAGE DARK MODE TEXT FIXES --- */
 body.dark-mode .hero-title,
 body.dark-mode .hero-subtitle,
@@ -687,6 +698,48 @@ body.dark-mode .modal-notification-message {
 
 body.dark-mode .modal-notification-time {
     color: #a0aec0 !important;
+}
+
+/* Notification Elements - Dashboard, Lote-detalhes, Home, Lotes */
+body.dark-mode .notification-body {
+    color: #ffffff !important;
+}
+
+body.dark-mode .notification-title {
+    color: #ffffff !important;
+}
+
+body.dark-mode .notification-message {
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .notification-text {
+    color: #ffffff !important;
+}
+
+/* Alert Elements - Login and other pages */
+body.dark-mode .alert {
+    color: #ffffff !important;
+}
+
+body.dark-mode .alert-danger {
+    color: #ffffff !important;
+    background-color: #991b1b !important;
+}
+
+body.dark-mode .alert-success {
+    color: #ffffff !important;
+    background-color: #065f46 !important;
+}
+
+body.dark-mode .alert-warning {
+    color: #ffffff !important;
+    background-color: #92400e !important;
+}
+
+body.dark-mode .alert-info {
+    color: #ffffff !important;
+    background-color: #1e40af !important;
 }
 
 /* Breadcrumb/Guia de Navegação */

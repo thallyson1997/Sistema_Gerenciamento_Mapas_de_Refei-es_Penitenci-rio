@@ -564,7 +564,7 @@
                 </p>
             </div>
             
-            <div style="padding: 1rem; background-color: #fffbeb; border-radius: 8px; border-left: 4px solid #f59e0b; margin-bottom: 2rem;">
+            <div class="info-box-logout" style="padding: 1rem; background-color: #fffbeb; border-radius: 8px; border-left: 4px solid #f59e0b; margin-bottom: 2rem;">
                 <p style="font-size: 0.875rem; margin: 0; color: #92400e;">
                     <strong>ℹ️ Informação:</strong> Você precisará fazer login novamente para acessar o sistema.
                 </p>
@@ -601,6 +601,39 @@
         
         // Variável para armazenar instância do gráfico de refeições
         let chartRefeicoesInstance = null;
+        
+        // ===== Modal de Logout =====
+        const modalLogout = document.getElementById('modal-confirmacao-logout');
+        const btnCancelarLogout = document.getElementById('btn-cancelar-logout');
+        const btnConfirmarLogout = document.getElementById('btn-confirmar-logout');
+        
+        document.getElementById('logoutLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            modalLogout.style.display = 'block';
+        });
+        
+        if (btnCancelarLogout) {
+            btnCancelarLogout.addEventListener('click', function() {
+                modalLogout.style.display = 'none';
+            });
+        }
+        
+        if (btnConfirmarLogout) {
+            btnConfirmarLogout.addEventListener('click', function() {
+                localStorage.removeItem('sgmrp_usuario');
+                localStorage.removeItem('sgmrp_remember');
+                window.location.href = "{{ url_for('login') }}";
+            });
+        }
+        
+        // Fechar modal ao clicar fora
+        if (modalLogout) {
+            modalLogout.addEventListener('click', function(e) {
+                if (e.target === modalLogout) {
+                    modalLogout.style.display = 'none';
+                }
+            });
+        }
         
         // Função para carregar o gráfico de refeições
         async function carregarGraficoRefeicoes() {
@@ -678,6 +711,10 @@
             
             // Formatar labels (YYYY-MM -> Mês/Ano)
             const labelsFormatados = dados.labels.map(label => {
+                // Verificar se já está formatado (formato: Mês/Ano)
+                if (label.includes('/') && !label.includes('-')) {
+                    return label; // Já está formatado
+                }
                 const [ano, mes] = label.split('-');
                 const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
                 return `${meses[parseInt(mes) - 1]}/${ano}`;
@@ -882,6 +919,10 @@
             if (chartGastos) chartGastos.destroy();
 
             const labelsFormatados = (dados.labels || dados.periodos).map(periodo => {
+                // Verificar se já está formatado (formato: Mês/Ano)
+                if (periodo.includes('/') && !periodo.includes('-')) {
+                    return periodo; // Já está formatado
+                }
                 const [ano, mes] = periodo.split('-');
                 const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
                 return `${meses[parseInt(mes) - 1]}/${ano}`;
@@ -1623,6 +1664,106 @@
                     });
                 }
                 
+                // Se modo Por Unidade E Acumulado, adicionar linhas de valor contratual por unidade
+                if (tipoAgrupamento === 'por-unidade' && tipoVisualizacao === 'acumulada') {
+                    try {
+                        const unidadesResponse = await fetch(`/api/lote/${loteId}/unidades`);
+                        const unidadesData = await unidadesResponse.json();
+                        
+                        if (unidadesData.success && unidadesData.unidades) {
+                            // Criar mapa de unidade_id -> {valor_contratual, nome}
+                            const valoresContratuaisMap = {};
+                            unidadesData.unidades.forEach(u => {
+                                if (u.valor_contratual_unidade) {
+                                    valoresContratuaisMap[u.id] = {
+                                        valor: u.valor_contratual_unidade,
+                                        nome: u.nome
+                                    };
+                                }
+                            });
+                            
+                            // Paleta de cores (mesma usada para datasets)
+                            const cores = [
+                                { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' },
+                                { border: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
+                                { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
+                                { border: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' },
+                                { border: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.1)' },
+                                { border: '#ec4899', bg: 'rgba(236, 72, 153, 0.1)' },
+                                { border: '#14b8a6', bg: 'rgba(20, 184, 166, 0.1)' },
+                                { border: '#f97316', bg: 'rgba(249, 115, 22, 0.1)' },
+                                { border: '#06b6d4', bg: 'rgba(6, 182, 212, 0.1)' },
+                                { border: '#84cc16', bg: 'rgba(132, 204, 22, 0.1)' },
+                                { border: '#6366f1', bg: 'rgba(99, 102, 241, 0.1)' },
+                                { border: '#d946ef', bg: 'rgba(217, 70, 239, 0.1)' },
+                                { border: '#eab308', bg: 'rgba(234, 179, 8, 0.1)' },
+                                { border: '#22c55e', bg: 'rgba(34, 197, 94, 0.1)' },
+                                { border: '#a855f7', bg: 'rgba(168, 85, 247, 0.1)' },
+                                { border: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.1)' },
+                                { border: '#f43f5e', bg: 'rgba(244, 63, 94, 0.1)' },
+                                { border: '#64748b', bg: 'rgba(100, 116, 139, 0.1)' },
+                                { border: '#fb923c', bg: 'rgba(251, 146, 60, 0.1)' },
+                                { border: '#2dd4bf', bg: 'rgba(45, 212, 191, 0.1)' }
+                            ];
+                            
+                            // Função auxiliar para clarear cor
+                            const hexToRgb = (hex) => {
+                                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                                return result ? {
+                                    r: parseInt(result[1], 16),
+                                    g: parseInt(result[2], 16),
+                                    b: parseInt(result[3], 16)
+                                } : null;
+                            };
+                            
+                            // Para cada dataset de unidade nos dados originais
+                            const datasetsOriginais = chartGastos.data.datasets.filter(ds => !ds.label.includes('Previsão'));
+                            datasetsOriginais.forEach((dataset, index) => {
+                                // Tentar encontrar unidade_id no label ou usar índice
+                                const unidadesSelecionadas = Array.from(document.querySelectorAll('.filtro-unidade-checkbox:checked')).map(cb => parseInt(cb.value));
+                                const unidadeId = unidadesSelecionadas[index];
+                                
+                                if (unidadeId && valoresContratuaisMap[unidadeId]) {
+                                    const valorContratual = valoresContratuaisMap[unidadeId].valor;
+                                    const nomeUnidade = valoresContratuaisMap[unidadeId].nome;
+                                    const cor = cores[index % cores.length];
+                                    
+                                    // Criar cor mais clara (adicionar 40% de branco)
+                                    const rgb = hexToRgb(cor.border);
+                                    if (rgb) {
+                                        const lighten = (val) => Math.min(255, val + (255 - val) * 0.4);
+                                        const corClara = `rgb(${lighten(rgb.r)}, ${lighten(rgb.g)}, ${lighten(rgb.b)})`;
+                                        
+                                        // Array com valor fixo para todos os períodos
+                                        const dadosValorContratual = new Array(novosLabels.length).fill(valorContratual);
+                                        
+                                        novosDatasets.push({
+                                            label: `${nomeUnidade} (Limite)`,
+                                            data: dadosValorContratual,
+                                            borderColor: corClara,
+                                            backgroundColor: 'transparent',
+                                            borderWidth: 2,
+                                            borderDash: [5, 5],
+                                            tension: 0,
+                                            pointRadius: 0,
+                                            pointHoverRadius: 4,
+                                            pointBackgroundColor: corClara,
+                                            pointBorderColor: '#ffffff',
+                                            pointBorderWidth: 2,
+                                            fill: false,
+                                            datalabels: {
+                                                display: false
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.warn('Erro ao adicionar linhas de valor contratual por unidade:', error);
+                    }
+                }
+                
                 // Plugin customizado para desenhar texto do valor contratual na linha
                 const pluginValorContratual = {
                     id: 'valorContratualLabel',
@@ -1631,17 +1772,37 @@
                         const datasets = chart.data.datasets;
                         
                         datasets.forEach((dataset, datasetIndex) => {
-                            if (dataset.label === 'Valor Contratual' && dataset.datalabels) {
+                            // Verifica se é linha de Valor Contratual (total) ou linha de Limite (por unidade)
+                            const isValorContratual = dataset.label === 'Valor Contratual' && dataset.datalabels;
+                            const isLimiteUnidade = dataset.label && dataset.label.includes('(Limite)');
+                            
+                            if (isValorContratual || isLimiteUnidade) {
                                 const meta = chart.getDatasetMeta(datasetIndex);
                                 const middleIndex = Math.floor(meta.data.length / 2);
                                 const point = meta.data[middleIndex];
                                 
                                 if (point) {
-                                    const valor = dataset.datalabels.formatter();
+                                    let valor;
+                                    let cor;
+                                    
+                                    if (isValorContratual) {
+                                        valor = dataset.datalabels.formatter();
+                                        cor = '#ef4444';
+                                    } else {
+                                        // Linha de limite de unidade
+                                        const valorNumerico = dataset.data[0]; // Todas as posições têm o mesmo valor
+                                        valor = new Intl.NumberFormat('pt-BR', { 
+                                            style: 'currency', 
+                                            currency: 'BRL', 
+                                            minimumFractionDigits: 0, 
+                                            maximumFractionDigits: 0 
+                                        }).format(valorNumerico);
+                                        cor = dataset.borderColor; // Usar a mesma cor da linha
+                                    }
                                     
                                     ctx.save();
                                     ctx.font = 'bold 11px Arial';
-                                    ctx.fillStyle = '#ef4444';
+                                    ctx.fillStyle = cor;
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'bottom';
                                     
@@ -1655,12 +1816,12 @@
                                     // Fundo branco com borda
                                     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
                                     ctx.fillRect(x - textWidth/2 - padding, y - textHeight, textWidth + padding * 2, textHeight);
-                                    ctx.strokeStyle = '#ef4444';
+                                    ctx.strokeStyle = cor;
                                     ctx.lineWidth = 1;
                                     ctx.strokeRect(x - textWidth/2 - padding, y - textHeight, textWidth + padding * 2, textHeight);
                                     
                                     // Texto
-                                    ctx.fillStyle = '#ef4444';
+                                    ctx.fillStyle = cor;
                                     ctx.fillText(valor, x, y - 3);
                                     ctx.restore();
                                 }

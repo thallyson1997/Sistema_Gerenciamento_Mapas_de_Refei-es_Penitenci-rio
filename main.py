@@ -1638,7 +1638,8 @@ def api_get_unidades_lote(lote_id):
                 'id': u.id,
                 'nome': u.nome,
                 'lote_id': u.lote_id,
-                'subunidades_count': subunidades_count
+                'subunidades_count': subunidades_count,
+                'valor_contratual_unidade': u.valor_contratual_unidade
             })
         
         print(f"✅ Retornando {len(unidades_list)} unidades do lote {lote_id}")
