@@ -1188,13 +1188,14 @@
                     return;
                 }
                 
-                // Salvar dados originais
+                // Salvar dados originais (incluindo agrupamento para preservar estilos)
                 dadosOriginaisRefeicoes = {
                     labels: [...chartRefeicoesInstance.data.labels],
                     datasets: chartRefeicoesInstance.data.datasets.map(ds => ({
                         ...ds,
                         data: [...ds.data]
-                    }))
+                    })),
+                    agrupamento: tipoAgrupamento
                 };
                 
                 // Buscar dados desagregados por tipo de refeição
@@ -1432,13 +1433,14 @@
                     return;
                 }
                 
-                // Salvar dados originais
+                // Salvar dados originais (incluindo agrupamento para preservar estilos)
                 dadosOriginaisGastos = {
                     labels: [...chartGastos.data.labels],
                     datasets: chartGastos.data.datasets.map(ds => ({
                         ...ds,
                         data: [...ds.data]
-                    }))
+                    })),
+                    agrupamento: tipoAgrupamento
                 };
                 
                 // Buscar dados desagregados por tipo de refeição
