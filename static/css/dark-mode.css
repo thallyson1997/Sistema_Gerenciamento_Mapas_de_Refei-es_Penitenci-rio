@@ -1127,3 +1127,42 @@ body.dark-mode .mes-ano-inputs label {
     color: #e5e7eb !important;
 }
 
+/* --- CARDS DE ANÁLISE DE PREVISÃO DARK MODE --- */
+body.dark-mode .analise-card {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .analise-card-title {
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .analise-metric-card {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .analise-metric-card:hover {
+    background-color: #1e293b !important;
+}
+
+body.dark-mode .analise-metric-label {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .analise-metric-value {
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .analise-card [style*="background: rgba(59, 130, 246, 0.1)"] {
+    background: rgba(59, 130, 246, 0.15) !important;
+    border-left-color: #60a5fa !important;
+}
+
+body.dark-mode .analise-card [style*="color: var(--gray-600)"] {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .analise-card [style*="color: var(--gray-700)"] {
+    color: #cbd5e1 !important;
+}

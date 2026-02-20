@@ -309,6 +309,89 @@
             cursor: pointer !important;
             pointer-events: auto !important;
         }
+
+        /* Cards de Análise de Previsão */
+        .analise-cards-container {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .analise-cards-container.show {
+            display: flex;
+        }
+
+        .analise-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .analise-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+
+        .analise-card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .analise-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .analise-metric-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .analise-metric-card:hover {
+            background: #f3f4f6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .analise-metric-emoji {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .analise-metric-label {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            line-height: 1.3;
+        }
+
+        .analise-metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -471,6 +554,9 @@
                     </div>
                 </div>
             </section>
+            
+            <!-- Cards de Análise de Previsão -->
+            <div id="analise-cards-container" class="analise-cards-container"></div>
 
         </div>
     </main>
@@ -1395,6 +1481,90 @@
             }
         }
         
+        // Função para criar cards de análise de previsão
+        function criarCardsAnalise(dadosLotes, unidadesSelecionadasInfo = null) {
+            const container = document.getElementById('analise-cards-container');
+            
+            // Limpar cards anteriores
+            container.innerHTML = '';
+            
+            // Só mostrar no modo Total ou Por Lote
+            if (tipoAgrupamento !== 'total' && tipoAgrupamento !== 'por-lote') {
+                container.classList.remove('show');
+                return;
+            }
+            
+            // Criar um card para cada lote
+            dadosLotes.forEach(loteData => {
+                const card = document.createElement('div');
+                card.className = 'analise-card';
+                
+                // Determinar emoji para porcentagem consumida (atual)
+                let emojiAtual = '✅';
+                if (loteData.porcentagemConsumida >= 100) {
+                    emojiAtual = '🚨';
+                } else if (loteData.porcentagemConsumida >= 80) {
+                    emojiAtual = '⚠️';
+                }
+                
+                // Determinar emoji para porcentagem projetada
+                let emojiProjetado = '✅';
+                if (loteData.porcentagemProjetada >= 100) {
+                    emojiProjetado = '🚨';
+                } else if (loteData.porcentagemProjetada >= 90) {
+                    emojiProjetado = '⚠️';
+                }
+                
+                // Construir HTML de unidades selecionadas (se não todas)
+                let unidadesHtml = '';
+                if (unidadesSelecionadasInfo && !unidadesSelecionadasInfo.todas) {
+                    const unidadesTexto = unidadesSelecionadasInfo.nomes.join(', ');
+                    unidadesHtml = `
+                        <div style="margin-top: 0.5rem; padding: 0.5rem; background: rgba(59, 130, 246, 0.1); border-left: 3px solid var(--primary-color); border-radius: 4px;">
+                            <div style="font-size: 0.75rem; color: var(--gray-600); font-weight: 600; margin-bottom: 0.25rem;">
+                                🏢 Unidades Analisadas:
+                            </div>
+                            <div style="font-size: 0.85rem; color: var(--gray-700); font-weight: 500;">
+                                ${unidadesTexto}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                card.innerHTML = `
+                    <div class="analise-card-title">
+                        📦 ${loteData.nome}
+                    </div>
+                    ${unidadesHtml}
+                    
+                    <div class="analise-metrics-grid">
+                        <div class="analise-metric-card">
+                            <div class="analise-metric-emoji">💰</div>
+                            <div class="analise-metric-label">Média Aritmética<br>dos Gastos</div>
+                            <div class="analise-metric-value">${loteData.mediaFormatada}</div>
+                        </div>
+                        
+                        <div class="analise-metric-card">
+                            <div class="analise-metric-emoji">${emojiAtual}</div>
+                            <div class="analise-metric-label">Consumido do Contrato<br>(Atual)</div>
+                            <div class="analise-metric-value">${loteData.porcentagemConsumida.toFixed(1)}%</div>
+                        </div>
+                        
+                        <div class="analise-metric-card">
+                            <div class="analise-metric-emoji">${emojiProjetado}</div>
+                            <div class="analise-metric-label">Consumo Previsto<br>(Até o Fim)</div>
+                            <div class="analise-metric-value">${loteData.porcentagemProjetada.toFixed(1)}%</div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            // Mostrar container
+            container.classList.add('show');
+        }
+        
         // Função para adicionar previsão ao gráfico de gastos
         async function adicionarPrevisaoGastos() {
             try {
@@ -1405,6 +1575,8 @@
                         renderizarGraficoGastos(dadosOriginaisGastos);
                     }
                     document.getElementById('btn-previsao-gastos').textContent = '🔮 Previsão';
+                    // Esconder cards de análise
+                    document.getElementById('analise-cards-container').classList.remove('show');
                     return;
                 }
                 
@@ -1843,6 +2015,137 @@
                 chartGastos.update();
                 
                 console.log('✅ Gráfico de gastos atualizado com previsões por tipo de refeição!');
+                
+                // Calcular média aritmética e criar cards de análise
+                if (tipoAgrupamento === 'total' || tipoAgrupamento === 'por-lote') {
+                    const dadosParaCards = [];
+                    
+                    // Filtrar apenas datasets originais (não previsões nem linhas de valor contratual)
+                    const datasetsOriginais = novosDatasets.filter(ds => 
+                        !ds.label.includes('Previsão') && 
+                        !ds.label.includes('Valor Contratual') &&
+                        !ds.label.includes('(Limite)')
+                    );
+                    
+                    datasetsOriginais.forEach(dataset => {
+                        console.log(`\n📊 Calculando média para: ${dataset.label}`);
+                        console.log(`   Modo de visualização: ${tipoVisualizacao}`);
+                        
+                        // Pegar apenas dados históricos (antes da previsão)
+                        let dadosHistoricos = dataset.data.slice(0, periodos.length);
+                        console.log(`   Dados históricos originais (${dadosHistoricos.length} meses):`, dadosHistoricos.map(v => v.toFixed(2)));
+                        
+                        // Se modo acumulado, precisamos desacumular para obter valores mensais originais
+                        if (tipoVisualizacao === 'acumulada') {
+                            console.log(`   🔄 Desacumulando valores...`);
+                            const dadosMensais = [dadosHistoricos[0]]; // Primeiro valor é igual
+                            for (let i = 1; i < dadosHistoricos.length; i++) {
+                                dadosMensais.push(dadosHistoricos[i] - dadosHistoricos[i - 1]);
+                            }
+                            dadosHistoricos = dadosMensais;
+                            console.log(`   Dados mensais desacumulados:`, dadosHistoricos.map(v => v.toFixed(2)));
+                        }
+                        
+                        // Excluir primeiro mês (outlier) e calcular média
+                        const dadosSemOutlier = dadosHistoricos.slice(1);
+                        console.log(`   Dados sem outlier (excluindo 1º mês):`, dadosSemOutlier.map(v => v.toFixed(2)));
+                        
+                        const soma = dadosSemOutlier.reduce((acc, val) => acc + val, 0);
+                        const media = soma / dadosSemOutlier.length;
+                        console.log(`   ➕ Soma: R$ ${soma.toFixed(2)}`);
+                        console.log(`   ➗ Divisor: ${dadosSemOutlier.length} meses`);
+                        console.log(`   💰 Média: R$ ${media.toFixed(2)}`);
+                        
+                        // Calcular total consumido (incluindo primeiro mês)
+                        const totalConsumido = dadosHistoricos.reduce((acc, val) => acc + val, 0);
+                        console.log(`   💵 Total consumido até agora: R$ ${totalConsumido.toFixed(2)}`);
+                        
+                        // Buscar dataset de previsão correspondente
+                        const datasetPrevisao = novosDatasets.find(ds => ds.label === `${dataset.label} (Previsão)`);
+                        let totalProjetado = totalConsumido;
+                        
+                        if (datasetPrevisao) {
+                            // Pegar dados de previsão (não-null)
+                            let dadosPrevisao = datasetPrevisao.data.filter((v, idx) => v !== null && idx >= periodos.length);
+                            console.log(`   🔮 Dados de previsão originais (${dadosPrevisao.length} meses):`, dadosPrevisao.map(v => v.toFixed(2)));
+                            
+                            // Se modo acumulado, desacumular previsão também
+                            if (tipoVisualizacao === 'acumulada') {
+                                const previsoesDesacumuladas = [dadosPrevisao[0] - dadosHistoricos[dadosHistoricos.length - 1]];
+                                for (let i = 1; i < dadosPrevisao.length; i++) {
+                                    previsoesDesacumuladas.push(dadosPrevisao[i] - dadosPrevisao[i - 1]);
+                                }
+                                dadosPrevisao = previsoesDesacumuladas;
+                                console.log(`   🔄 Previsões desacumuladas:`, dadosPrevisao.map(v => v.toFixed(2)));
+                            }
+                            
+                            const totalPrevisao = dadosPrevisao.reduce((acc, val) => acc + val, 0);
+                            totalProjetado = totalConsumido + totalPrevisao;
+                            console.log(`   🔮 Total da previsão: R$ ${totalPrevisao.toFixed(2)}`);
+                            console.log(`   📈 Total projetado (histórico + previsão): R$ ${totalProjetado.toFixed(2)}`);
+                        }
+                        
+                        // Calcular porcentagem consumida em relação ao valor contratual
+                        const valorContratual = lote.valor_contratual || 0;
+                        const porcentagemConsumida = valorContratual > 0 ? (totalConsumido / valorContratual) * 100 : 0;
+                        const porcentagemProjetada = valorContratual > 0 ? (totalProjetado / valorContratual) * 100 : 0;
+                        console.log(`   📊 Valor contratual: R$ ${valorContratual.toFixed(2)}`);
+                        console.log(`   📈 Porcentagem consumida (atual): ${porcentagemConsumida.toFixed(2)}%`);
+                        console.log(`   📊 Porcentagem projetada (até fim): ${porcentagemProjetada.toFixed(2)}%`);
+                        
+                        // Formatar valores
+                        const mediaFormatada = new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }).format(media);
+                        
+                        dadosParaCards.push({
+                            nome: tipoAgrupamento === 'total' ? lote.nome : dataset.label,
+                            mediaFormatada: mediaFormatada,
+                            porcentagemConsumida: porcentagemConsumida,
+                            porcentagemProjetada: porcentagemProjetada
+                        });
+                    });
+                    
+                    // Coletar informações sobre unidades selecionadas
+                    let unidadesSelecionadasInfo = null;
+                    if (unidadesSelecionadas.length > 0) {
+                        // Buscar todas as unidades do lote (checkboxes disponíveis)
+                        const todosCheckboxesLote = document.querySelectorAll('.filtro-unidade-checkbox');
+                        const totalUnidadesLote = todosCheckboxesLote.length;
+                        
+                        // Verificar se todas as unidades estão selecionadas
+                        const todasSelecionadas = totalUnidadesLote === unidadesSelecionadas.length;
+                        
+                        if (!todasSelecionadas) {
+                            // Buscar nomes das unidades selecionadas diretamente dos labels dos checkboxes
+                            const checkboxesMarcados = document.querySelectorAll('.filtro-unidade-checkbox:checked');
+                            const nomesUnidades = Array.from(checkboxesMarcados).map(checkbox => {
+                                // Buscar label associado ao checkbox
+                                const label = checkbox.closest('label') || checkbox.parentElement.querySelector('label');
+                                if (label) {
+                                    // Pegar texto do label, removendo espaços extras
+                                    return label.textContent.trim();
+                                }
+                                return `Unidade ${checkbox.value}`;
+                            });
+                            
+                            console.log(`📝 Nomes das unidades selecionadas:`, nomesUnidades);
+                            
+                            unidadesSelecionadasInfo = {
+                                todas: false,
+                                nomes: nomesUnidades
+                            };
+                        }
+                    }
+                    
+                    // Criar cards
+                    if (dadosParaCards.length > 0) {
+                        criarCardsAnalise(dadosParaCards, unidadesSelecionadasInfo);
+                    }
+                }
                 
                 previsaoAtivaGastos = true;
                 document.getElementById('btn-previsao-gastos').textContent = '❌ Remover Previsão';
